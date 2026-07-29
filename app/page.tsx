@@ -211,14 +211,9 @@ export default function Home() {
               illustrated 12-day activity and 7-day hold cycles can create a
               release opportunity approximately every 5–7 days.
             </p>
-            <div className="rhythm-facts">
-              <span><b>3</b> campaign lanes</span>
-              <span><b>19</b> days per illustrated cycle</span>
-              <span><b>5–7</b> days between potential releases</span>
-            </div>
             <p className="rhythm-caution">
-              A release is not guaranteed income. At each point you choose
-              whether to restart, reserve, or request a withdrawal.
+              Referrals are not part of this rhythm. At each release point, you
+              choose whether to restart, reserve, or request a withdrawal.
             </p>
           </div>
 
