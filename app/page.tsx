@@ -109,9 +109,6 @@ export default function Home() {
               See how it works <span aria-hidden="true">↓</span>
             </a>
           </div>
-          <p className="fine-print">
-            Free registration · Campaign purchase and activation required to earn
-          </p>
         </div>
 
         <div className="welcome-feature">
