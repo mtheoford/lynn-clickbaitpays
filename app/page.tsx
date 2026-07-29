@@ -1,339 +1,307 @@
 const affiliateLink = "https://clickbaitpays.me/?ref=thinleo";
 
-const videos = [
-  {
-    number: "01",
-    eyebrow: "Start here",
-    title: "ClickBaitPays in a nutshell",
-    description:
-      "Get the big picture first: what the platform is, who it serves, and how advertisers and participating members connect.",
-    src: "https://player.vimeo.com/video/1210888620?h=46a4e2c6c8&title=0&byline=0&portrait=0",
-  },
-  {
-    number: "02",
-    eyebrow: "Plan your path",
-    title: "Income strategies explained",
-    description:
-      "See how members think about campaigns, daily activity, referrals, and reinvesting—without skipping the important details.",
-    src: "https://player.vimeo.com/video/1210888623?h=310a937e30&title=0&byline=0&portrait=0",
-  },
-  {
-    number: "03",
-    eyebrow: "Know the tools",
-    title: "Back-office walkthrough",
-    description:
-      "Tour the member dashboard and learn where campaigns, clicks, balances, referrals, deposits, and withdrawals live.",
-    src: "https://player.vimeo.com/video/1210888621?h=adb75853a1&title=0&byline=0&portrait=0",
-  },
-];
-
 const resources = [
   {
-    icon: "↗",
-    title: "Getting Started Guide",
-    description: "A practical walkthrough from account setup to first campaign.",
+    title: "Getting Started",
+    eyebrow: "Step-by-step guide",
     href: "https://media.base44.com/files/public/6a59be82aeb9c1fbceeb9656/618d0fa01_CBPGettingStartedGuide.pdf",
   },
   {
-    icon: "↗",
     title: "Growth Roadmap",
-    description: "An illustrative reinvestment path using recurring campaign cycles.",
+    eyebrow: "Illustrative strategy",
     href: "https://media.base44.com/files/public/6a59be82aeb9c1fbceeb9656/970c892b8_CBPGrowthRoadmap.pdf",
   },
   {
-    icon: "↗",
     title: "Sustainability Story",
-    description: "Read the platform team’s explanation of its business model.",
+    eyebrow: "The team’s explanation",
     href: "https://media.base44.com/files/public/6a59be82aeb9c1fbceeb9656/4a93543a4_CBPSustainabilityStory.pdf",
   },
   {
-    icon: "↗",
     title: "Official FAQ",
-    description: "Review current rules, timing, fees, and account requirements.",
+    eyebrow: "Current rules & fees",
     href: "https://clickbaitpays.me/questions.php",
   },
 ];
 
 const faqs = [
   {
-    question: "What is ClickBaitPays?",
+    question: "Is joining free?",
     answer:
-      "ClickBaitPays describes itself as a paid-to-click advertising platform. Advertisers purchase campaigns to receive traffic, while participating members purchase and activate a campaign, view funded ads, and earn USDT for eligible clicks.",
-  },
-  {
-    question: "Can I join for free?",
-    answer:
-      "Account registration is free. Earning through ad activity requires purchasing an Ad Campaign and paying the activation fee for that campaign level.",
+      "Account registration is free. Earning from eligible ad activity requires purchasing an Ad Campaign and paying that campaign level’s activation fee.",
   },
   {
     question: "Do I need referrals?",
     answer:
-      "No. The official FAQ says referrals are optional. Direct referrals can add a 10% commission on their eligible clicks, but your own campaign activity does not require recruiting.",
+      "No. ClickBaitPays says referrals are optional. Direct referrals can add commission income, but members can participate through their own campaign activity.",
   },
   {
-    question: "When do campaign earnings become available?",
+    question: "When can earnings be withdrawn?",
     answer:
-      "Current public materials describe 12 days of campaign activity followed by a 7-day hold before earnings move to Available Balance. Always confirm the current timing inside the official dashboard before purchasing.",
-  },
-  {
-    question: "What should I know about withdrawals?",
-    answer:
-      "The official FAQ currently states that withdrawals have a 10 USDT minimum, carry a 10% fee, may be requested once per week, and are processed manually. Crypto transfers are generally irreversible.",
-  },
-  {
-    question: "Can everyone in my household have an account?",
-    answer:
-      "Current rules allow one account per adult and up to three accounts per household. Household accounts must use the same original sponsor. Registration should be completed from a home IP without a VPN or mobile data.",
+      "Current public materials describe 12 days of campaign activity plus a 7-day hold. The official FAQ lists a 10 USDT withdrawal minimum, a 10% fee, and manual weekly processing. Confirm current terms in the official dashboard.",
   },
 ];
 
+function JoinButton({ label = "Join ClickBaitPays" }: { label?: string }) {
+  return (
+    <a
+      className="join-button"
+      href={affiliateLink}
+      target="_blank"
+      rel="noopener noreferrer sponsored"
+    >
+      <span>{label}</span>
+      <i aria-hidden="true">↗</i>
+    </a>
+  );
+}
+
 export default function Home() {
   return (
-    <main>
+    <main id="top">
       <header className="site-header">
         <a className="brand" href="#top" aria-label="CBP with Lynn home">
           <span className="brand-mark">C</span>
           <span>
-            <strong>CBP Path</strong>
-            <small>with Lynn Theobald</small>
+            <strong>CBP with Lynn</strong>
+            <small>Independent sponsor guide</small>
           </span>
         </a>
         <nav aria-label="Main navigation">
-          <a href="#how-it-works">How it works</a>
-          <a href="#videos">Videos</a>
-          <a href="#resources">Resources</a>
-          <a className="nav-cta" href={affiliateLink} target="_blank" rel="noopener noreferrer sponsored">
-            Explore CBP <span aria-hidden="true">↗</span>
-          </a>
+          <a href="#how">How it works</a>
+          <a href="#learn">Learn more</a>
+          <JoinButton label="Join now" />
         </nav>
       </header>
 
-      <section className="hero" id="top">
-        <div className="hero-glow hero-glow-one" />
-        <div className="hero-glow hero-glow-two" />
+      <section className="hero">
+        <div className="hero-aura hero-aura-one" />
+        <div className="hero-aura hero-aura-two" />
+
         <div className="hero-copy">
-          <p className="kicker"><span /> Your guided ClickBaitPays starting point</p>
+          <p className="eyebrow">
+            <span className="pulse-dot" />
+            Your guided ClickBaitPays introduction
+          </p>
           <h1>
             Advertise.
             <br />
             Participate.
             <br />
-            <em>Build momentum.</em>
+            <em>Get rewarded.</em>
           </h1>
           <p className="hero-lead">
-            Discover a crypto-powered advertising platform where members can promote
-            what matters to them, view funded ads, and earn for eligible activity.
+            Discover how ClickBaitPays connects advertisers who want attention
+            with participating members who can earn USDT for eligible ad views.
           </p>
           <div className="hero-actions">
-            <a className="button button-primary" href={affiliateLink} target="_blank" rel="noopener noreferrer sponsored">
-              Explore ClickBaitPays <span aria-hidden="true">↗</span>
-            </a>
-            <a className="button button-secondary" href="#videos">
-              Watch the overview <span aria-hidden="true">↓</span>
+            <JoinButton />
+            <a className="text-link" href="#how">
+              See how it works <span aria-hidden="true">↓</span>
             </a>
           </div>
-          <p className="microcopy">Free account registration · Campaign purchase required to earn</p>
+          <p className="fine-print">
+            Free registration · Campaign purchase and activation required to earn
+          </p>
         </div>
 
-        <div className="hero-panel" aria-label="Your guided path">
-          <div className="panel-orbit orbit-one" />
-          <div className="panel-orbit orbit-two" />
-          <div className="panel-center">
-            <span className="panel-icon">CBP</span>
-            <strong>Your path, simplified</strong>
-            <small>Learn before you leap</small>
+        <div className="welcome-feature">
+          <div className="video-callout">
+            <span className="pulse-dot" />
+            Start here · Welcome to ClickBaitPays
           </div>
-          <div className="floating-chip chip-one"><span>01</span> Understand</div>
-          <div className="floating-chip chip-two"><span>02</span> Activate</div>
-          <div className="floating-chip chip-three"><span>03</span> Participate</div>
-          <div className="floating-chip chip-four"><span>04</span> Decide</div>
+          <div className="hero-video">
+            <iframe
+              src="https://player.vimeo.com/video/1210888620?h=46a4e2c6c8&title=0&byline=0&portrait=0"
+              title="Welcome to ClickBaitPays"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+          <div className="video-caption">
+            <div>
+              <strong>Watch the overview</strong>
+              <span>The fastest way to understand the opportunity</span>
+            </div>
+            <span className="watch-cue" aria-hidden="true">▶</span>
+          </div>
         </div>
       </section>
 
-      <section className="trust-strip" aria-label="Site benefits">
-        <div><strong>3</strong><span>guided videos</span></div>
-        <div><strong>4</strong><span>practical resources</span></div>
-        <div><strong>1:1</strong><span>sponsor support</span></div>
-        <div><strong>Clear</strong><span>fees & expectations</span></div>
+      <section className="momentum-strip" aria-label="What you will find">
+        <div className="momentum-track">
+          <span><b>✓</b> Real advertising traffic</span>
+          <span><b>✓</b> Crypto-powered participation</span>
+          <span><b>✓</b> No referrals required</span>
+          <span><b>✓</b> Sponsor support from Lynn</span>
+          <span aria-hidden="true"><b>✓</b> Real advertising traffic</span>
+          <span aria-hidden="true"><b>✓</b> Crypto-powered participation</span>
+          <span aria-hidden="true"><b>✓</b> No referrals required</span>
+          <span aria-hidden="true"><b>✓</b> Sponsor support from Lynn</span>
+        </div>
       </section>
 
-      <section className="section section-intro" id="how-it-works">
+      <section className="section how-section" id="how">
         <div className="section-heading">
-          <p className="kicker"><span /> The model in plain English</p>
-          <h2>Know the path before<br />you take the first step.</h2>
+          <p className="eyebrow">The simple version</p>
+          <h2>Three steps from curious to active.</h2>
+        </div>
+        <div className="steps">
+          <article>
+            <span>01</span>
+            <div className="step-symbol">◎</div>
+            <h3>Join through Lynn</h3>
+            <p>Create your account using Lynn’s sponsor link from your home connection.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <div className="step-symbol">◇</div>
+            <h3>Activate a campaign</h3>
+            <p>Choose an ad campaign, fund it with crypto, and pay the level’s activation fee.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <div className="step-symbol">↗</div>
+            <h3>View funded ads</h3>
+            <p>Complete eligible daily views, then decide whether to reinvest or withdraw.</p>
+          </article>
+        </div>
+        <div className="inline-conversion">
+          <p><strong>Ready to see it for yourself?</strong> Registration takes just a few minutes.</p>
+          <JoinButton />
+        </div>
+      </section>
+
+      <section className="section learn-section" id="learn">
+        <div className="section-heading compact-heading">
+          <div>
+            <p className="eyebrow">Go one layer deeper</p>
+            <h2>See the strategy.<br />Know the dashboard.</h2>
+          </div>
           <p>
-            ClickBaitPays combines advertising with paid participation. Here is the
-            current public process—simplified, without the hype.
+            These two optional walkthroughs answer the questions most people have
+            after the welcome video.
           </p>
         </div>
-        <div className="steps-grid">
+
+        <div className="secondary-videos">
           <article>
-            <span className="step-number">01</span>
-            <div className="step-icon">◎</div>
-            <h3>Create your account</h3>
-            <p>Register through your sponsor link from your home internet connection. Avoid a VPN or mobile data.</p>
+            <div className="small-video">
+              <iframe
+                src="https://player.vimeo.com/video/1210888623?h=310a937e30&title=0&byline=0&portrait=0"
+                title="ClickBaitPays income strategies"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+                loading="lazy"
+              />
+            </div>
+            <div className="small-video-copy">
+              <span>01 · Strategy</span>
+              <h3>Income strategies</h3>
+              <p>Campaigns, daily activity, referrals, and reinvesting explained.</p>
+            </div>
           </article>
           <article>
-            <span className="step-number">02</span>
-            <div className="step-icon">◇</div>
-            <h3>Choose a campaign</h3>
-            <p>Fund your account with crypto, purchase an advertising campaign, and pay that level’s activation fee.</p>
+            <div className="small-video">
+              <iframe
+                src="https://player.vimeo.com/video/1210888621?h=adb75853a1&title=0&byline=0&portrait=0"
+                title="ClickBaitPays back-office walkthrough"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+                loading="lazy"
+              />
+            </div>
+            <div className="small-video-copy">
+              <span>02 · Tour</span>
+              <h3>Back-office walkthrough</h3>
+              <p>See campaigns, clicks, balances, referrals, deposits, and withdrawals.</p>
+            </div>
           </article>
-          <article>
-            <span className="step-number">03</span>
-            <div className="step-icon">✦</div>
-            <h3>Complete daily activity</h3>
-            <p>View the required funded ads. Eligible clicks earn USDT based on the campaign level’s stated rate.</p>
-          </article>
-          <article>
-            <span className="step-number">04</span>
-            <div className="step-icon">↗</div>
-            <h3>Use your available balance</h3>
-            <p>After the stated hold, choose whether to reinvest, pay it forward, or request an eligible withdrawal.</p>
-          </article>
+        </div>
+
+        <div className="key-facts" aria-label="Key ClickBaitPays facts">
+          <div><strong>12</strong><span>activity days</span></div>
+          <div><strong>7</strong><span>hold days</span></div>
+          <div><strong>10%</strong><span>withdrawal fee</span></div>
+          <p>Current public terms—always confirm inside the official dashboard.</p>
         </div>
       </section>
 
-      <section className="section video-section" id="videos">
-        <div className="section-heading centered">
-          <p className="kicker"><span /> Learn it. See it. Decide.</p>
-          <h2>Your ClickBaitPays video path</h2>
-          <p>Watch in order for the clearest introduction—from the core idea to the member dashboard.</p>
-        </div>
-        <div className="video-list">
-          {videos.map((video) => (
-            <article className="video-card" key={video.title}>
-              <div className="video-copy">
-                <span className="video-number">{video.number}</span>
-                <p className="video-eyebrow">{video.eyebrow}</p>
-                <h3>{video.title}</h3>
-                <p>{video.description}</p>
-              </div>
-              <div className="video-frame">
-                <iframe
-                  src={video.src}
-                  title={video.title}
-                  allow="autoplay; fullscreen; picture-in-picture"
-                  allowFullScreen
-                  loading="lazy"
-                />
-              </div>
-            </article>
-          ))}
+      <section className="section decision-section">
+        <div className="decision-grid">
+          <div className="resource-panel">
+            <p className="eyebrow">Fast answers</p>
+            <h2>Resources worth opening</h2>
+            <div className="resource-list">
+              {resources.map((resource) => (
+                <a href={resource.href} target="_blank" rel="noopener noreferrer" key={resource.title}>
+                  <span>
+                    <small>{resource.eyebrow}</small>
+                    <strong>{resource.title}</strong>
+                  </span>
+                  <i aria-hidden="true">↗</i>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div className="faq-panel">
+            <p className="eyebrow">Before you join</p>
+            <h2>Good questions.<br />Straight answers.</h2>
+            <div className="faq-list">
+              {faqs.map((faq) => (
+                <details key={faq.question}>
+                  <summary>{faq.question}<i aria-hidden="true">+</i></summary>
+                  <p>{faq.answer}</p>
+                </details>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="section expectation-section">
-        <div className="expectation-card">
+      <section className="sponsor-section">
+        <div className="sponsor-copy">
+          <div className="avatar">LT</div>
           <div>
-            <p className="kicker"><span /> A smarter starting point</p>
-            <h2>Excitement is good.<br /><em>Clarity is better.</em></h2>
-          </div>
-          <div className="expectation-list">
-            <div><span>12</span><p><strong>Activity days</strong><small>Described for a typical campaign cycle</small></p></div>
-            <div><span>7</span><p><strong>Hold days</strong><small>Before completed earnings become available</small></p></div>
-            <div><span>10%</span><p><strong>Withdrawal fee</strong><small>Based on the current official FAQ</small></p></div>
-          </div>
-          <p className="expectation-note">
-            Program terms, campaign values, and timing can change. Confirm all current
-            figures in the official ClickBaitPays dashboard before sending cryptocurrency.
-          </p>
-        </div>
-      </section>
-
-      <section className="section resources-section" id="resources">
-        <div className="section-heading split-heading">
-          <div>
-            <p className="kicker"><span /> Keep learning</p>
-            <h2>Your CBP resource desk</h2>
-          </div>
-          <p>Open the guides, compare the claims, and make an informed decision at your own pace.</p>
-        </div>
-        <div className="resource-grid">
-          {resources.map((resource) => (
-            <a key={resource.title} href={resource.href} target="_blank" rel="noopener noreferrer">
-              <span className="resource-icon">{resource.icon}</span>
-              <div>
-                <h3>{resource.title}</h3>
-                <p>{resource.description}</p>
-              </div>
-              <span className="resource-arrow">↗</span>
-            </a>
-          ))}
-        </div>
-      </section>
-
-      <section className="section faq-section" id="faq">
-        <div className="section-heading">
-          <p className="kicker"><span /> Questions worth asking</p>
-          <h2>Before you join</h2>
-          <p>Clear answers to the questions people usually ask after watching the videos.</p>
-        </div>
-        <div className="faq-list">
-          {faqs.map((faq, index) => (
-            <details key={faq.question}>
-              <summary>
-                <span>{String(index + 1).padStart(2, "0")}</span>
-                {faq.question}
-                <i aria-hidden="true">+</i>
-              </summary>
-              <p>{faq.answer}</p>
-            </details>
-          ))}
-        </div>
-      </section>
-
-      <section className="section sponsor-section">
-        <div className="sponsor-card">
-          <div className="sponsor-avatar">LT</div>
-          <p className="kicker"><span /> Your independent sponsor</p>
-          <h2>Lynn Theobald</h2>
-          <p className="sponsor-copy">
-            Questions after watching the videos? Lynn can help you navigate the
-            information, find the right resources, and understand the next step.
-          </p>
-          <div className="sponsor-actions">
-            <a className="button button-primary" href={affiliateLink} target="_blank" rel="noopener noreferrer sponsored">
-              Visit ClickBaitPays <span aria-hidden="true">↗</span>
-            </a>
-            <a className="button button-secondary" href="mailto:lynntheo@gmail.com">
-              Email Lynn
-            </a>
-          </div>
-          <div className="contact-row">
-            <a href="mailto:lynntheo@gmail.com">✉ lynntheo@gmail.com</a>
-            <a href="tel:80171705630">☎ 801-7170-5630</a>
+            <p className="eyebrow">Your independent sponsor</p>
+            <h2>Start with Lynn Theobald.</h2>
+            <p>Questions before joining? Lynn is here to help you find the facts and take the next step with confidence.</p>
+            <div className="contact-links">
+              <a href="mailto:lynntheo@gmail.com">lynntheo@gmail.com</a>
+              <a href="tel:80171705630">801-7170-5630</a>
+            </div>
           </div>
         </div>
-      </section>
-
-      <section className="final-cta">
-        <p className="kicker"><span /> Ready to explore?</p>
-        <h2>Take the next step<br />with the facts in hand.</h2>
-        <a className="button button-primary" href={affiliateLink} target="_blank" rel="noopener noreferrer sponsored">
-          Explore ClickBaitPays with Lynn <span aria-hidden="true">↗</span>
-        </a>
+        <div className="sponsor-action">
+          <span>Ready when you are</span>
+          <JoinButton label="Join ClickBaitPays with Lynn" />
+        </div>
       </section>
 
       <footer>
         <div className="footer-brand">
           <span className="brand-mark">C</span>
-          <div><strong>CBP Path</strong><small>with Lynn Theobald</small></div>
+          <span><strong>CBP with Lynn</strong><small>Independent sponsor guide</small></span>
         </div>
         <p>
-          This is an independent affiliate information site and is not operated by
-          ClickBaitPays. Participation involves cryptocurrency and financial risk.
-          Earnings are not guaranteed. Review official terms before participating.
+          Independent affiliate site—not operated by ClickBaitPays. Participation
+          involves cryptocurrency and financial risk. Earnings are not guaranteed.
+          Review official terms before participating.
         </p>
         <div className="footer-links">
-          <a href="https://clickbaitpays.me/terms.php" target="_blank" rel="noopener noreferrer">Official terms</a>
+          <a href="https://clickbaitpays.me/terms.php" target="_blank" rel="noopener noreferrer">Terms</a>
           <a href="https://clickbaitpays.me/privacy.php" target="_blank" rel="noopener noreferrer">Privacy</a>
           <a href="mailto:lynntheo@gmail.com">Contact Lynn</a>
         </div>
       </footer>
 
-      <a className="mobile-sticky" href={affiliateLink} target="_blank" rel="noopener noreferrer sponsored">
-        Explore ClickBaitPays <span aria-hidden="true">↗</span>
+      <a
+        className="mobile-join"
+        href={affiliateLink}
+        target="_blank"
+        rel="noopener noreferrer sponsored"
+      >
+        Join ClickBaitPays <span aria-hidden="true">↗</span>
       </a>
     </main>
   );

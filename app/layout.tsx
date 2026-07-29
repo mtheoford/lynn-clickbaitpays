@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Manrope } from "next/font/google";
+import { headers } from "next/headers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -12,22 +13,36 @@ const manrope = Manrope({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "ClickBaitPays with Lynn Theobald | Learn Before You Leap",
-  description:
-    "Explore ClickBaitPays with guided videos, practical resources, clear expectations, and independent sponsor support from Lynn Theobald.",
-  openGraph: {
-    title: "Explore ClickBaitPays with Lynn Theobald",
+export async function generateMetadata(): Promise<Metadata> {
+  const requestHeaders = await headers();
+  const host =
+    requestHeaders.get("x-forwarded-host") ??
+    requestHeaders.get("host") ??
+    "lynn-clickbaitpays.theoford.chatgpt.site";
+  const protocol =
+    requestHeaders.get("x-forwarded-proto") ??
+    (host.includes("localhost") ? "http" : "https");
+  const socialImage = `${protocol}://${host}/og.png`;
+
+  return {
+    title: "Join ClickBaitPays with Lynn Theobald",
     description:
-      "A clearer, more useful path through the videos, resources, fees, and next steps.",
-    type: "website",
-  },
-  twitter: {
-    card: "summary",
-    title: "Explore ClickBaitPays with Lynn Theobald",
-    description: "Learn the model, watch the videos, and decide with the facts in hand.",
-  },
-};
+      "Watch the ClickBaitPays welcome video, see how the platform works, and join with independent sponsor Lynn Theobald.",
+    openGraph: {
+      title: "Join ClickBaitPays with Lynn Theobald",
+      description:
+        "Watch the welcome video, understand the model, and take the next step with Lynn.",
+      type: "website",
+      images: [{ url: socialImage, width: 1536, height: 1024 }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "Join ClickBaitPays with Lynn Theobald",
+      description: "Watch the welcome video and see how ClickBaitPays works.",
+      images: [socialImage],
+    },
+  };
+}
 
 export default function RootLayout({
   children,
