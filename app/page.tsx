@@ -70,7 +70,7 @@ export default function Home() {
         </a>
         <nav aria-label="Main navigation">
           <a href="#how">Income strategy</a>
-          <a href="#roadmap">Growth roadmap</a>
+          <a href="#calculator">Calculator</a>
           <a href="#learn">Learn more</a>
           <JoinButton />
         </nav>
@@ -183,80 +183,12 @@ export default function Home() {
                 staggered timing, direct-referral commissions, and the choices
                 members make when campaign value becomes available.
               </p>
-              <JoinButton />
+              <div className="strategy-support-actions">
+                <JoinButton />
+                <ReferralSimulator />
+              </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      <section className="section growth-section" id="roadmap">
-        <div className="growth-heading">
-          <div>
-            <p className="eyebrow">Two ways to build momentum</p>
-            <h2>Build a rhythm.<br /><em>Then grow your reach.</em></h2>
-          </div>
-          <div className="growth-summary">
-            <strong>2 growth engines</strong>
-            <span>Campaigns + direct referrals</span>
-            <p>Your own campaign activity can create a foundation. Personally sponsored members can add a second stream.</p>
-          </div>
-        </div>
-
-        <div className="rhythm-card">
-          <div className="rhythm-copy">
-            <p className="eyebrow">Engine 01 · Campaign rhythm</p>
-            <h3>Stagger three campaigns.<br />Create more frequent decision points.</h3>
-            <p>
-              Start one campaign each week. After the initial ramp-up, the
-              illustrated 12-day activity and 7-day hold cycles can create a
-              release opportunity approximately every 5–7 days.
-            </p>
-            <p className="rhythm-caution">
-              Referrals are not part of this rhythm. At each release point, you
-              choose whether to restart, reserve, or request a withdrawal.
-            </p>
-          </div>
-
-          <div className="rhythm-timeline" aria-label="Three staggered campaign timelines">
-            <div className="timeline-axis" aria-hidden="true">
-              <span>Week 1</span><span>Week 2</span><span>Week 3</span><span>Week 4</span><span>Week 5</span><span>Week 6</span><span>Week 7</span>
-            </div>
-            <div className="campaign-lane lane-a">
-              <strong>A</strong><div><span className="active-block">12 days active</span><span className="hold-block">7 day hold</span><i>Release</i><span className="restart-block">Restart</span></div>
-            </div>
-            <div className="campaign-lane lane-b">
-              <strong>B</strong><div><span className="active-block">12 days active</span><span className="hold-block">7 day hold</span><i>Release</i><span className="restart-block">Restart</span></div>
-            </div>
-            <div className="campaign-lane lane-c">
-              <strong>C</strong><div><span className="active-block">12 days active</span><span className="hold-block">7 day hold</span><i>Release</i><span className="restart-block">Restart</span></div>
-            </div>
-            <div className="release-rhythm">
-              <span>Ramp-up</span>
-              <div><i>●</i><b>Potential release</b><i>●</i><b>Potential release</b><i>●</i><b>Potential release</b></div>
-            </div>
-          </div>
-        </div>
-
-        <ReferralSimulator />
-
-        <p className="growth-source">
-          Sources:{" "}
-          <a
-            href="https://clickbaitpays.me/questions.php"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Official ClickBaitPays FAQ
-          </a>
-          {" "}and presenter training examples. The FAQ currently states a 10%
-          direct-referral commission credited per eligible click. Package totals,
-          campaign timing, availability, fees, and program rules can change.
-          Calculator results are illustrative—not actual or guaranteed earnings.
-        </p>
-
-        <div className="growth-cta">
-          <p><strong>See the two-engine opportunity?</strong> Watch the welcome video, then choose the starting level that fits you.</p>
-          <JoinButton />
         </div>
       </section>
 

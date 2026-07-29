@@ -432,7 +432,191 @@ nav > a:not(.join-button):hover { color: white; }
 
 .strategy-support .join-button {
   min-width: 230px;
+}
+
+.strategy-support-actions {
   margin-top: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.calculator-launch {
+  display: inline-flex;
+}
+
+.calculator-launch-button {
+  min-height: 48px;
+  padding: 0 19px;
+  border: 1px solid rgba(46, 231, 242, 0.42);
+  border-radius: 12px;
+  color: var(--white);
+  background: rgba(46, 231, 242, 0.07);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.calculator-launch-button span {
+  margin-left: 9px;
+  color: var(--cyan);
+  font-size: 16px;
+}
+
+.calculator-launch-button:hover {
+  border-color: var(--cyan);
+  background: rgba(46, 231, 242, 0.12);
+  transform: translateY(-2px);
+}
+
+.calculator-launch-button:focus-visible,
+.calculator-modal-close:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+}
+
+.calculator-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  padding: 24px;
+  display: grid;
+  place-items: center;
+  background: rgba(3, 4, 14, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.calculator-modal {
+  width: min(100%, 620px);
+  max-height: calc(100vh - 48px);
+  padding: 34px;
+  overflow-y: auto;
+  border: 1px solid rgba(103, 118, 255, 0.34);
+  border-radius: 23px;
+  background:
+    radial-gradient(circle at 90% 10%, rgba(155, 92, 255, 0.16), transparent 32%),
+    linear-gradient(145deg, #151936, #090b1d);
+  box-shadow: 0 34px 100px rgba(0, 0, 0, 0.58);
+  position: relative;
+}
+
+.calculator-modal-close {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: #cbd0e2;
+  background: rgba(255, 255, 255, 0.04);
+  font: inherit;
+  font-size: 25px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.calculator-modal > .eyebrow {
+  margin-right: 50px;
+}
+
+.calculator-modal h2 {
+  max-width: 500px;
+  margin: 0;
+  font-family: var(--font-manrope), sans-serif;
+  font-size: 36px;
+  line-height: 1.04;
+  letter-spacing: -0.05em;
+}
+
+.calculator-modal-intro {
+  max-width: 520px;
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.calculator-modal-fields {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 12px;
+}
+
+.calculator-modal-fields label > span {
+  margin: 0 0 8px 2px;
+  display: block;
+  color: #aeb5cb;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.calculator-modal-fields input,
+.calculator-modal-fields select {
+  width: 100%;
+  height: 46px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  outline: none;
+  color: var(--white);
+  background: #10142b;
+  font: inherit;
+  font-size: 13px;
+}
+
+.calculator-modal-fields input:focus,
+.calculator-modal-fields select:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(46, 231, 242, 0.1);
+}
+
+.calculator-modal-result {
+  margin-top: 18px;
+  padding: 22px;
+  border: 1px solid rgba(46, 231, 242, 0.23);
+  border-radius: 16px;
+  background: linear-gradient(110deg, rgba(46, 231, 242, 0.08), rgba(155, 92, 255, 0.08));
+}
+
+.calculator-modal-result > span {
+  color: #b6bdd1;
+  font-size: 12px;
+}
+
+.calculator-modal-result strong {
+  margin-top: 5px;
+  display: block;
+  color: var(--cyan);
+  font-family: var(--font-manrope), sans-serif;
+  font-size: 40px;
+  line-height: 1;
+  letter-spacing: -0.055em;
+}
+
+.calculator-modal-result strong small {
+  font-size: 12px;
+}
+
+.calculator-modal-result p {
+  margin: 10px 0 0;
+  color: #b0b7cb;
+  font-size: 12px;
+}
+
+.calculator-modal-note {
+  margin: 16px 2px 0;
+  color: #737c9a;
+  font-size: 10px;
+  line-height: 1.55;
 }
 
 .steps {
@@ -1990,7 +2174,15 @@ footer > p { margin: 0; color: #7e87a5; font-size: 11px; line-height: 1.55; }
   .strategy-video-footer strong { width: 100%; margin: 2px 0 0; text-align: right; }
   .strategy-support { margin-top: 20px; }
   .strategy-support p { font-size: 11px; }
-  .strategy-support .join-button { width: 100%; }
+  .strategy-support-actions { width: 100%; align-items: stretch; flex-direction: column; }
+  .strategy-support .join-button,
+  .calculator-launch,
+  .calculator-launch-button { width: 100%; }
+  .calculator-modal-backdrop { padding: 12px; }
+  .calculator-modal { max-height: calc(100vh - 24px); padding: 28px 20px 22px; border-radius: 19px; }
+  .calculator-modal-close { top: 14px; right: 14px; }
+  .calculator-modal h2 { font-size: 31px; }
+  .calculator-modal-fields { grid-template-columns: 1fr; }
   .inline-conversion { padding: 18px 4px; align-items: stretch; flex-direction: column; }
   .growth-heading h2 { font-size: 35px; }
   .growth-summary { padding-left: 16px; }
