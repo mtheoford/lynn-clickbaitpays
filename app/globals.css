@@ -1025,69 +1025,6 @@ nav > a:not(.join-button):hover { color: white; }
 .release-rhythm i { color: var(--pink); font-style: normal; }
 .release-rhythm b { color: #cbd0e2; font-size: 7px; }
 
-.household-model {
-  min-height: 94px;
-  margin-top: 16px;
-  padding: 18px 22px;
-  display: grid;
-  grid-template-columns: 48px 1fr auto;
-  align-items: center;
-  gap: 18px;
-  border: 1px solid var(--line);
-  border-radius: 17px;
-  background: rgba(255, 255, 255, 0.016);
-}
-
-.household-icon {
-  width: 48px;
-  height: 48px;
-  display: grid;
-  place-items: center;
-  border-radius: 14px;
-  color: var(--cyan);
-  background: rgba(46,231,242,0.07);
-  font-size: 23px;
-}
-
-.household-model small,
-.household-model strong {
-  display: block;
-}
-
-.household-model small {
-  color: var(--cyan);
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.household-model strong {
-  margin-top: 4px;
-  font-family: var(--font-manrope), sans-serif;
-  font-size: 15px;
-}
-
-.household-model p {
-  margin: 5px 0 0;
-  color: var(--muted);
-  font-size: 9px;
-}
-
-.nine-lanes {
-  width: 102px;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-}
-
-.nine-lanes i {
-  height: 10px;
-  border-radius: 4px;
-  background: linear-gradient(90deg, rgba(46,231,242,0.7), rgba(155,92,255,0.7));
-  box-shadow: 0 0 9px rgba(91,133,255,0.15);
-}
-
 .referral-simulator {
   margin-top: 16px;
   padding: 28px;
@@ -1540,9 +1477,6 @@ footer > p { margin: 0; color: #68708b; font-size: 9px; line-height: 1.55; }
   .release-rhythm { margin-left: 26px; }
   .release-rhythm > div { justify-content: space-evenly; }
   .release-rhythm b { display: none; }
-  .household-model { padding: 17px; grid-template-columns: 42px 1fr; }
-  .household-icon { width: 42px; height: 42px; }
-  .nine-lanes { grid-column: 1 / -1; width: 100%; }
   .simulator-heading { align-items: flex-start; flex-direction: column; gap: 14px; }
   .simulator-layout { margin-top: 18px; }
   .simulator-labels { display: none; }

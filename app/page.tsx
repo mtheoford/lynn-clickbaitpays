@@ -238,18 +238,6 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="household-model">
-          <span className="household-icon" aria-hidden="true">⌂</span>
-          <div>
-            <small>Household scaling rule</small>
-            <strong>Up to 3 eligible adults · potentially 3 campaign lanes each</strong>
-            <p>Each adult needs a separate account and unique email under the same original sponsor. Household members cannot sponsor one another.</p>
-          </div>
-          <div className="nine-lanes" aria-label="Potentially nine campaign lanes across three eligible adult accounts">
-            {Array.from({ length: 9 }, (_, index) => <i key={index} />)}
-          </div>
-        </div>
-
         <ReferralSimulator />
 
         <p className="growth-source">
