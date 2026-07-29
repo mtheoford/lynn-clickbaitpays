@@ -152,42 +152,52 @@ export default function Home() {
 
       <section className="section how-section" id="how">
         <div className="strategy-feature">
-          <div className="strategy-copy">
-            <p className="eyebrow">The strategy that changes the picture</p>
-            <h2>See how campaigns and referrals can work together.</h2>
+          <div className="strategy-heading-wide">
+            <div>
+              <p className="eyebrow">The strategy that changes the picture</p>
+              <h2>See how campaigns and referrals can work together.</h2>
+            </div>
             <p>
               This focused walkthrough explains the three-campaign approach,
               staggered timing, direct-referral commissions, and the choices
               members make when campaign value becomes available.
             </p>
-            <div className="strategy-points">
-              <span><b>01</b> Build your campaign foundation</span>
-              <span><b>02</b> Stagger for a smoother rhythm</span>
-              <span><b>03</b> Add personally sponsored members</span>
-            </div>
-            <JoinButton label="Join with Lynn after watching" />
           </div>
-          <div className="strategy-video-wrap">
-            <div className="strategy-video-label">
-              <span className="pulse-dot" />
-              Featured · Income strategies
+
+          <div className="strategy-stage">
+            <div className="strategy-video-wrap">
+              <div className="strategy-video-label">
+                <span className="pulse-dot" />
+                Featured · Income strategies
+              </div>
+              <div className="strategy-video">
+                <iframe
+                  src="https://player.vimeo.com/video/1210888623?h=310a937e30&title=0&byline=0&portrait=0"
+                  title="ClickBaitPays income strategies"
+                  allow="autoplay; fullscreen; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+              <div className="strategy-video-footer">
+                <span>Campaigns</span>
+                <i aria-hidden="true">•</i>
+                <span>Staggering</span>
+                <i aria-hidden="true">•</i>
+                <span>Direct referrals</span>
+                <strong>Watch now <b aria-hidden="true">▶</b></strong>
+              </div>
             </div>
-            <div className="strategy-video">
-              <iframe
-                src="https://player.vimeo.com/video/1210888623?h=310a937e30&title=0&byline=0&portrait=0"
-                title="ClickBaitPays income strategies"
-                allow="autoplay; fullscreen; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
-            <div className="strategy-video-footer">
-              <span>Campaigns</span>
-              <i aria-hidden="true">•</i>
-              <span>Staggering</span>
-              <i aria-hidden="true">•</i>
-              <span>Direct referrals</span>
-              <strong>Watch now <b aria-hidden="true">▶</b></strong>
-            </div>
+
+            <aside className="strategy-action-rail">
+              <p className="eyebrow">What you’ll learn</p>
+              <div className="strategy-points">
+                <span><b>01</b> Build your campaign foundation</span>
+                <span><b>02</b> Stagger for a smoother rhythm</span>
+                <span><b>03</b> Add personally sponsored members</span>
+              </div>
+              <p>Watch the strategy first. Then use the calculator below to model a starting point that fits you.</p>
+              <JoinButton label="Join with Lynn" />
+            </aside>
           </div>
         </div>
       </section>
