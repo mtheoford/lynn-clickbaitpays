@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import ReferralSimulator from "./ReferralSimulator";
 
 const affiliateLink = "https://clickbaitpays.me/?ref=thinleo";
 
@@ -41,15 +41,6 @@ const faqs = [
     answer:
       "Current public materials describe 12 days of campaign activity plus a 7-day hold. The official FAQ lists a 10 USDT withdrawal minimum, a 10% fee, and manual weekly processing. Confirm current terms in the official dashboard.",
   },
-];
-
-const growthMilestones = [
-  { day: "Start", level: "Level 2", amount: 77, width: 3.21 },
-  { day: "Day 76", level: "Level 3", amount: 150, width: 6.25 },
-  { day: "Day 152", level: "Level 4", amount: 300, width: 12.5 },
-  { day: "Day 209", level: "Level 5", amount: 600, width: 25 },
-  { day: "Day 285", level: "Level 6", amount: 1200, width: 50 },
-  { day: "Day 304", level: "Level 7", amount: 2400, width: 100 },
 ];
 
 function JoinButton({ label = "Join ClickBaitPays" }: { label?: string }) {
@@ -186,113 +177,87 @@ export default function Home() {
       <section className="section growth-section" id="roadmap">
         <div className="growth-heading">
           <div>
-            <p className="eyebrow">The roadmap, decoded</p>
-            <h2>How the sample plan turns<br /><em>84 USDT into a Level 7 campaign.</em></h2>
+            <p className="eyebrow">Two ways to build momentum</p>
+            <h2>Build a rhythm.<br /><em>Then grow your reach.</em></h2>
           </div>
           <div className="growth-summary">
-            <strong>16 cycles</strong>
-            <span>≈ 304 days</span>
-            <p>By repeatedly recycling completed campaign value instead of withdrawing it.</p>
+            <strong>2 growth engines</strong>
+            <span>Campaigns + direct referrals</span>
+            <p>Your own campaign activity can create a foundation. Personally sponsored members can add a second stream.</p>
           </div>
         </div>
 
-        <div className="growth-visual">
-          <div className="reinvestment-loop">
-            <div className="loop-start">
-              <small>Starting capital</small>
-              <strong>84 USDT</strong>
-              <span>Buys a Level 2 campaign + activation</span>
-            </div>
-            <div className="loop-flow" aria-label="The repeating campaign cycle">
-              <div><b>1</b><span><strong>Buy</strong><small>an ad campaign</small></span></div>
-              <i aria-hidden="true">→</i>
-              <div><b>2</b><span><strong>Click</strong><small>for 12 days</small></span></div>
-              <i aria-hidden="true">→</i>
-              <div><b>3</b><span><strong>Hold</strong><small>for 7 days</small></span></div>
-              <i aria-hidden="true">→</i>
-              <div><b>4</b><span><strong>Recycle</strong><small>completion value</small></span></div>
-            </div>
-            <div className="loop-repeat">
-              <span aria-hidden="true">↻</span>
-              Repeat the approximately 19-day cycle
-            </div>
+        <div className="rhythm-card">
+          <div className="rhythm-copy">
+            <p className="eyebrow">Engine 01 · Campaign rhythm</p>
+            <h3>Stagger three campaigns.<br />Create more frequent decision points.</h3>
             <p>
-              The strategy compounds by buying larger or multiple campaigns with
-              each completion. It assumes the member keeps reinvesting rather than
-              taking money out.
+              Start one campaign each week. After the initial ramp-up, the
+              illustrated 12-day activity and 7-day hold cycles can create a
+              release opportunity approximately every 5–7 days.
+            </p>
+            <div className="rhythm-facts">
+              <span><b>3</b> campaign lanes</span>
+              <span><b>19</b> days per illustrated cycle</span>
+              <span><b>5–7</b> days between potential releases</span>
+            </div>
+            <p className="rhythm-caution">
+              A release is not guaranteed income. At each point you choose
+              whether to restart, reserve, or request a withdrawal.
             </p>
           </div>
 
-          <div className="milestone-chart">
-            <div className="chart-heading">
-              <div>
-                <h3>Highest campaign level purchased</h3>
-                <p>Campaign purchase value by roadmap milestone</p>
-              </div>
-              <span>0–2,400 USDT · linear scale</span>
+          <div className="rhythm-timeline" aria-label="Three staggered campaign timelines">
+            <div className="timeline-axis" aria-hidden="true">
+              <span>Week 1</span><span>Week 2</span><span>Week 3</span><span>Week 4</span><span>Week 5</span><span>Week 6</span><span>Week 7</span>
             </div>
-            <div className="bar-list">
-              {growthMilestones.map((milestone, index) => (
-                <div className="bar-row" key={milestone.level}>
-                  <span className="bar-day">{milestone.day}</span>
-                  <span className="bar-level">{milestone.level}</span>
-                  <div className="bar-track">
-                    <div
-                      className={`bar-fill ${index === growthMilestones.length - 1 ? "bar-final" : ""}`}
-                      style={{ "--bar-width": `${milestone.width}%`, "--bar-delay": `${index * 90}ms` } as CSSProperties}
-                    />
-                  </div>
-                  <strong>{milestone.amount.toLocaleString()} USDT</strong>
-                </div>
-              ))}
+            <div className="campaign-lane lane-a">
+              <strong>A</strong><div><span className="active-block">12 days active</span><span className="hold-block">7 day hold</span><i>Release</i><span className="restart-block">Restart</span></div>
+            </div>
+            <div className="campaign-lane lane-b">
+              <strong>B</strong><div><span className="active-block">12 days active</span><span className="hold-block">7 day hold</span><i>Release</i><span className="restart-block">Restart</span></div>
+            </div>
+            <div className="campaign-lane lane-c">
+              <strong>C</strong><div><span className="active-block">12 days active</span><span className="hold-block">7 day hold</span><i>Release</i><span className="restart-block">Restart</span></div>
+            </div>
+            <div className="release-rhythm">
+              <span>Ramp-up</span>
+              <div><i>●</i><b>Potential release</b><i>●</i><b>Potential release</b><i>●</i><b>Potential release</b></div>
             </div>
           </div>
         </div>
 
-        <div className="growth-outcome">
+        <div className="household-model">
+          <span className="household-icon" aria-hidden="true">⌂</span>
           <div>
-            <span>Day 304 position</span>
-            <strong>Level 7 active</strong>
-            <small>2,400 campaign + 240 activation + 535.57 remaining balance</small>
+            <small>Household scaling rule</small>
+            <strong>Up to 3 eligible adults · potentially 3 campaign lanes each</strong>
+            <p>Each adult needs a separate account and unique email under the same original sponsor. Household members cannot sponsor one another.</p>
           </div>
-          <div className="outcome-arrow" aria-hidden="true">→</div>
-          <div className="projected-outcome">
-            <span>If the Level 7 campaign completes</span>
-            <strong>3,240 USDT</strong>
-            <small>Projected campaign completion value before the withdrawal fee</small>
-          </div>
-          <div className="not-cash">
-            <b>Important</b>
-            This is reinvested campaign value—not a record of cash withdrawn or guaranteed profit.
+          <div className="nine-lanes" aria-label="Potentially nine campaign lanes across three eligible adult accounts">
+            {Array.from({ length: 9 }, (_, index) => <i key={index} />)}
           </div>
         </div>
 
-        <details className="growth-assumptions">
-          <summary>What has to go right for this sample roadmap to work?<i aria-hidden="true">+</i></summary>
-          <div>
-            <span>✓ All required daily ad activity is completed</span>
-            <span>✓ Eligible funded ads remain available</span>
-            <span>✓ Campaign values and program rules stay unchanged</span>
-            <span>✓ Completion value is repeatedly reinvested</span>
-            <span>✓ No early withdrawals interrupt compounding</span>
-          </div>
-        </details>
+        <ReferralSimulator />
 
         <p className="growth-source">
-          Source:{" "}
+          Sources:{" "}
           <a
-            href="https://media.base44.com/files/public/6a59be82aeb9c1fbceeb9656/970c892b8_CBPGrowthRoadmap.pdf"
+            href="https://clickbaitpays.me/questions.php"
             target="_blank"
             rel="noopener noreferrer"
           >
-            ClickBaitPays “84 USDT to 2,500 USDT Sample Growth Roadmap”
+            Official ClickBaitPays FAQ
           </a>
-          . Values are illustrative, depend on consistent activity and reinvestment,
-          and are not guaranteed.
+          {" "}and presenter training examples. The FAQ currently states a 10%
+          direct-referral commission credited per eligible click. Package totals,
+          campaign timing, availability, fees, and program rules can change.
+          Calculator results are illustrative—not actual or guaranteed earnings.
         </p>
 
         <div className="growth-cta">
-          <p><strong>Now the roadmap makes sense.</strong> Watch the welcome video, then decide whether the strategy fits you.</p>
+          <p><strong>See the two-engine opportunity?</strong> Watch the welcome video, then choose the starting level that fits you.</p>
           <JoinButton label="Join ClickBaitPays with Lynn" />
         </div>
       </section>

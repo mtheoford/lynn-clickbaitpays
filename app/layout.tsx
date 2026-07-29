@@ -22,23 +22,23 @@ export async function generateMetadata(): Promise<Metadata> {
   const protocol =
     requestHeaders.get("x-forwarded-proto") ??
     (host.includes("localhost") ? "http" : "https");
-  const socialImage = `${protocol}://${host}/og-roadmap.png`;
+  const socialImage = `${protocol}://${host}/og.png`;
 
   return {
     title: "Join ClickBaitPays with Lynn Theobald",
     description:
-      "See the 84 USDT sample growth roadmap explained visually, watch the welcome video, and explore ClickBaitPays with Lynn Theobald.",
+      "Explore ClickBaitPays campaign strategies, model illustrative direct-referral commissions, and get started with Lynn Theobald.",
     openGraph: {
       title: "Join ClickBaitPays with Lynn Theobald",
       description:
-        "See how the sample roadmap reinvests campaign completion value across 16 cycles.",
+        "See the three-campaign rhythm and model illustrative direct-referral commissions.",
       type: "website",
       images: [{ url: socialImage, width: 1536, height: 1024 }],
     },
     twitter: {
       card: "summary_large_image",
       title: "Join ClickBaitPays with Lynn Theobald",
-      description: "The 84 USDT sample growth roadmap, explained in plain English.",
+      description: "Campaign rhythm and referral potential, explained in plain English.",
       images: [socialImage],
     },
   };
