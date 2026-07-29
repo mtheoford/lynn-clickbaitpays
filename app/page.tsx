@@ -96,6 +96,13 @@ export default function Home() {
             Discover how ClickBaitPays connects advertisers who want attention
             with participating members who can earn USDT for eligible ad views.
           </p>
+          <div className="everybody-wins" aria-label="How ClickBaitPays describes its model">
+            <span><b>Advertisers</b> get traffic!</span>
+            <i aria-hidden="true">+</i>
+            <span><b>Viewers</b> get paid!</span>
+            <i aria-hidden="true">=</i>
+            <span><b>Everybody wins!</b></span>
+          </div>
           <div className="hero-actions">
             <JoinButton />
             <a className="text-link" href="#how">

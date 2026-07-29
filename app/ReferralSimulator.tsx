@@ -100,7 +100,7 @@ export default function ReferralSimulator() {
             <span>stated direct-referral commission</span>
           </div>
           <button type="button" className="reset-calculator" onClick={resetCalculator}>
-            Reset all to 0
+            <span aria-hidden="true">↺</span> Reset all to 0
           </button>
         </div>
       </div>
