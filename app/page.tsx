@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 const affiliateLink = "https://clickbaitpays.me/?ref=thinleo";
 
 const resources = [
@@ -41,6 +43,15 @@ const faqs = [
   },
 ];
 
+const growthMilestones = [
+  { day: "Start", level: "Level 2", amount: 77, width: 3.21 },
+  { day: "Day 76", level: "Level 3", amount: 150, width: 6.25 },
+  { day: "Day 152", level: "Level 4", amount: 300, width: 12.5 },
+  { day: "Day 209", level: "Level 5", amount: 600, width: 25 },
+  { day: "Day 285", level: "Level 6", amount: 1200, width: 50 },
+  { day: "Day 304", level: "Level 7", amount: 2400, width: 100 },
+];
+
 function JoinButton({ label = "Join ClickBaitPays" }: { label?: string }) {
   return (
     <a
@@ -68,6 +79,7 @@ export default function Home() {
         </a>
         <nav aria-label="Main navigation">
           <a href="#how">How it works</a>
+          <a href="#roadmap">Growth roadmap</a>
           <a href="#learn">Learn more</a>
           <JoinButton label="Join now" />
         </nav>
@@ -168,6 +180,120 @@ export default function Home() {
         <div className="inline-conversion">
           <p><strong>Ready to see it for yourself?</strong> Registration takes just a few minutes.</p>
           <JoinButton />
+        </div>
+      </section>
+
+      <section className="section growth-section" id="roadmap">
+        <div className="growth-heading">
+          <div>
+            <p className="eyebrow">The roadmap, decoded</p>
+            <h2>How the sample plan turns<br /><em>84 USDT into a Level 7 campaign.</em></h2>
+          </div>
+          <div className="growth-summary">
+            <strong>16 cycles</strong>
+            <span>≈ 304 days</span>
+            <p>By repeatedly recycling completed campaign value instead of withdrawing it.</p>
+          </div>
+        </div>
+
+        <div className="growth-visual">
+          <div className="reinvestment-loop">
+            <div className="loop-start">
+              <small>Starting capital</small>
+              <strong>84 USDT</strong>
+              <span>Buys a Level 2 campaign + activation</span>
+            </div>
+            <div className="loop-flow" aria-label="The repeating campaign cycle">
+              <div><b>1</b><span><strong>Buy</strong><small>an ad campaign</small></span></div>
+              <i aria-hidden="true">→</i>
+              <div><b>2</b><span><strong>Click</strong><small>for 12 days</small></span></div>
+              <i aria-hidden="true">→</i>
+              <div><b>3</b><span><strong>Hold</strong><small>for 7 days</small></span></div>
+              <i aria-hidden="true">→</i>
+              <div><b>4</b><span><strong>Recycle</strong><small>completion value</small></span></div>
+            </div>
+            <div className="loop-repeat">
+              <span aria-hidden="true">↻</span>
+              Repeat the approximately 19-day cycle
+            </div>
+            <p>
+              The strategy compounds by buying larger or multiple campaigns with
+              each completion. It assumes the member keeps reinvesting rather than
+              taking money out.
+            </p>
+          </div>
+
+          <div className="milestone-chart">
+            <div className="chart-heading">
+              <div>
+                <h3>Highest campaign level purchased</h3>
+                <p>Campaign purchase value by roadmap milestone</p>
+              </div>
+              <span>0–2,400 USDT · linear scale</span>
+            </div>
+            <div className="bar-list">
+              {growthMilestones.map((milestone, index) => (
+                <div className="bar-row" key={milestone.level}>
+                  <span className="bar-day">{milestone.day}</span>
+                  <span className="bar-level">{milestone.level}</span>
+                  <div className="bar-track">
+                    <div
+                      className={`bar-fill ${index === growthMilestones.length - 1 ? "bar-final" : ""}`}
+                      style={{ "--bar-width": `${milestone.width}%`, "--bar-delay": `${index * 90}ms` } as CSSProperties}
+                    />
+                  </div>
+                  <strong>{milestone.amount.toLocaleString()} USDT</strong>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="growth-outcome">
+          <div>
+            <span>Day 304 position</span>
+            <strong>Level 7 active</strong>
+            <small>2,400 campaign + 240 activation + 535.57 remaining balance</small>
+          </div>
+          <div className="outcome-arrow" aria-hidden="true">→</div>
+          <div className="projected-outcome">
+            <span>If the Level 7 campaign completes</span>
+            <strong>3,240 USDT</strong>
+            <small>Projected campaign completion value before the withdrawal fee</small>
+          </div>
+          <div className="not-cash">
+            <b>Important</b>
+            This is reinvested campaign value—not a record of cash withdrawn or guaranteed profit.
+          </div>
+        </div>
+
+        <details className="growth-assumptions">
+          <summary>What has to go right for this sample roadmap to work?<i aria-hidden="true">+</i></summary>
+          <div>
+            <span>✓ All required daily ad activity is completed</span>
+            <span>✓ Eligible funded ads remain available</span>
+            <span>✓ Campaign values and program rules stay unchanged</span>
+            <span>✓ Completion value is repeatedly reinvested</span>
+            <span>✓ No early withdrawals interrupt compounding</span>
+          </div>
+        </details>
+
+        <p className="growth-source">
+          Source:{" "}
+          <a
+            href="https://media.base44.com/files/public/6a59be82aeb9c1fbceeb9656/970c892b8_CBPGrowthRoadmap.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            ClickBaitPays “84 USDT to 2,500 USDT Sample Growth Roadmap”
+          </a>
+          . Values are illustrative, depend on consistent activity and reinvestment,
+          and are not guaranteed.
+        </p>
+
+        <div className="growth-cta">
+          <p><strong>Now the roadmap makes sense.</strong> Watch the welcome video, then decide whether the strategy fits you.</p>
+          <JoinButton label="Join ClickBaitPays with Lynn" />
         </div>
       </section>
 
