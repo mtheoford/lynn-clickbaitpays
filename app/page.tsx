@@ -72,7 +72,7 @@ export default function Home() {
           <a href="#how">Income strategy</a>
           <a href="#roadmap">Growth roadmap</a>
           <a href="#learn">Learn more</a>
-          <JoinButton label="Join now" />
+          <JoinButton />
         </nav>
       </header>
 
@@ -153,15 +153,8 @@ export default function Home() {
       <section className="section how-section" id="how">
         <div className="strategy-feature">
           <div className="strategy-heading-wide">
-            <div>
-              <p className="eyebrow">The strategy that changes the picture</p>
-              <h2>See how campaigns and referrals can work together.</h2>
-            </div>
-            <p>
-              This focused walkthrough explains the three-campaign approach,
-              staggered timing, direct-referral commissions, and the choices
-              members make when campaign value becomes available.
-            </p>
+            <p className="eyebrow">The strategy that changes the picture</p>
+            <h2>See how campaigns and referrals can work together.</h2>
           </div>
 
           <div className="strategy-stage">
@@ -187,17 +180,14 @@ export default function Home() {
                 <strong>Watch now <b aria-hidden="true">▶</b></strong>
               </div>
             </div>
-
-            <aside className="strategy-action-rail">
-              <p className="eyebrow">What you’ll learn</p>
-              <div className="strategy-points">
-                <span><b>01</b> Build your campaign foundation</span>
-                <span><b>02</b> Stagger for a smoother rhythm</span>
-                <span><b>03</b> Add personally sponsored members</span>
-              </div>
-              <p>Watch the strategy first. Then use the calculator below to model a starting point that fits you.</p>
-              <JoinButton label="Join with Lynn" />
-            </aside>
+            <div className="strategy-support">
+              <p>
+                This focused walkthrough explains the three-campaign approach,
+                staggered timing, direct-referral commissions, and the choices
+                members make when campaign value becomes available.
+              </p>
+              <JoinButton />
+            </div>
           </div>
         </div>
       </section>
@@ -274,7 +264,7 @@ export default function Home() {
 
         <div className="growth-cta">
           <p><strong>See the two-engine opportunity?</strong> Watch the welcome video, then choose the starting level that fits you.</p>
-          <JoinButton label="Join ClickBaitPays with Lynn" />
+          <JoinButton />
         </div>
       </section>
 
@@ -358,7 +348,7 @@ export default function Home() {
         </div>
         <div className="sponsor-action">
           <span>Ready when you are</span>
-          <JoinButton label="Join ClickBaitPays with Lynn" />
+          <JoinButton />
         </div>
       </section>
 

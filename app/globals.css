@@ -308,11 +308,12 @@ nav > a:not(.join-button):hover { color: white; }
 }
 
 .strategy-heading-wide {
-  display: grid;
-  grid-template-columns: 1.35fr 0.65fr;
-  align-items: end;
-  gap: 70px;
+  max-width: 940px;
+  margin: 0 auto;
+  text-align: center;
 }
+
+.strategy-heading-wide .eyebrow { margin-bottom: 16px; }
 
 .strategy-heading-wide h2 {
   margin: 0;
@@ -322,65 +323,15 @@ nav > a:not(.join-button):hover { color: white; }
   letter-spacing: -0.055em;
 }
 
-.strategy-heading-wide > p {
-  margin: 0 0 3px;
-  padding-left: 20px;
-  border-left: 1px solid var(--line);
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.65;
-}
-
 .strategy-stage {
+  width: min(100%, 960px);
   margin-top: 34px;
-  display: grid;
-  grid-template-columns: 1.4fr 0.6fr;
-  align-items: stretch;
-  gap: 18px;
-}
-
-.strategy-points {
-  margin: 12px 0 18px;
-  border-top: 1px solid var(--line);
-}
-
-.strategy-points span {
-  min-height: 55px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border-bottom: 1px solid var(--line);
-  color: #c8cddd;
-  font-size: 10px;
-  font-weight: 700;
-}
-
-.strategy-points b {
-  color: var(--cyan);
-  font-size: 8px;
-  letter-spacing: 0.08em;
-}
-
-.strategy-action-rail {
-  min-width: 0;
-  padding: 27px 25px;
   display: flex;
   flex-direction: column;
-  border: 1px solid rgba(155,92,255,0.2);
-  border-radius: 20px;
-  background:
-    radial-gradient(circle at 90% 10%, rgba(155,92,255,0.13), transparent 34%),
-    rgba(11,13,32,0.82);
+  align-items: center;
+  margin-left: auto;
+  margin-right: auto;
 }
-
-.strategy-action-rail > p:not(.eyebrow) {
-  margin: auto 0 18px;
-  color: var(--muted);
-  font-size: 9px;
-  line-height: 1.6;
-}
-
-.strategy-action-rail .join-button { width: 100%; }
 
 .strategy-video-wrap {
   padding: 14px;
@@ -462,6 +413,27 @@ nav > a:not(.join-button):hover { color: white; }
   color: var(--cyan);
   background: rgba(46,231,242,0.08);
   font-size: 8px;
+}
+
+.strategy-support {
+  max-width: 760px;
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.strategy-support p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.strategy-support .join-button {
+  min-width: 230px;
+  margin-top: 18px;
 }
 
 .steps {
@@ -1686,14 +1658,7 @@ footer > p { margin: 0; color: #68708b; font-size: 9px; line-height: 1.55; }
   .hero { grid-template-columns: 1fr; padding-top: 52px; }
   .hero-copy { max-width: 760px; }
   .welcome-feature { width: min(100%, 760px); transform: none; }
-  .strategy-heading-wide { grid-template-columns: 1fr; gap: 18px; }
-  .strategy-heading-wide > p { max-width: 720px; padding-left: 16px; }
-  .strategy-stage { grid-template-columns: 1fr; }
   .strategy-video-wrap { width: 100%; }
-  .strategy-action-rail { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
-  .strategy-action-rail > .eyebrow { grid-column: 1 / -1; }
-  .strategy-action-rail .strategy-points { grid-row: 2 / span 2; }
-  .strategy-action-rail > p:not(.eyebrow) { margin: 12px 0 18px; }
   .growth-heading { grid-template-columns: 1fr; gap: 24px; }
   .growth-summary { max-width: 420px; }
   .growth-visual { grid-template-columns: 1fr; }
@@ -1742,15 +1707,15 @@ footer > p { margin: 0; color: #68708b; font-size: 9px; line-height: 1.55; }
   .steps article:last-child { border-bottom: 0; }
   .step-symbol { margin-top: 18px; }
   .strategy-heading-wide h2 { font-size: 35px; }
-  .strategy-heading-wide > p { padding-left: 13px; }
   .strategy-stage { margin-top: 26px; }
   .strategy-video-wrap { padding: 10px; border-radius: 18px; }
   .strategy-video-wrap::after { border-radius: 18px; }
   .strategy-video-label { height: 35px; font-size: 9px; }
   .strategy-video-footer { flex-wrap: wrap; }
   .strategy-video-footer strong { width: 100%; margin: 2px 0 0; text-align: right; }
-  .strategy-action-rail { padding: 21px 17px; display: flex; }
-  .strategy-action-rail > p:not(.eyebrow) { margin: 4px 0 18px; }
+  .strategy-support { margin-top: 20px; }
+  .strategy-support p { font-size: 11px; }
+  .strategy-support .join-button { width: 100%; }
   .inline-conversion { padding: 18px 4px; align-items: stretch; flex-direction: column; }
   .growth-heading h2 { font-size: 35px; }
   .growth-summary { padding-left: 16px; }
