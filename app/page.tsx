@@ -142,11 +142,11 @@ export default function Home() {
           <span><b>✓</b> Real advertising traffic</span>
           <span><b>✓</b> Crypto-powered participation</span>
           <span><b>✓</b> No referrals required</span>
-          <span><b>✓</b> Sponsor support from Lynn</span>
+          <span><b>✓</b> Sponsor &amp; up-line support</span>
           <span aria-hidden="true"><b>✓</b> Real advertising traffic</span>
           <span aria-hidden="true"><b>✓</b> Crypto-powered participation</span>
           <span aria-hidden="true"><b>✓</b> No referrals required</span>
-          <span aria-hidden="true"><b>✓</b> Sponsor support from Lynn</span>
+          <span aria-hidden="true"><b>✓</b> Sponsor &amp; up-line support</span>
         </div>
       </section>
 
