@@ -69,7 +69,7 @@ export default function Home() {
           </span>
         </a>
         <nav aria-label="Main navigation">
-          <a href="#how">How it works</a>
+          <a href="#how">Income strategy</a>
           <a href="#roadmap">Growth roadmap</a>
           <a href="#learn">Learn more</a>
           <JoinButton label="Join now" />
@@ -144,33 +144,44 @@ export default function Home() {
       </section>
 
       <section className="section how-section" id="how">
-        <div className="section-heading">
-          <p className="eyebrow">The simple version</p>
-          <h2>Three steps from curious to active.</h2>
-        </div>
-        <div className="steps">
-          <article>
-            <span>01</span>
-            <div className="step-symbol">◎</div>
-            <h3>Join through Lynn</h3>
-            <p>Create your account using Lynn’s sponsor link from your home connection.</p>
-          </article>
-          <article>
-            <span>02</span>
-            <div className="step-symbol">◇</div>
-            <h3>Activate a campaign</h3>
-            <p>Choose an ad campaign, fund it with crypto, and pay the level’s activation fee.</p>
-          </article>
-          <article>
-            <span>03</span>
-            <div className="step-symbol">↗</div>
-            <h3>View funded ads</h3>
-            <p>Complete eligible daily views, then decide whether to reinvest or withdraw.</p>
-          </article>
-        </div>
-        <div className="inline-conversion">
-          <p><strong>Ready to see it for yourself?</strong> Registration takes just a few minutes.</p>
-          <JoinButton />
+        <div className="strategy-feature">
+          <div className="strategy-copy">
+            <p className="eyebrow">The strategy that changes the picture</p>
+            <h2>See how campaigns and referrals can work together.</h2>
+            <p>
+              This focused walkthrough explains the three-campaign approach,
+              staggered timing, direct-referral commissions, and the choices
+              members make when campaign value becomes available.
+            </p>
+            <div className="strategy-points">
+              <span><b>01</b> Build your campaign foundation</span>
+              <span><b>02</b> Stagger for a smoother rhythm</span>
+              <span><b>03</b> Add personally sponsored members</span>
+            </div>
+            <JoinButton label="Join with Lynn after watching" />
+          </div>
+          <div className="strategy-video-wrap">
+            <div className="strategy-video-label">
+              <span className="pulse-dot" />
+              Featured · Income strategies
+            </div>
+            <div className="strategy-video">
+              <iframe
+                src="https://player.vimeo.com/video/1210888623?h=310a937e30&title=0&byline=0&portrait=0"
+                title="ClickBaitPays income strategies"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+            <div className="strategy-video-footer">
+              <span>Campaigns</span>
+              <i aria-hidden="true">•</i>
+              <span>Staggering</span>
+              <i aria-hidden="true">•</i>
+              <span>Direct referrals</span>
+              <strong>Watch now <b aria-hidden="true">▶</b></strong>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -265,32 +276,16 @@ export default function Home() {
       <section className="section learn-section" id="learn">
         <div className="section-heading compact-heading">
           <div>
-            <p className="eyebrow">Go one layer deeper</p>
-            <h2>See the strategy.<br />Know the dashboard.</h2>
+            <p className="eyebrow">See what happens after you join</p>
+            <h2>Know the dashboard.</h2>
           </div>
           <p>
-            These two optional walkthroughs answer the questions most people have
-            after the welcome video.
+            Take a practical tour of the member experience, from campaign
+            tracking to referrals, balances, deposits, and withdrawals.
           </p>
         </div>
 
-        <div className="secondary-videos">
-          <article>
-            <div className="small-video">
-              <iframe
-                src="https://player.vimeo.com/video/1210888623?h=310a937e30&title=0&byline=0&portrait=0"
-                title="ClickBaitPays income strategies"
-                allow="autoplay; fullscreen; picture-in-picture"
-                allowFullScreen
-                loading="lazy"
-              />
-            </div>
-            <div className="small-video-copy">
-              <span>01 · Strategy</span>
-              <h3>Income strategies</h3>
-              <p>Campaigns, daily activity, referrals, and reinvesting explained.</p>
-            </div>
-          </article>
+        <div className="secondary-videos single-video">
           <article>
             <div className="small-video">
               <iframe
@@ -302,18 +297,11 @@ export default function Home() {
               />
             </div>
             <div className="small-video-copy">
-              <span>02 · Tour</span>
+              <span>Member tour</span>
               <h3>Back-office walkthrough</h3>
               <p>See campaigns, clicks, balances, referrals, deposits, and withdrawals.</p>
             </div>
           </article>
-        </div>
-
-        <div className="key-facts" aria-label="Key ClickBaitPays facts">
-          <div><strong>12</strong><span>activity days</span></div>
-          <div><strong>7</strong><span>hold days</span></div>
-          <div><strong>10%</strong><span>withdrawal fee</span></div>
-          <p>Current public terms—always confirm inside the official dashboard.</p>
         </div>
       </section>
 
