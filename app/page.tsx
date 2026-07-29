@@ -341,13 +341,18 @@ export default function Home() {
             <h2>Start with Lynn Theobald.</h2>
             <p>Questions before joining? Lynn is here to help you find the facts and take the next step with confidence.</p>
             <div className="contact-links">
-              <a href="mailto:lynntheo@gmail.com">lynntheo@gmail.com</a>
-              <a href="tel:80171705630">801-7170-5630</a>
+              <a href="mailto:lynntheo@gmail.com">
+                <i className="contact-icon" aria-hidden="true">✉</i>
+                lynntheo@gmail.com
+              </a>
+              <a href="tel:80171705630">
+                <i className="contact-icon" aria-hidden="true">☎</i>
+                801-7170-5630
+              </a>
             </div>
           </div>
         </div>
         <div className="sponsor-action">
-          <span>Ready when you are</span>
           <JoinButton />
         </div>
       </section>
