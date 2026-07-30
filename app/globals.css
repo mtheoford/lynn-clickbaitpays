@@ -47,17 +47,26 @@ main { min-height: 100vh; overflow: hidden; }
 }
 
 .brand-mark {
-  width: 38px;
-  height: 38px;
-  display: grid;
-  place-items: center;
+  width: 42px;
+  height: 42px;
+  display: block;
+  flex: 0 0 auto;
+  padding: 2px;
+  overflow: hidden;
   border: 1px solid rgba(46, 231, 242, 0.55);
-  border-radius: 11px;
-  color: #071018;
-  background: linear-gradient(135deg, var(--cyan), var(--violet));
-  box-shadow: 0 0 28px rgba(46, 231, 242, 0.18);
-  font-family: var(--font-manrope), sans-serif;
-  font-weight: 900;
+  border-radius: 12px;
+  background: #08091b;
+  box-shadow:
+    0 0 28px rgba(46, 231, 242, 0.18),
+    inset 0 0 14px rgba(155, 92, 255, 0.12);
+}
+
+.brand-mark img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 9px;
+  object-fit: cover;
 }
 
 .brand strong, .footer-brand strong { display: block; font-family: var(--font-manrope), sans-serif; font-size: 14px; }
@@ -3100,7 +3109,8 @@ footer > p { margin: 0; color: #7e87a5; font-size: 11px; line-height: 1.55; }
 @media (max-width: 680px) {
   .site-header, .hero, .section, .sponsor-section, footer { width: calc(100% - 28px); }
   .site-header { height: 66px; }
-  .brand-mark { width: 34px; height: 34px; }
+  .brand-mark { width: 36px; height: 36px; border-radius: 11px; }
+  .brand-mark img { border-radius: 8px; }
   nav .join-button { min-height: 38px; padding: 0 13px; border-radius: 10px; font-size: 11px; }
   .hero { min-height: auto; padding: 46px 0 50px; gap: 40px; }
   .hero h1 { font-size: clamp(46px, 14vw, 65px); }

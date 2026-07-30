@@ -1,4 +1,6 @@
+import Image from "next/image";
 import ReferralSimulator from "./ReferralSimulator";
+import cbpMark from "../public/cbp-mark.png";
 
 const affiliateLink = "https://clickbaitpays.me/?ref=thinleo";
 
@@ -57,12 +59,20 @@ function JoinButton({ label = "Join ClickBaitPays" }: { label?: string }) {
   );
 }
 
+function BrandMark() {
+  return (
+    <span className="brand-mark" aria-hidden="true">
+      <Image src={cbpMark} alt="" sizes="42px" priority />
+    </span>
+  );
+}
+
 export default function Home() {
   return (
     <main id="top">
       <header className="site-header">
         <a className="brand" href="#top" aria-label="CBP with Lynn home">
-          <span className="brand-mark">C</span>
+          <BrandMark />
           <span>
             <strong>CBP with Lynn</strong>
             <small>Independent sponsor guide</small>
@@ -71,7 +81,6 @@ export default function Home() {
         <nav aria-label="Main navigation">
           <a href="#how">Income strategy</a>
           <a href="#calculator">Calculator</a>
-          <a href="#learn">Learn more</a>
           <JoinButton />
         </nav>
       </header>
@@ -279,7 +288,7 @@ export default function Home() {
 
       <footer>
         <div className="footer-brand">
-          <span className="brand-mark">C</span>
+          <BrandMark />
           <span><strong>CBP with Lynn</strong><small>Independent sponsor guide</small></span>
         </div>
         <p>
