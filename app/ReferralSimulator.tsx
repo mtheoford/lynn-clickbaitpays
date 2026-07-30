@@ -25,12 +25,13 @@ const money = new Intl.NumberFormat("en-US", {
 
 export default function ReferralSimulator() {
   const [isOpen, setIsOpen] = useState(false);
-  const [people, setPeople] = useState(1);
+  const [peopleInput, setPeopleInput] = useState("1");
   const [level, setLevel] = useState(3);
   const [useStagger, setUseStagger] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const modalRef = useRef<HTMLElement>(null);
+  const people = Math.min(100, Math.max(0, Number(peopleInput) || 0));
 
   const commission = useMemo(() => {
     const selected = levels.find((item) => item.id === level);
@@ -125,15 +126,28 @@ export default function ReferralSimulator() {
                   min="0"
                   max="100"
                   step="1"
-                  value={people}
-                  onChange={(event) =>
-                    setPeople(
-                      Math.min(
-                        100,
-                        Math.max(0, Number(event.target.value) || 0),
-                      ),
-                    )
-                  }
+                  value={peopleInput}
+                  onFocus={(event) => event.currentTarget.select()}
+                  onBlur={() => {
+                    if (peopleInput === "") setPeopleInput("0");
+                  }}
+                  onChange={(event) => {
+                    const nextValue = event.target.value;
+                    if (nextValue === "") {
+                      setPeopleInput("");
+                      return;
+                    }
+
+                    const withoutLeadingZeros = nextValue.replace(
+                      /^0+(?=\d)/,
+                      "",
+                    );
+                    const clamped = Math.min(
+                      100,
+                      Math.max(0, Number(withoutLeadingZeros) || 0),
+                    );
+                    setPeopleInput(String(clamped));
+                  }}
                 />
               </label>
               <label>
