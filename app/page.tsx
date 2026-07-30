@@ -81,10 +81,6 @@ export default function Home() {
         <div className="hero-aura hero-aura-two" />
 
         <div className="hero-copy">
-          <p className="eyebrow">
-            <span className="pulse-dot" />
-            Your guided ClickBaitPays introduction
-          </p>
           <h1>
             Advertise.
             <br />
