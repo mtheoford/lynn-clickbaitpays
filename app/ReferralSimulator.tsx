@@ -27,6 +27,7 @@ export default function ReferralSimulator() {
   const [isOpen, setIsOpen] = useState(false);
   const [people, setPeople] = useState(1);
   const [level, setLevel] = useState(3);
+  const [useStagger, setUseStagger] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const modalRef = useRef<HTMLElement>(null);
@@ -40,6 +41,7 @@ export default function ReferralSimulator() {
     if (!isOpen) return;
 
     const previousOverflow = document.body.style.overflow;
+    const triggerElement = triggerRef.current;
     document.body.style.overflow = "hidden";
     closeRef.current?.focus();
 
@@ -68,7 +70,7 @@ export default function ReferralSimulator() {
     return () => {
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", handleKeyDown);
-      triggerRef.current?.focus();
+      triggerElement?.focus();
     };
   }, [isOpen]);
 
@@ -149,21 +151,69 @@ export default function ReferralSimulator() {
               </label>
             </div>
 
+            <label className="stagger-option">
+              <input
+                type="checkbox"
+                checked={useStagger}
+                onChange={(event) => setUseStagger(event.target.checked)}
+              />
+              <span className="stagger-option-control" aria-hidden="true">
+                <i />
+              </span>
+              <span className="stagger-option-copy">
+                <strong>Model the 3-campaign weekly stagger</strong>
+                <small>
+                  Each person starts one campaign per week for three weeks.
+                </small>
+              </span>
+            </label>
+
             <div className="calculator-modal-result" aria-live="polite">
-              <span>Illustrative referral commission per completed round</span>
+              <span>
+                {useStagger
+                  ? "Illustrative referral payout per week after ramp-up"
+                  : "Illustrative referral commission per completed round"}
+              </span>
               <strong>{money.format(commission)} <small>USDT</small></strong>
               <p>
                 {people === 0
                   ? "Your campaign activity remains the foundation with no referrals included."
-                  : `Based on ${people} personally sponsored ${people === 1 ? "member" : "members"} at Level ${level}.`}
+                  : useStagger
+                    ? `Based on ${people} personally sponsored ${people === 1 ? "member" : "members"}, each running three Level ${level} campaigns started one week apart.`
+                    : `Based on ${people} personally sponsored ${people === 1 ? "member" : "members"} at Level ${level}.`}
               </p>
+
+              {useStagger && (
+                <div className="stagger-timeline" aria-label="Three-week stagger illustration">
+                  <div>
+                    <span>Week 1</span>
+                    <strong>Start #1</strong>
+                    <small>Ramp-up</small>
+                  </div>
+                  <div>
+                    <span>Week 2</span>
+                    <strong>Start #2</strong>
+                    <small>Ramp-up</small>
+                  </div>
+                  <div>
+                    <span>Week 3</span>
+                    <strong>Start #3</strong>
+                    <small>First payout window</small>
+                  </div>
+                  <div className="stagger-timeline-ongoing">
+                    <span>Then weekly</span>
+                    <strong>{money.format(commission)} USDT</strong>
+                    <small>Approximately every 5–7 days</small>
+                  </div>
+                </div>
+              )}
             </div>
 
             <p className="calculator-modal-note">
               Uses the presenter-stated package examples and the official FAQ’s
               stated 10% direct-referral commission per eligible click. Program
-              rules, availability, and results can change. Earnings are not
-              guaranteed.
+              rules, timing, availability, and results can change. Weekly
+              stagger results are an illustration, not guaranteed payouts.
             </p>
           </section>
         </div>
