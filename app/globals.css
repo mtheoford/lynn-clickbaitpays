@@ -211,7 +211,6 @@ nav > a:not(.join-button):hover { color: white; }
   border-radius: 24px;
   background: linear-gradient(145deg, rgba(23, 27, 62, 0.94), rgba(9, 11, 28, 0.96));
   box-shadow: 0 35px 90px rgba(0, 0, 0, 0.32), 0 0 75px rgba(83, 94, 255, 0.12);
-  transform: perspective(1200px) rotateY(-1.3deg);
 }
 
 .welcome-feature::after {
@@ -232,10 +231,10 @@ nav > a:not(.join-button):hover { color: white; }
   display: flex;
   align-items: center;
   gap: 9px;
-  color: #d7dbee;
-  font-size: 11px;
-  font-weight: 750;
-  letter-spacing: 0.03em;
+  color: #e5e8f5;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.015em;
 }
 
 .hero-video { aspect-ratio: 16 / 9; overflow: hidden; border-radius: 15px; background: #02030a; }
