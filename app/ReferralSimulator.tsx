@@ -470,7 +470,8 @@ export default function ReferralSimulator() {
                 <div>
                   <strong>Where are you starting?</strong>
                   <small>
-                    The goal is fixed: three active Level 7 campaigns.
+                    We’ll estimate how long it could take to grow from your
+                    starting point to three Level 7 campaigns.
                   </small>
                 </div>
               </div>
