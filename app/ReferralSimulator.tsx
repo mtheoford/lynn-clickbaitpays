@@ -257,6 +257,87 @@ function ChoiceButtons({
   );
 }
 
+type JourneyIconName =
+  | "start"
+  | "growth"
+  | "continuity"
+  | "person"
+  | "people"
+  | "sliders"
+  | "clock"
+  | "wallet"
+  | "recovered";
+
+function JourneyIcon({ name }: { name: JourneyIconName }) {
+  return (
+    <svg
+      className="journey-icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {name === "start" && <path d="M7 5v14l11-7L7 5Z" />}
+      {name === "growth" && (
+        <>
+          <path d="m4 17 5-5 4 3 7-8" />
+          <path d="M15 7h5v5" />
+        </>
+      )}
+      {name === "continuity" && (
+        <>
+          <path d="M20 7v5h-5" />
+          <path d="M4 17v-5h5" />
+          <path d="M6.2 7.3A7 7 0 0 1 18.7 10M17.8 16.7A7 7 0 0 1 5.3 14" />
+        </>
+      )}
+      {name === "person" && (
+        <>
+          <circle cx="12" cy="8" r="3" />
+          <path d="M6.5 20a5.5 5.5 0 0 1 11 0" />
+        </>
+      )}
+      {name === "people" && (
+        <>
+          <circle cx="12" cy="7" r="2.5" />
+          <circle cx="5.5" cy="10" r="2" />
+          <circle cx="18.5" cy="10" r="2" />
+          <path d="M8 19a4 4 0 0 1 8 0M2.5 19a3 3 0 0 1 4.8-2.4M21.5 19a3 3 0 0 0-4.8-2.4" />
+        </>
+      )}
+      {name === "sliders" && (
+        <>
+          <path d="M4 6h5M15 6h5M4 12h9M17 12h3M4 18h3M11 18h9" />
+          <circle cx="12" cy="6" r="2" />
+          <circle cx="15" cy="12" r="2" />
+          <circle cx="9" cy="18" r="2" />
+        </>
+      )}
+      {name === "clock" && (
+        <>
+          <circle cx="12" cy="12" r="8" />
+          <path d="M12 8v4l3 2" />
+        </>
+      )}
+      {name === "wallet" && (
+        <>
+          <path d="M4 7.5h14a2 2 0 0 1 2 2v8H6a2 2 0 0 1-2-2v-10a2 2 0 0 1 2-2h10" />
+          <path d="M15 11h5v4h-5a2 2 0 0 1 0-4Z" />
+        </>
+      )}
+      {name === "recovered" && (
+        <>
+          <circle cx="12" cy="12" r="8" />
+          <path d="m8.5 12 2.2 2.2 4.8-5" />
+        </>
+      )}
+    </svg>
+  );
+}
+
 function monthNumber(day: number) {
   if (day < 0) return -1;
   if (day === 0) return 0;
@@ -609,6 +690,7 @@ export default function ReferralSimulator() {
                   aria-pressed={journeyMode === "start"}
                   onClick={() => setJourneyMode("start")}
                 >
+                  <JourneyIcon name="start" />
                   <span>Start here</span>
                   <strong>Start &amp; learn</strong>
                   <small>One round. Decide what comes next.</small>
@@ -619,6 +701,7 @@ export default function ReferralSimulator() {
                   aria-pressed={journeyMode === "compound"}
                   onClick={() => setJourneyMode("compound")}
                 >
+                  <JourneyIcon name="growth" />
                   <span>Grow over time</span>
                   <strong>Build momentum</strong>
                   <small>Compound toward three Level 7 campaigns.</small>
@@ -629,6 +712,7 @@ export default function ReferralSimulator() {
                   aria-pressed={journeyMode === "continuity"}
                   onClick={() => setJourneyMode("continuity")}
                 >
+                  <JourneyIcon name="continuity" />
                   <span>Reduce downtime</span>
                   <strong>Maintain continuity</strong>
                   <small>Prepare two rounds to reduce downtime.</small>
@@ -651,6 +735,7 @@ export default function ReferralSimulator() {
                   aria-pressed={referralMode === "none"}
                   onClick={() => setReferralMode("none")}
                 >
+                  <JourneyIcon name="person" />
                   <span>Campaign only</span>
                   <strong>No referrals</strong>
                   <small>Campaigns only</small>
@@ -661,6 +746,7 @@ export default function ReferralSimulator() {
                   aria-pressed={referralMode === "refer3"}
                   onClick={() => setReferralMode("refer3")}
                 >
+                  <JourneyIcon name="people" />
                   <span>Illustrative example</span>
                   <strong>Refer 3</strong>
                   <small>Level 3 · 3 staggered each</small>
@@ -671,6 +757,7 @@ export default function ReferralSimulator() {
                   aria-pressed={referralMode === "custom"}
                   onClick={() => setReferralMode("custom")}
                 >
+                  <JourneyIcon name="sliders" />
                   <span>Build your own</span>
                   <strong>Custom</strong>
                   <small>Choose your assumptions</small>
@@ -877,22 +964,22 @@ export default function ReferralSimulator() {
                 {journeyMode === "compound" ? (
                   <>
                     <div className="story-campaign">
-                      <i aria-hidden="true">1</i>
+                      <i aria-hidden="true"><JourneyIcon name="start" /></i>
                       <span>{milestoneLabel(selectedPath.threeCampaignsDay)}</span>
                       <strong>Three campaigns running</strong>
                     </div>
                     <div className="story-growth">
-                      <i aria-hidden="true">2</i>
+                      <i aria-hidden="true"><JourneyIcon name="growth" /></i>
                       <span>{milestoneLabel(selectedPath.firstLevelSevenDay)}</span>
                       <strong>First Level 7 campaign</strong>
                     </div>
                     <div className="story-growth">
-                      <i aria-hidden="true">3</i>
+                      <i aria-hidden="true"><JourneyIcon name="continuity" /></i>
                       <span>{milestoneLabel(selectedPath.goalDay)}</span>
                       <strong>Three Level 7 campaigns</strong>
                     </div>
                     <div className="story-recovered">
-                      <i aria-hidden="true">4</i>
+                      <i aria-hidden="true"><JourneyIcon name="recovered" /></i>
                       <span>{timeLabel(breakEvenDay)}</span>
                       <strong>Starting funds recovered</strong>
                     </div>
@@ -900,12 +987,14 @@ export default function ReferralSimulator() {
                 ) : (
                   <>
                     <div className="story-campaign">
-                      <i aria-hidden="true">1</i>
+                      <i aria-hidden="true"><JourneyIcon name="start" /></i>
                       <span>Day 1</span>
                       <strong>{startingCampaigns} campaign{startingCampaigns === 1 ? "" : "s"} begin</strong>
                     </div>
                     <div className={journeyMode === "continuity" ? "story-reserve" : "story-activity"}>
-                      <i aria-hidden="true">2</i>
+                      <i aria-hidden="true">
+                        <JourneyIcon name={journeyMode === "continuity" ? "continuity" : "clock"} />
+                      </i>
                       <span>Day 12</span>
                       <strong>
                         {journeyMode === "continuity"
@@ -914,12 +1003,12 @@ export default function ReferralSimulator() {
                       </strong>
                     </div>
                     <div className="story-release">
-                      <i aria-hidden="true">3</i>
+                      <i aria-hidden="true"><JourneyIcon name="wallet" /></i>
                       <span>Day 19</span>
                       <strong>First value becomes available</strong>
                     </div>
                     <div className="story-recovered">
-                      <i aria-hidden="true">4</i>
+                      <i aria-hidden="true"><JourneyIcon name="recovered" /></i>
                       <span>{timeLabel(breakEvenDay)}</span>
                       <strong>Starting funds recovered</strong>
                     </div>
