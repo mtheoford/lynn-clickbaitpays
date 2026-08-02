@@ -11,6 +11,7 @@ type Level = {
 };
 
 type ReferralMode = "none" | "refer3" | "custom";
+type JourneyMode = "start" | "compound" | "continuity";
 
 type CampaignLane = {
   level: number;
@@ -32,61 +33,32 @@ type PathInputs = {
   referralCampaigns: number;
 };
 
+type HorizonResult = {
+  months: number;
+  withdrawals: number;
+  recoveredPercent: number;
+  roiPercent: number;
+};
+
 const levels: Level[] = [
-  {
-    id: 1,
-    campaign: 13,
-    activation: 1,
-    earnings: 17.17,
-    referralCommission: 1.908,
-  },
-  {
-    id: 2,
-    campaign: 77,
-    activation: 7,
-    earnings: 101.7,
-    referralCommission: 11.3,
-  },
-  {
-    id: 3,
-    campaign: 150,
-    activation: 15,
-    earnings: 194.4,
-    referralCommission: 21.6,
-  },
-  {
-    id: 4,
-    campaign: 300,
-    activation: 30,
-    earnings: 388.8,
-    referralCommission: 43.2,
-  },
-  {
-    id: 5,
-    campaign: 600,
-    activation: 60,
-    earnings: 777.6,
-    referralCommission: 86.4,
-  },
-  {
-    id: 6,
-    campaign: 1200,
-    activation: 120,
-    earnings: 1555.2,
-    referralCommission: 172.8,
-  },
-  {
-    id: 7,
-    campaign: 2400,
-    activation: 240,
-    earnings: 3240,
-    referralCommission: 360,
-  },
+  { id: 1, campaign: 13, activation: 1, earnings: 17.17, referralCommission: 1.908 },
+  { id: 2, campaign: 77, activation: 7, earnings: 101.7, referralCommission: 11.3 },
+  { id: 3, campaign: 150, activation: 15, earnings: 194.4, referralCommission: 21.6 },
+  { id: 4, campaign: 300, activation: 30, earnings: 388.8, referralCommission: 43.2 },
+  { id: 5, campaign: 600, activation: 60, earnings: 777.6, referralCommission: 86.4 },
+  { id: 6, campaign: 1200, activation: 120, earnings: 1555.2, referralCommission: 172.8 },
+  { id: 7, campaign: 2400, activation: 240, earnings: 3240, referralCommission: 360 },
 ];
 
 const cycleDays = 19;
 const clickDays = 12;
+const withdrawalRate = 0.9;
 const maximumProjectionDays = 365 * 20;
+const horizonDays = [
+  { months: 3, days: 90 },
+  { months: 6, days: 180 },
+  { months: 12, days: 365 },
+];
 
 const money = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 2,
@@ -119,6 +91,26 @@ function referralCommissionForDay(
   }
 
   return dailyCommission;
+}
+
+function referralCashThroughDay(
+  day: number,
+  people: number,
+  level: number,
+  campaignCount: number,
+) {
+  if (people === 0) return 0;
+
+  let total = 0;
+  for (let currentDay = 1; currentDay <= day; currentDay += 1) {
+    total += referralCommissionForDay(
+      currentDay,
+      people,
+      level,
+      campaignCount,
+    );
+  }
+  return total * withdrawalRate;
 }
 
 function simulatePath({
@@ -180,9 +172,7 @@ function simulatePath({
             upgrade.campaign +
             (activatedLevels.has(upgrade.id) ? 0 : upgrade.activation);
 
-          if (wallet + 0.0001 >= upgradeCost) {
-            nextLevel = upgrade.id;
-          }
+          if (wallet + 0.0001 >= upgradeCost) nextLevel = upgrade.id;
         }
 
         const next = getLevel(nextLevel);
@@ -267,33 +257,38 @@ function ChoiceButtons({
   );
 }
 
-function goalMonth(day: number) {
+function monthNumber(day: number) {
   if (day < 0) return -1;
   if (day === 0) return 0;
   return Math.ceil(day / 30);
 }
 
-function goalTimeLabel(day: number) {
-  const months = goalMonth(day);
-  if (months < 0) return "Beyond this model";
-  if (months === 0) return "Goal reached";
-  if (months === 1) return "About 1 month";
-  return `About ${months} months`;
+function timeLabel(day: number) {
+  if (day < 0) return "Beyond this model";
+  if (day === 0) return "Starting point";
+  if (day <= 45) return `About ${day} days`;
+  const months = monthNumber(day);
+  return `About ${months} ${months === 1 ? "month" : "months"}`;
 }
 
 function milestoneLabel(day: number) {
-  const months = goalMonth(day);
+  const months = monthNumber(day);
   if (months < 0) return "Not reached";
   if (months === 0) return "Starting point";
   return `Month ${months}`;
+}
+
+function percent(value: number) {
+  const rounded = Math.round(value);
+  return `${rounded > 0 ? "+" : ""}${rounded}%`;
 }
 
 export default function ReferralSimulator() {
   const [isOpen, setIsOpen] = useState(false);
   const [startingLevel, setStartingLevel] = useState(3);
   const [startingCampaigns, setStartingCampaigns] = useState(1);
-  const [referralMode, setReferralMode] =
-    useState<ReferralMode>("none");
+  const [journeyMode, setJourneyMode] = useState<JourneyMode>("start");
+  const [referralMode, setReferralMode] = useState<ReferralMode>("none");
   const [customPeopleInput, setCustomPeopleInput] = useState("3");
   const [customReferralLevel, setCustomReferralLevel] = useState(3);
   const [customReferralCampaigns, setCustomReferralCampaigns] = useState(3);
@@ -347,32 +342,119 @@ export default function ReferralSimulator() {
     ],
   );
 
-  const baselineMonths = goalMonth(baselinePath.goalDay);
-  const selectedMonths = goalMonth(selectedPath.goalDay);
-  const monthsSaved =
-    baselineMonths >= 0 && selectedMonths >= 0
-      ? Math.max(0, baselineMonths - selectedMonths)
-      : 0;
-  const levelSeven = getLevel(7);
-  const campaignMonthlyPotential =
-    ((levelSeven.earnings - levelSeven.campaign) * 3 * 30 * 0.9) /
-    cycleDays;
+  const starting = getLevel(startingLevel);
+  const oneRoundFunds =
+    (starting.campaign * startingCampaigns + starting.activation) *
+    householdAccounts;
+  const continuityReserve =
+    starting.campaign * startingCampaigns * householdAccounts;
+  const readyToRollFunds = oneRoundFunds + continuityReserve;
+  const selectedStartingFunds =
+    journeyMode === "continuity" ? readyToRollFunds : oneRoundFunds;
+  const firstReleaseGross =
+    starting.earnings * startingCampaigns * householdAccounts;
+  const firstReleaseNet = firstReleaseGross * withdrawalRate;
+  const firstRoundDifference = firstReleaseNet - oneRoundFunds;
+  const firstRoundReturn = (firstRoundDifference / oneRoundFunds) * 100;
+
   const referralMonthlyPotential =
     (referralPlan.people *
       referralPlan.campaigns *
       getLevel(referralPlan.level).referralCommission *
       30 *
-      0.9) /
+      withdrawalRate) /
     cycleDays;
-  const householdCampaignPotential =
-    campaignMonthlyPotential * householdAccounts;
-  const householdReferralPotential =
+  const currentRoundNetSurplus =
+    (starting.earnings - starting.campaign) *
+    startingCampaigns *
+    withdrawalRate *
+    householdAccounts;
+  const currentRoundInterval = journeyMode === "continuity" ? clickDays : cycleDays;
+  const currentCampaignMonthlyPotential =
+    (currentRoundNetSurplus * 30) / currentRoundInterval;
+  const currentReferralMonthlyPotential =
     referralMonthlyPotential * householdAccounts;
-  const combinedMonthlyPotential =
-    householdCampaignPotential + householdReferralPotential;
+
+  const levelSeven = getLevel(7);
+  const levelSevenCampaignMonthlyPotential =
+    ((levelSeven.earnings - levelSeven.campaign) *
+      3 *
+      30 *
+      withdrawalRate) /
+    cycleDays;
+  const goalCampaignMonthlyPotential =
+    levelSevenCampaignMonthlyPotential * householdAccounts;
+  const goalReferralMonthlyPotential =
+    referralMonthlyPotential * householdAccounts;
+  const goalCombinedMonthlyPotential =
+    goalCampaignMonthlyPotential + goalReferralMonthlyPotential;
+
+  const monthsSaved = Math.max(
+    0,
+    monthNumber(baselinePath.goalDay) - monthNumber(selectedPath.goalDay),
+  );
+
+  const cashPathWithdrawalAtDay = (day: number) => {
+    const rounds =
+      day < cycleDays
+        ? 0
+        : Math.floor((day - cycleDays) / currentRoundInterval) + 1;
+    const ownCash = rounds * currentRoundNetSurplus;
+    const referralCash =
+      referralCashThroughDay(
+        day,
+        referralPlan.people,
+        referralPlan.level,
+        referralPlan.campaigns,
+      ) * householdAccounts;
+    return ownCash + referralCash;
+  };
+
+  const compoundWithdrawalStartDay =
+    selectedPath.goalDay < 0 ? -1 : selectedPath.goalDay + cycleDays;
+  const compoundWithdrawalAtDay = (day: number) => {
+    if (compoundWithdrawalStartDay < 0 || day <= compoundWithdrawalStartDay) {
+      return 0;
+    }
+    return (
+      ((day - compoundWithdrawalStartDay) / 30) *
+      goalCombinedMonthlyPotential
+    );
+  };
+
+  const withdrawalAtDay =
+    journeyMode === "compound"
+      ? compoundWithdrawalAtDay
+      : cashPathWithdrawalAtDay;
+
+  let breakEvenDay = -1;
+  for (let day = 1; day <= maximumProjectionDays; day += 1) {
+    if (withdrawalAtDay(day) + 0.0001 >= selectedStartingFunds) {
+      breakEvenDay = day;
+      break;
+    }
+  }
+
+  const horizons: HorizonResult[] = horizonDays.map(({ months, days }) => {
+    const withdrawals = withdrawalAtDay(days);
+    return {
+      months,
+      withdrawals,
+      recoveredPercent: (withdrawals / selectedStartingFunds) * 100,
+      roiPercent:
+        ((withdrawals - selectedStartingFunds) / selectedStartingFunds) * 100,
+    };
+  });
+
+  const selectedMonthlyPotential =
+    journeyMode === "compound"
+      ? goalCombinedMonthlyPotential
+      : currentCampaignMonthlyPotential + currentReferralMonthlyPotential;
   const householdGoalCampaigns = householdAccounts * 3;
-  const startingCost =
-    selectedPath.initialCost * householdAccounts;
+  const activeCampaignValue =
+    journeyMode === "compound"
+      ? levelSeven.campaign * householdGoalCampaigns
+      : starting.campaign * startingCampaigns * householdAccounts;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -419,7 +501,7 @@ export default function ReferralSimulator() {
         className="calculator-launch-button"
         onClick={() => setIsOpen(true)}
       >
-        Calculate your Level 7 path <span aria-hidden="true">↗</span>
+        Explore your campaign path <span aria-hidden="true">↗</span>
       </button>
 
       {isOpen && (
@@ -431,7 +513,7 @@ export default function ReferralSimulator() {
         >
           <section
             ref={modalRef}
-            className="calculator-modal planner-modal"
+            className="calculator-modal planner-modal journey-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="calculator-title"
@@ -441,26 +523,26 @@ export default function ReferralSimulator() {
               type="button"
               className="calculator-modal-close"
               onClick={() => setIsOpen(false)}
-              aria-label="Close Level 7 path calculator"
+              aria-label="Close campaign path calculator"
             >
               ×
             </button>
 
-            <p className="eyebrow">Illustrative compounding path</p>
+            <p className="eyebrow">Your campaign journey</p>
             <h2 id="calculator-title">
-              How quickly could you reach three Level 7 campaigns?
+              Start where you are. See where it could lead.
             </h2>
             <p className="calculator-modal-intro">
-              Choose where you begin. The calculator keeps three campaigns
-              running, compounds available value, and upgrades one campaign at
-              a time until the Level 7 goal is reached.
+              One campaign at any level is a valid beginning. Choose a starting
+              point, then compare ways to learn, grow, or build greater
+              continuity over time.
             </p>
 
-            <div className="planner-no-referrals">
-              <strong>✓ Referrals remain optional</strong>
+            <div className="planner-no-referrals journey-welcome">
+              <strong>✓ Every starting point counts</strong>
               <span>
-                Compare the campaign-only path with the additional speed and
-                monthly potential direct referrals could add.
+                Referrals and a two-round reserve remain optional. You can begin
+                with one campaign, learn the process, and decide what comes next.
               </span>
             </div>
 
@@ -468,10 +550,9 @@ export default function ReferralSimulator() {
               <div className="planner-section-heading">
                 <span>01</span>
                 <div>
-                  <strong>Where are you starting?</strong>
+                  <strong>Choose a starting point that fits you</strong>
                   <small>
-                    We’ll estimate how long it could take to grow from your
-                    starting point to three Level 7 campaigns.
+                    Start at any level with one, two, or three campaigns.
                   </small>
                 </div>
               </div>
@@ -505,24 +586,125 @@ export default function ReferralSimulator() {
                 />
               </div>
 
-              <p className="planner-start-cost">
-                Estimated starting campaign purchase:{" "}
-                <strong>{money.format(startingCost)} USDT</strong>
-                <span>
-                  Includes the starting level’s one-time activation fee
-                  {householdAccounts > 1 ? " for each household account" : ""}.
-                </span>
-              </p>
+              <div className="first-step-preview">
+                <div>
+                  <span>Your starting amount</span>
+                  <strong>{money.format(oneRoundFunds)} USDT</strong>
+                  <small>One campaign round plus level activation</small>
+                </div>
+                <i aria-hidden="true">→</i>
+                <div>
+                  <span>First value available</span>
+                  <strong>{money.format(firstReleaseGross)} USDT</strong>
+                  <small>After the illustrated 12-day activity + 7-day hold</small>
+                </div>
+                <i aria-hidden="true">→</i>
+                <div className="first-step-net">
+                  <span>Net if withdrawn</span>
+                  <strong>{money.format(firstReleaseNet)} USDT</strong>
+                  <small>
+                    {percent(firstRoundReturn)} versus the starting amount
+                  </small>
+                </div>
+              </div>
             </div>
 
             <div className="planner-section">
               <div className="planner-section-heading">
                 <span>02</span>
                 <div>
+                  <strong>Choose the story you want to explore</strong>
+                  <small>
+                    There is no wrong-sized beginning. You can change paths as
+                    your confidence and goals grow.
+                  </small>
+                </div>
+              </div>
+
+              <div className="journey-mode-cards">
+                <button
+                  type="button"
+                  className={journeyMode === "start" ? "is-selected" : ""}
+                  aria-pressed={journeyMode === "start"}
+                  onClick={() => setJourneyMode("start")}
+                >
+                  <span>Start here</span>
+                  <strong>Start &amp; learn</strong>
+                  <small>
+                    Fund one round, experience the process, then choose whether
+                    to withdraw, restart, or grow.
+                  </small>
+                </button>
+                <button
+                  type="button"
+                  className={journeyMode === "compound" ? "is-selected" : ""}
+                  aria-pressed={journeyMode === "compound"}
+                  onClick={() => setJourneyMode("compound")}
+                >
+                  <span>Grow over time</span>
+                  <strong>Build momentum</strong>
+                  <small>
+                    Compound available value toward three Level 7 campaigns.
+                    No additional reserve is assumed.
+                  </small>
+                </button>
+                <button
+                  type="button"
+                  className={journeyMode === "continuity" ? "is-selected" : ""}
+                  aria-pressed={journeyMode === "continuity"}
+                  onClick={() => setJourneyMode("continuity")}
+                >
+                  <span>Reduce downtime</span>
+                  <strong>Maintain continuity</strong>
+                  <small>
+                    Prepare two rounds so the next campaign can begin while the
+                    prior value is in hold.
+                  </small>
+                </button>
+              </div>
+
+              <div className="journey-path-explainer" aria-live="polite">
+                {journeyMode === "start" && (
+                  <>
+                    <strong>One round is enough to begin.</strong>
+                    <p>
+                      When value becomes available, you can withdraw it, use it
+                      to restart the same campaign, or begin building toward a
+                      larger plan.
+                    </p>
+                  </>
+                )}
+                {journeyMode === "compound" && (
+                  <>
+                    <strong>Let the starting point grow into the bigger vision.</strong>
+                    <p>
+                      This path keeps available value working, fills three
+                      campaigns, and upgrades one campaign at a time until the
+                      Level 7 goal is reached.
+                    </p>
+                  </>
+                )}
+                {journeyMode === "continuity" && (
+                  <>
+                    <strong>One round starts. The second helps maintain momentum.</strong>
+                    <p>
+                      The continuity reserve is not another active campaign. It
+                      remains available to replace completed campaigns while
+                      prior value finishes its hold.
+                    </p>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="planner-section">
+              <div className="planner-section-heading">
+                <span>03</span>
+                <div>
                   <strong>Add a referral accelerator—or don’t</strong>
                   <small>
-                    The Refer 3 example is ready to use; custom remains
-                    available.
+                    Referrals are never required. Compare the independent path
+                    with the additional pace direct referrals could add.
                   </small>
                 </div>
               </div>
@@ -544,7 +726,7 @@ export default function ReferralSimulator() {
                   aria-pressed={referralMode === "refer3"}
                   onClick={() => setReferralMode("refer3")}
                 >
-                  <span>Recommended example</span>
+                  <span>Illustrative example</span>
                   <strong>Refer 3</strong>
                   <small>Level 3 · 3 staggered each</small>
                 </button>
@@ -573,9 +755,7 @@ export default function ReferralSimulator() {
                       value={customPeopleInput}
                       onFocus={(event) => event.currentTarget.select()}
                       onBlur={() => {
-                        if (customPeopleInput === "") {
-                          setCustomPeopleInput("0");
-                        }
+                        if (customPeopleInput === "") setCustomPeopleInput("0");
                       }}
                       onChange={(event) => {
                         const nextValue = event.target.value;
@@ -583,7 +763,6 @@ export default function ReferralSimulator() {
                           setCustomPeopleInput("");
                           return;
                         }
-
                         const withoutLeadingZeros = nextValue.replace(
                           /^0+(?=\d)/,
                           "",
@@ -630,9 +809,7 @@ export default function ReferralSimulator() {
               <summary>
                 <span>
                   Household view
-                  <small>
-                    Apply this same plan to more than one household account
-                  </small>
+                  <small>Apply this same path to more than one household account</small>
                 </span>
                 <i aria-hidden="true">+</i>
               </summary>
@@ -649,42 +826,79 @@ export default function ReferralSimulator() {
                 />
                 <p>
                   The household view applies the same starting plan and referral
-                  profile to each selected account. The combined goal becomes{" "}
-                  {householdGoalCampaigns} Level 7 campaigns.
+                  profile to each selected account. Official household account
+                  rules still apply.
                 </p>
               </div>
             </details>
 
-            <div className="level-path-result" aria-live="polite">
+            <div className="level-path-result journey-result" aria-live="polite">
               <div className="goal-time-result">
-                <span>Estimated time to the Level 7 goal</span>
-                <strong>{goalTimeLabel(selectedPath.goalDay)}</strong>
+                <span>Estimated cash break-even on this path</span>
+                <strong>{timeLabel(breakEvenDay)}</strong>
                 <p>
-                  Three Level 7 campaigns per account ·{" "}
-                  {householdGoalCampaigns} campaigns in this view
+                  Cash break-even means cumulative illustrated net withdrawals
+                  equal the selected starting funds while campaigns remain in
+                  the modeled rhythm.
                 </p>
               </div>
 
-              <div className="path-comparison">
+              <div className="journey-funding-metrics">
                 <div>
-                  <span>Campaign-only path</span>
-                  <strong>{goalTimeLabel(baselinePath.goalDay)}</strong>
-                  <small>No referral commissions included</small>
+                  <span>Start with</span>
+                  <strong>{money.format(oneRoundFunds)} USDT</strong>
+                  <small>Any selected starting point is valid</small>
                 </div>
-                <i aria-hidden="true">→</i>
-                <div className="accelerated-path">
-                  <span>Your selected path</span>
-                  <strong>{goalTimeLabel(selectedPath.goalDay)}</strong>
+                {journeyMode === "continuity" ? (
+                  <div>
+                    <span>Continuity reserve</span>
+                    <strong>{money.format(continuityReserve)} USDT</strong>
+                    <small>One additional round held ready</small>
+                  </div>
+                ) : journeyMode === "compound" ? (
+                  <div>
+                    <span>Level 7 destination</span>
+                    <strong>{householdGoalCampaigns} campaigns</strong>
+                    <small>Three per household account</small>
+                  </div>
+                ) : (
+                  <div>
+                    <span>Optional future target</span>
+                    <strong>{money.format(readyToRollFunds)} USDT</strong>
+                    <small>Build toward two-round continuity later</small>
+                  </div>
+                )}
+                <div className="journey-funding-total">
+                  <span>
+                    {journeyMode === "continuity"
+                      ? "Ready-to-roll total"
+                      : journeyMode === "compound"
+                        ? "Goal timing"
+                        : "First release"}
+                  </span>
+                  <strong>
+                    {journeyMode === "continuity"
+                      ? `${money.format(readyToRollFunds)} USDT`
+                      : journeyMode === "compound"
+                        ? timeLabel(selectedPath.goalDay)
+                        : "About 19 days"}
+                  </strong>
                   <small>
-                    {referralPlan.people === 0
-                      ? "Campaign activity only"
-                      : `${monthsSaved} ${monthsSaved === 1 ? "month" : "months"} sooner in this illustration`}
+                    {journeyMode === "continuity"
+                      ? "Two rounds plus one-time activation"
+                      : journeyMode === "compound"
+                        ? referralPlan.people === 0
+                          ? "Campaign activity only"
+                          : `${monthsSaved} ${monthsSaved === 1 ? "month" : "months"} sooner with selected referrals`
+                        : "Then choose to withdraw, restart, or grow"}
                   </small>
                 </div>
               </div>
 
               <div className="goal-monthly-heading">
-                <span>At the goal</span>
+                <span>
+                  {journeyMode === "compound" ? "At the Level 7 goal" : "On this selected rhythm"}
+                </span>
                 <strong>Illustrative ongoing monthly potential</strong>
               </div>
 
@@ -692,17 +906,23 @@ export default function ReferralSimulator() {
                 <div>
                   <span>Campaigns</span>
                   <strong>
-                    {money.format(householdCampaignPotential)} USDT
+                    {money.format(
+                      journeyMode === "compound"
+                        ? goalCampaignMonthlyPotential
+                        : currentCampaignMonthlyPotential,
+                    )} USDT
                   </strong>
-                  <small>
-                    After campaign replacement and withdrawal fee
-                  </small>
+                  <small>After campaign replacement and withdrawal fee</small>
                 </div>
                 <b aria-hidden="true">+</b>
                 <div>
                   <span>Direct referrals</span>
                   <strong>
-                    {money.format(householdReferralPotential)} USDT
+                    {money.format(
+                      journeyMode === "compound"
+                        ? goalReferralMonthlyPotential
+                        : currentReferralMonthlyPotential,
+                    )} USDT
                   </strong>
                   <small>
                     {referralPlan.people === 0
@@ -713,26 +933,95 @@ export default function ReferralSimulator() {
                 <b aria-hidden="true">=</b>
                 <div className="combined-potential">
                   <span>Combined</span>
-                  <strong>{money.format(combinedMonthlyPotential)} USDT</strong>
+                  <strong>{money.format(selectedMonthlyPotential)} USDT</strong>
                   <small>Illustrative monthly withdrawal pace</small>
                 </div>
               </div>
 
-              <div className="goal-timeline">
-                <div>
-                  <i aria-hidden="true">1</i>
-                  <span>{milestoneLabel(selectedPath.threeCampaignsDay)}</span>
-                  <strong>Three campaigns running</strong>
+              <div className="journey-storyline">
+                {journeyMode === "compound" ? (
+                  <>
+                    <div>
+                      <i aria-hidden="true">1</i>
+                      <span>{milestoneLabel(selectedPath.threeCampaignsDay)}</span>
+                      <strong>Three campaigns running</strong>
+                    </div>
+                    <div>
+                      <i aria-hidden="true">2</i>
+                      <span>{milestoneLabel(selectedPath.firstLevelSevenDay)}</span>
+                      <strong>First Level 7 campaign</strong>
+                    </div>
+                    <div>
+                      <i aria-hidden="true">3</i>
+                      <span>{milestoneLabel(selectedPath.goalDay)}</span>
+                      <strong>Three Level 7 campaigns</strong>
+                    </div>
+                    <div>
+                      <i aria-hidden="true">4</i>
+                      <span>{timeLabel(breakEvenDay)}</span>
+                      <strong>Starting funds recovered</strong>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <i aria-hidden="true">1</i>
+                      <span>Day 1</span>
+                      <strong>{startingCampaigns} campaign{startingCampaigns === 1 ? "" : "s"} begin</strong>
+                    </div>
+                    <div>
+                      <i aria-hidden="true">2</i>
+                      <span>Day 12</span>
+                      <strong>
+                        {journeyMode === "continuity"
+                          ? "Reserve can start the next round"
+                          : "Campaign activity completes"}
+                      </strong>
+                    </div>
+                    <div>
+                      <i aria-hidden="true">3</i>
+                      <span>Day 19</span>
+                      <strong>First value becomes available</strong>
+                    </div>
+                    <div>
+                      <i aria-hidden="true">4</i>
+                      <span>{timeLabel(breakEvenDay)}</span>
+                      <strong>Starting funds recovered</strong>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <div className="return-story">
+                <div className="return-story-heading">
+                  <div>
+                    <span>See the numbers behind your journey</span>
+                    <strong>3-, 6-, and 12-month cash view</strong>
+                  </div>
+                  <p>
+                    Active campaign value kept separate: {money.format(activeCampaignValue)} USDT.
+                  </p>
                 </div>
-                <div>
-                  <i aria-hidden="true">2</i>
-                  <span>{milestoneLabel(selectedPath.firstLevelSevenDay)}</span>
-                  <strong>First Level 7 campaign</strong>
-                </div>
-                <div>
-                  <i aria-hidden="true">3</i>
-                  <span>{milestoneLabel(selectedPath.goalDay)}</span>
-                  <strong>Three Level 7 campaigns</strong>
+                <div className="return-horizons">
+                  {horizons.map((horizon) => (
+                    <div key={horizon.months}>
+                      <span>{horizon.months} months</span>
+                      <strong>{money.format(horizon.withdrawals)} USDT</strong>
+                      <small>illustrative net withdrawals</small>
+                      <dl>
+                        <div>
+                          <dt>Starting funds recovered</dt>
+                          <dd>{Math.round(horizon.recoveredPercent)}%</dd>
+                        </div>
+                        <div>
+                          <dt>Cash ROI</dt>
+                          <dd className={horizon.roiPercent >= 0 ? "is-positive" : ""}>
+                            {percent(horizon.roiPercent)}
+                          </dd>
+                        </div>
+                      </dl>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -743,31 +1032,44 @@ export default function ReferralSimulator() {
               </summary>
               <div>
                 <p>
-                  Available campaign value and selected direct-referral
-                  commissions are continuously compounded. The model fills
-                  three campaigns at the starting level, then upgrades one
-                  campaign at a time while maintaining the other active
-                  campaigns.
+                  The model uses published campaign costs and earnings, a
+                  12-day activity period plus a 7-day hold, one-time activation
+                  fees, selected direct-referral commissions, and a 10%
+                  withdrawal fee.
                 </p>
                 <p>
-                  It uses a 12-day activity period plus a 7-day hold, published
-                  campaign costs and earnings, one-time activation fees,
-                  direct-referral commissions, and a 10% withdrawal fee.
+                  Cash ROI equals illustrated net withdrawals minus selected
+                  starting funds, divided by those starting funds. Active
+                  campaign value is shown separately and is not counted as cash
+                  recovered.
+                </p>
+                <p>
+                  Start &amp; learn assumes campaigns restart when value becomes
+                  available. Maintain continuity assumes one additional round
+                  is held ready so completed campaigns can be replaced during
+                  the hold period.
+                </p>
+                <p>
+                  Build momentum compounds available value, fills three
+                  campaigns at the starting level, and upgrades one campaign at
+                  a time until the Level 7 goal is reached.
                 </p>
               </div>
             </details>
 
             <p className="calculator-modal-note">
-              Illustrative strategy only—not guaranteed earnings or an
-              investment projection. Campaign availability, member activity,
-              program rules, fees, and timing can change. Household accounts
-              remain subject to the{" "}
+              Illustrative strategy only—not guaranteed earnings, financial
+              advice, or an investment projection. Campaign availability,
+              member activity, program rules, fees, and timing can change.
+              Funding source and financing costs are not modeled; borrowed
+              funds create repayment obligations regardless of campaign
+              performance. Review the{" "}
               <a
                 href="https://clickbaitpays.me/questions.php"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                official account rules
+                current official rules
               </a>
               .
             </p>
