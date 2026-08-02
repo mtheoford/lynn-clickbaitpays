@@ -532,37 +532,14 @@ export default function ReferralSimulator() {
             <h2 id="calculator-title">
               Start where you are. See where it could lead.
             </h2>
-            <p className="calculator-modal-intro">
-              One campaign at any level is a valid beginning. Choose a starting
-              point, then compare ways to learn, grow, or build greater
-              continuity over time.
-            </p>
-
-            <div className="planner-no-referrals journey-welcome">
-              <strong>✓ Every starting point counts</strong>
-              <span>
-                Referrals and a two-round reserve remain optional. You can begin
-                with one campaign, learn the process, and decide what comes next.
-              </span>
-            </div>
-
-            <div className="journey-color-key" aria-label="Calculator color key">
-              <span className="key-campaign"><i />Your campaigns</span>
-              <span className="key-growth"><i />Growth &amp; compounding</span>
-              <span className="key-reserve"><i />Continuity reserve</span>
-              <span className="key-referral"><i />Optional referrals</span>
-              <span className="key-recovered"><i />Cash recovered</span>
-            </div>
 
             <div className="planner-section journey-step-start">
-              <div className="planner-section-heading">
+              <div className="planner-section-heading journey-heading-split">
                 <span>01</span>
                 <div>
-                  <strong>Choose a starting point that fits you</strong>
-                  <small>
-                    Start at any level with one, two, or three campaigns.
-                  </small>
+                  <strong>Choose your starting point</strong>
                 </div>
+                <b className="journey-reassurance">✓ Every starting point counts</b>
               </div>
 
               <div className="level-path-start-grid">
@@ -621,11 +598,7 @@ export default function ReferralSimulator() {
               <div className="planner-section-heading">
                 <span>02</span>
                 <div>
-                  <strong>Choose the story you want to explore</strong>
-                  <small>
-                    There is no wrong-sized beginning. You can change paths as
-                    your confidence and goals grow.
-                  </small>
+                  <strong>Choose your path</strong>
                 </div>
               </div>
 
@@ -638,10 +611,7 @@ export default function ReferralSimulator() {
                 >
                   <span>Start here</span>
                   <strong>Start &amp; learn</strong>
-                  <small>
-                    Fund one round, experience the process, then choose whether
-                    to withdraw, restart, or grow.
-                  </small>
+                  <small>One round. Decide what comes next.</small>
                 </button>
                 <button
                   type="button"
@@ -651,10 +621,7 @@ export default function ReferralSimulator() {
                 >
                   <span>Grow over time</span>
                   <strong>Build momentum</strong>
-                  <small>
-                    Compound available value toward three Level 7 campaigns.
-                    No additional reserve is assumed.
-                  </small>
+                  <small>Compound toward three Level 7 campaigns.</small>
                 </button>
                 <button
                   type="button"
@@ -664,44 +631,8 @@ export default function ReferralSimulator() {
                 >
                   <span>Reduce downtime</span>
                   <strong>Maintain continuity</strong>
-                  <small>
-                    Prepare two rounds so the next campaign can begin while the
-                    prior value is in hold.
-                  </small>
+                  <small>Prepare two rounds to reduce downtime.</small>
                 </button>
-              </div>
-
-              <div className="journey-path-explainer" aria-live="polite">
-                {journeyMode === "start" && (
-                  <>
-                    <strong>One round is enough to begin.</strong>
-                    <p>
-                      When value becomes available, you can withdraw it, use it
-                      to restart the same campaign, or begin building toward a
-                      larger plan.
-                    </p>
-                  </>
-                )}
-                {journeyMode === "compound" && (
-                  <>
-                    <strong>Let the starting point grow into the bigger vision.</strong>
-                    <p>
-                      This path keeps available value working, fills three
-                      campaigns, and upgrades one campaign at a time until the
-                      Level 7 goal is reached.
-                    </p>
-                  </>
-                )}
-                {journeyMode === "continuity" && (
-                  <>
-                    <strong>One round starts. The second helps maintain momentum.</strong>
-                    <p>
-                      The continuity reserve is not another active campaign. It
-                      remains available to replace completed campaigns while
-                      prior value finishes its hold.
-                    </p>
-                  </>
-                )}
               </div>
             </div>
 
@@ -709,11 +640,7 @@ export default function ReferralSimulator() {
               <div className="planner-section-heading">
                 <span>03</span>
                 <div>
-                  <strong>Add a referral accelerator—or don’t</strong>
-                  <small>
-                    Referrals are never required. Compare the independent path
-                    with the additional pace direct referrals could add.
-                  </small>
+                  <strong>Optional referrals</strong>
                 </div>
               </div>
 
@@ -726,7 +653,7 @@ export default function ReferralSimulator() {
                 >
                   <span>Campaign only</span>
                   <strong>No referrals</strong>
-                  <small>See the independent baseline</small>
+                  <small>Campaigns only</small>
                 </button>
                 <button
                   type="button"
@@ -746,7 +673,7 @@ export default function ReferralSimulator() {
                 >
                   <span>Build your own</span>
                   <strong>Custom</strong>
-                  <small>Choose people, level, and activity</small>
+                  <small>Choose your assumptions</small>
                 </button>
               </div>
 

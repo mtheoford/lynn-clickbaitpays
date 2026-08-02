@@ -12,7 +12,8 @@
   --violet: #9b5cff;
   --pink: #ee5fc7;
   --amber: #ffbd59;
-  --green: #58e3a0;
+  --green: #3dff9a;
+  --green-rgb: 61, 255, 154;
   --max: 1180px;
 }
 
@@ -793,47 +794,6 @@ nav > a:not(.join-button):hover { color: white; }
   max-width: 790px;
 }
 
-.journey-modal .calculator-modal-intro {
-  max-width: 720px;
-}
-
-.journey-color-key {
-  margin-top: 10px;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 7px;
-}
-
-.journey-color-key span {
-  min-height: 25px;
-  padding: 0 9px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  color: #929ab5;
-  background: rgba(255, 255, 255, 0.015);
-  font-size: 8px;
-  font-weight: 750;
-}
-
-.journey-color-key i {
-  width: 7px;
-  height: 7px;
-  flex: 0 0 7px;
-  border-radius: 50%;
-  background: currentColor;
-  box-shadow: 0 0 10px currentColor;
-}
-
-.journey-color-key .key-campaign { color: var(--cyan); }
-.journey-color-key .key-growth { color: #ad83ff; }
-.journey-color-key .key-reserve { color: var(--amber); }
-.journey-color-key .key-referral { color: var(--pink); }
-.journey-color-key .key-recovered { color: var(--green); }
-
 .planner-no-referrals {
   margin-top: 20px;
   padding: 13px 15px;
@@ -924,6 +884,18 @@ nav > a:not(.join-button):hover { color: white; }
   color: var(--muted);
   font-size: 10px;
   line-height: 1.4;
+}
+
+.journey-heading-split > div {
+  flex: 1;
+}
+
+.journey-reassurance {
+  margin-left: auto;
+  color: var(--green);
+  font-size: 9px;
+  font-weight: 850;
+  white-space: nowrap;
 }
 
 .planner-start-grid,
@@ -1343,17 +1315,18 @@ nav > a:not(.join-button):hover { color: white; }
 }
 
 .first-step-preview .first-step-net {
-  border: 1px solid rgba(88, 227, 160, 0.28);
+  border: 1px solid rgba(var(--green-rgb), 0.34);
   border-radius: 10px;
-  background: rgba(88, 227, 160, 0.055);
+  background: rgba(var(--green-rgb), 0.075);
 }
 
 .first-step-preview .first-step-net strong {
   color: var(--green);
+  text-shadow: 0 0 16px rgba(var(--green-rgb), 0.2);
 }
 
-.first-step-preview > div:first-child strong { color: var(--cyan); }
-.first-step-preview > div:nth-of-type(2) strong { color: #ad83ff; }
+.first-step-preview > div:first-child strong { color: var(--amber); }
+.first-step-preview > div:nth-of-type(2) strong { color: var(--cyan); }
 
 .journey-mode-cards {
   margin-top: 16px;
@@ -1364,7 +1337,7 @@ nav > a:not(.join-button):hover { color: white; }
 
 .journey-mode-cards button {
   min-width: 0;
-  min-height: 138px;
+  min-height: 108px;
   padding: 16px;
   border: 1px solid var(--line);
   border-radius: 13px;
@@ -1459,31 +1432,6 @@ nav > a:not(.join-button):hover { color: white; }
 .journey-mode-cards button:focus-visible {
   outline: 2px solid var(--cyan);
   outline-offset: 2px;
-}
-
-.journey-path-explainer {
-  margin-top: 10px;
-  padding: 14px 16px;
-  display: grid;
-  grid-template-columns: minmax(190px, 0.75fr) 1.6fr;
-  align-items: center;
-  gap: 18px;
-  border-left: 2px solid var(--journey-accent);
-  border-radius: 0 11px 11px 0;
-  background: rgba(var(--journey-accent-rgb), 0.045);
-}
-
-.journey-path-explainer strong {
-  font-family: var(--font-manrope), sans-serif;
-  font-size: 12px;
-  line-height: 1.4;
-}
-
-.journey-path-explainer p {
-  margin: 0;
-  color: #8992ad;
-  font-size: 9px;
-  line-height: 1.55;
 }
 
 .referral-mode-cards {
@@ -1651,7 +1599,8 @@ nav > a:not(.join-button):hover { color: white; }
 }
 
 .journey-modal .goal-time-result > strong {
-  color: var(--journey-accent);
+  color: var(--green);
+  text-shadow: 0 0 22px rgba(var(--green-rgb), 0.16);
 }
 
 .journey-funding-metrics {
@@ -1709,12 +1658,16 @@ nav > a:not(.join-button):hover { color: white; }
   color: var(--journey-accent);
 }
 
+.journey-mode-start .journey-funding-total strong { color: var(--green); }
+.journey-mode-compound .journey-funding-total strong { color: #b792ff; }
+.journey-mode-continuity .journey-funding-total strong { color: var(--amber); }
+
 .journey-funding-start {
-  border-color: rgba(46, 231, 242, 0.24) !important;
-  background: rgba(46, 231, 242, 0.04) !important;
+  border-color: rgba(255, 189, 89, 0.28) !important;
+  background: rgba(255, 189, 89, 0.045) !important;
 }
 
-.journey-funding-start strong { color: var(--cyan); }
+.journey-funding-start strong { color: var(--amber); }
 
 .journey-funding-growth {
   border-color: rgba(155, 92, 255, 0.3) !important;
@@ -1864,9 +1817,12 @@ nav > a:not(.join-button):hover { color: white; }
   border-top: 2px solid rgba(238, 95, 199, 0.68);
 }
 
-.return-horizons .return-horizon-3 > strong { color: var(--cyan); }
-.return-horizons .return-horizon-6 > strong { color: #b792ff; }
-.return-horizons .return-horizon-12 > strong { color: #ff83dc; }
+.return-horizons .return-horizon-3 > strong,
+.return-horizons .return-horizon-6 > strong,
+.return-horizons .return-horizon-12 > strong {
+  color: var(--green);
+  text-shadow: 0 0 16px rgba(var(--green-rgb), 0.14);
+}
 
 .return-horizons > div > span,
 .return-horizons > div > strong,
@@ -2095,13 +2051,14 @@ nav > a:not(.join-button):hover { color: white; }
 }
 
 .goal-monthly-metrics .combined-potential {
-  border-color: rgba(88, 227, 160, 0.34);
-  background: linear-gradient(125deg, rgba(88, 227, 160, 0.075), rgba(46, 231, 242, 0.04));
+  border-color: rgba(var(--green-rgb), 0.38);
+  background: linear-gradient(125deg, rgba(var(--green-rgb), 0.09), rgba(46, 231, 242, 0.04));
 }
 
 .goal-monthly-metrics .combined-potential strong {
   color: var(--green);
   font-size: 19px;
+  text-shadow: 0 0 16px rgba(var(--green-rgb), 0.16);
 }
 
 .goal-monthly-metrics .campaign-potential {
@@ -3754,7 +3711,8 @@ footer > p { margin: 0; color: #7e87a5; font-size: 11px; line-height: 1.55; }
   .first-step-preview > i { transform: rotate(90deg); }
   .journey-mode-cards { grid-template-columns: 1fr; }
   .journey-mode-cards button { min-height: 102px; }
-  .journey-path-explainer { grid-template-columns: 1fr; gap: 6px; }
+  .journey-heading-split { flex-wrap: wrap; }
+  .journey-reassurance { margin: 4px 0 0 39px; }
   .referral-mode-cards { grid-template-columns: 1fr; }
   .referral-mode-cards button { min-height: 72px; }
   .household-options > div { grid-template-columns: 1fr; gap: 12px; }
