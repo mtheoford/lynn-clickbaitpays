@@ -513,7 +513,7 @@ export default function ReferralSimulator() {
         >
           <section
             ref={modalRef}
-            className="calculator-modal planner-modal journey-modal"
+            className={`calculator-modal planner-modal journey-modal journey-mode-${journeyMode}`}
             role="dialog"
             aria-modal="true"
             aria-labelledby="calculator-title"
@@ -546,7 +546,15 @@ export default function ReferralSimulator() {
               </span>
             </div>
 
-            <div className="planner-section">
+            <div className="journey-color-key" aria-label="Calculator color key">
+              <span className="key-campaign"><i />Your campaigns</span>
+              <span className="key-growth"><i />Growth &amp; compounding</span>
+              <span className="key-reserve"><i />Continuity reserve</span>
+              <span className="key-referral"><i />Optional referrals</span>
+              <span className="key-recovered"><i />Cash recovered</span>
+            </div>
+
+            <div className="planner-section journey-step-start">
               <div className="planner-section-heading">
                 <span>01</span>
                 <div>
@@ -609,7 +617,7 @@ export default function ReferralSimulator() {
               </div>
             </div>
 
-            <div className="planner-section">
+            <div className="planner-section journey-step-mode">
               <div className="planner-section-heading">
                 <span>02</span>
                 <div>
@@ -624,7 +632,7 @@ export default function ReferralSimulator() {
               <div className="journey-mode-cards">
                 <button
                   type="button"
-                  className={journeyMode === "start" ? "is-selected" : ""}
+                  className={`journey-card-start ${journeyMode === "start" ? "is-selected" : ""}`}
                   aria-pressed={journeyMode === "start"}
                   onClick={() => setJourneyMode("start")}
                 >
@@ -637,7 +645,7 @@ export default function ReferralSimulator() {
                 </button>
                 <button
                   type="button"
-                  className={journeyMode === "compound" ? "is-selected" : ""}
+                  className={`journey-card-compound ${journeyMode === "compound" ? "is-selected" : ""}`}
                   aria-pressed={journeyMode === "compound"}
                   onClick={() => setJourneyMode("compound")}
                 >
@@ -650,7 +658,7 @@ export default function ReferralSimulator() {
                 </button>
                 <button
                   type="button"
-                  className={journeyMode === "continuity" ? "is-selected" : ""}
+                  className={`journey-card-continuity ${journeyMode === "continuity" ? "is-selected" : ""}`}
                   aria-pressed={journeyMode === "continuity"}
                   onClick={() => setJourneyMode("continuity")}
                 >
@@ -697,7 +705,7 @@ export default function ReferralSimulator() {
               </div>
             </div>
 
-            <div className="planner-section">
+            <div className="planner-section journey-step-referral">
               <div className="planner-section-heading">
                 <span>03</span>
                 <div>
@@ -844,25 +852,25 @@ export default function ReferralSimulator() {
               </div>
 
               <div className="journey-funding-metrics">
-                <div>
+                <div className="journey-funding-start">
                   <span>Start with</span>
                   <strong>{money.format(oneRoundFunds)} USDT</strong>
                   <small>Any selected starting point is valid</small>
                 </div>
                 {journeyMode === "continuity" ? (
-                  <div>
+                  <div className="journey-funding-reserve">
                     <span>Continuity reserve</span>
                     <strong>{money.format(continuityReserve)} USDT</strong>
                     <small>One additional round held ready</small>
                   </div>
                 ) : journeyMode === "compound" ? (
-                  <div>
+                  <div className="journey-funding-growth">
                     <span>Level 7 destination</span>
                     <strong>{householdGoalCampaigns} campaigns</strong>
                     <small>Three per household account</small>
                   </div>
                 ) : (
-                  <div>
+                  <div className="journey-funding-growth">
                     <span>Optional future target</span>
                     <strong>{money.format(readyToRollFunds)} USDT</strong>
                     <small>Build toward two-round continuity later</small>
@@ -903,7 +911,7 @@ export default function ReferralSimulator() {
               </div>
 
               <div className="goal-monthly-metrics">
-                <div>
+                <div className="campaign-potential">
                   <span>Campaigns</span>
                   <strong>
                     {money.format(
@@ -915,7 +923,7 @@ export default function ReferralSimulator() {
                   <small>After campaign replacement and withdrawal fee</small>
                 </div>
                 <b aria-hidden="true">+</b>
-                <div>
+                <div className="referral-potential">
                   <span>Direct referrals</span>
                   <strong>
                     {money.format(
@@ -941,22 +949,22 @@ export default function ReferralSimulator() {
               <div className="journey-storyline">
                 {journeyMode === "compound" ? (
                   <>
-                    <div>
+                    <div className="story-campaign">
                       <i aria-hidden="true">1</i>
                       <span>{milestoneLabel(selectedPath.threeCampaignsDay)}</span>
                       <strong>Three campaigns running</strong>
                     </div>
-                    <div>
+                    <div className="story-growth">
                       <i aria-hidden="true">2</i>
                       <span>{milestoneLabel(selectedPath.firstLevelSevenDay)}</span>
                       <strong>First Level 7 campaign</strong>
                     </div>
-                    <div>
+                    <div className="story-growth">
                       <i aria-hidden="true">3</i>
                       <span>{milestoneLabel(selectedPath.goalDay)}</span>
                       <strong>Three Level 7 campaigns</strong>
                     </div>
-                    <div>
+                    <div className="story-recovered">
                       <i aria-hidden="true">4</i>
                       <span>{timeLabel(breakEvenDay)}</span>
                       <strong>Starting funds recovered</strong>
@@ -964,12 +972,12 @@ export default function ReferralSimulator() {
                   </>
                 ) : (
                   <>
-                    <div>
+                    <div className="story-campaign">
                       <i aria-hidden="true">1</i>
                       <span>Day 1</span>
                       <strong>{startingCampaigns} campaign{startingCampaigns === 1 ? "" : "s"} begin</strong>
                     </div>
-                    <div>
+                    <div className={journeyMode === "continuity" ? "story-reserve" : "story-activity"}>
                       <i aria-hidden="true">2</i>
                       <span>Day 12</span>
                       <strong>
@@ -978,12 +986,12 @@ export default function ReferralSimulator() {
                           : "Campaign activity completes"}
                       </strong>
                     </div>
-                    <div>
+                    <div className="story-release">
                       <i aria-hidden="true">3</i>
                       <span>Day 19</span>
                       <strong>First value becomes available</strong>
                     </div>
-                    <div>
+                    <div className="story-recovered">
                       <i aria-hidden="true">4</i>
                       <span>{timeLabel(breakEvenDay)}</span>
                       <strong>Starting funds recovered</strong>
@@ -1004,7 +1012,7 @@ export default function ReferralSimulator() {
                 </div>
                 <div className="return-horizons">
                   {horizons.map((horizon) => (
-                    <div key={horizon.months}>
+                    <div className={`return-horizon return-horizon-${horizon.months}`} key={horizon.months}>
                       <span>{horizon.months} months</span>
                       <strong>{money.format(horizon.withdrawals)} USDT</strong>
                       <small>illustrative net withdrawals</small>
@@ -1015,7 +1023,7 @@ export default function ReferralSimulator() {
                         </div>
                         <div>
                           <dt>Cash ROI</dt>
-                          <dd className={horizon.roiPercent >= 0 ? "is-positive" : ""}>
+                          <dd className={horizon.roiPercent >= 0 ? "is-positive" : "is-negative"}>
                             {percent(horizon.roiPercent)}
                           </dd>
                         </div>
