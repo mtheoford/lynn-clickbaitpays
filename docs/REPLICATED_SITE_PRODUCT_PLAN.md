@@ -201,12 +201,23 @@ Observed on 2026-08-03:
 - `proneurs.org` is managed in GoDaddy DNS.
 - Existing Sites custom-domain records use
   `custom-domains.chatgpt.site` plus a `_cf-custom-hostname` verification record.
-- Stripe business verification and bank setup are complete, but the account's
-  final "Review and submit" activation step is not complete.
+- Stripe account activation is complete.
+- A test-mode Stripe product named `ProNeurs Personal CBP Site` is configured
+  with `$9/month` and `$79/year` recurring prices.
+- The Stripe-hosted customer portal is configured for subscription management,
+  payment-method updates, invoices, and cancellation.
+- A test-mode signed webhook named `ProNeurs Personal CBP Sites (Test)` sends
+  the six required lifecycle events to
+  `https://lynn-clickbaitpays.theoford.chatgpt.site/api/stripe/webhook`.
+- The Stripe test secret, webhook signing secret, and both test price IDs are
+  stored as protected Sites runtime values and are not committed to source.
+- Sites runtime changes require deployment of the saved application version
+  before hosted Checkout and webhook handling use the new configuration.
 
 Do not add wildcard DNS until the production hosting destination and required
-verification value are known. Do not submit the Stripe activation review on the
-owner's behalf; it includes legal attestations the owner must review and accept.
+verification value are known. Repeat the product, prices, webhook, and runtime
+configuration in Stripe live mode only after the remaining launch gates are
+complete.
 
 ## Delivery increments
 
