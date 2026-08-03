@@ -17,6 +17,7 @@
     "test": "node --test tests/calculator-math.test.ts tests/site-config.test.ts tests/billing-lifecycle.test.ts tests/customer-auth.test.ts tests/checkout-reservation.test.ts",
     "test:rendered:sites": "npm run build:sites && node --test tests/rendered-html.test.mjs",
     "test:calculator": "node --test tests/calculator-math.test.ts",
+    "audit:security": "node scripts/security-audit.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next --ignore-pattern .open-next --ignore-pattern cloudflare-env.d.ts",
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
@@ -50,7 +51,8 @@
     "wrangler": "4.118.0"
   },
   "overrides": {
-    "@aws-sdk/credential-provider-sso": "3.973.9"
+    "@aws-sdk/credential-provider-sso": "3.973.9",
+    "undici": "7.29.0"
   },
   "type": "module"
 }

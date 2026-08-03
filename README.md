@@ -150,6 +150,13 @@ Verify the Resend sending domain before testing welcome and magic-link email.
 
 ## Operations and recovery
 
+- Weekly Dependabot checks cover npm packages and GitHub Actions. Enable
+  Dependabot alerts and security updates in the GitHub repository settings after
+  the branch is pushed.
+- `npm run audit:security` blocks new and critical advisories and enforces the
+  expiration dates in `.github/security-audit-allowlist.json`. The current risk
+  assessment and review procedure are in
+  [`docs/DEPENDENCY_SECURITY.md`](docs/DEPENDENCY_SECURITY.md).
 - D1 Time Travel provides point-in-time restore for accidental data changes;
   record the database bookmark before and after production migrations.
 - Failed billing messages are retried five times and then moved to the configured
