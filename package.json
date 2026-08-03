@@ -15,7 +15,7 @@
     "deploy:staging": "opennextjs-cloudflare build && opennextjs-cloudflare deploy -- --env staging --keep-vars",
     "deploy:production": "opennextjs-cloudflare build && opennextjs-cloudflare deploy -- --env production --keep-vars",
     "test": "node --test tests/calculator-math.test.ts tests/site-config.test.ts tests/billing-lifecycle.test.ts tests/customer-auth.test.ts tests/checkout-reservation.test.ts",
-    "test:rendered:sites": "npm run build:sites && node --test tests/rendered-html.test.mjs",
+    "test:rendered:sites": "npm run build:sites && node --import ./tests/register-cloudflare-workers.mjs --test tests/rendered-html.test.mjs",
     "test:calculator": "node --test tests/calculator-math.test.ts",
     "audit:security": "node scripts/security-audit.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next --ignore-pattern .open-next --ignore-pattern cloudflare-env.d.ts",

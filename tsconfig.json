@@ -21,7 +21,7 @@
     ],
     "paths": {
       "@/*": ["./*"],
-      "@runtime-platform": ["./lib/runtime-platform.ts"]
+      "@runtime-platform": ["./lib/runtime-platform.sites.ts"]
     }
   },
   "include": [
