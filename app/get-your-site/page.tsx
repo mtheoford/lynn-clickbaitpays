@@ -62,7 +62,10 @@ export default async function GetYourSitePage({
             <span>PN</span>
             <div><strong>Pro<span>Neurs</span></strong><small>Personal CBP Sites</small></div>
           </Link>
-          <Link href="/manage" className="compact-manage-link">Manage my page</Link>
+          <nav className="compact-utility-links" aria-label="Page links">
+            <Link href="/s/lynn-theobald">View live example</Link>
+            <Link href="/manage">Manage my page</Link>
+          </nav>
         </header>
 
         <div className="compact-sales-copy">
@@ -126,11 +129,15 @@ export default async function GetYourSitePage({
             />
           </div>
         </aside>
-      </section>
 
-      <p className="compact-sales-note">
-        Independent ProNeurs website service · No setup fee · Cancel anytime
-      </p>
+        <footer className="compact-sales-footer">
+          <p>One professional page for your videos, calculator, FAQs, and official referral link.</p>
+          <nav aria-label="Legal links">
+            <Link href="/terms">Terms</Link>
+            <Link href="/privacy">Privacy</Link>
+          </nav>
+        </footer>
+      </section>
     </main>
   );
 }
