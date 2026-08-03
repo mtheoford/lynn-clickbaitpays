@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 
 function slugify(value: string) {
   return value
@@ -30,6 +30,16 @@ export default function SignupForm({
   const [status, setStatus] = useState<"idle" | "submitting" | "error">("idle");
   const [message, setMessage] = useState("");
   const effectiveSlug = useMemo(() => slugify(slugTouched ? slug : name), [name, slug, slugTouched]);
+
+  useEffect(() => {
+    if (window.location.hash !== "#build") return;
+    const section = document.getElementById("build");
+    if (!section) return;
+
+    void document.fonts.ready.then(() => {
+      window.requestAnimationFrame(() => section.scrollIntoView({ block: "start" }));
+    });
+  }, []);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

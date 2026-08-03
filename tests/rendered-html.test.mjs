@@ -31,10 +31,10 @@ test("renders the marketing and signup page", async () => {
   const response = await render("/get-your-site?source=lynn-theobald");
   assert.equal(response.status, 200);
   const html = await response.text();
-  assert.match(html, /Share ClickBaitPays with a page that feels like/);
+  assert.match(html, /Your referral link/);
   assert.match(html, /your-name\.cbp\.proneurs\.org/);
   assert.match(html, /Continue with \$9\/month/);
-  assert.match(html, /secure Stripe Checkout/i);
+  assert.match(html, /secure checkout/i);
 });
 
 test("renders a replicated site through the pilot path route", async () => {
