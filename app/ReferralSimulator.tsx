@@ -1,59 +1,30 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-
-type Level = {
-  id: number;
-  campaign: number;
-  activation: number;
-  earnings: number;
-  referralCommission: number;
-};
+import {
+  clickDays,
+  cycleDays,
+  getLevel,
+  levels,
+  maximumProjectionDays,
+  milestoneLabel,
+  monthlyReferralPotential,
+  simulateCashPath,
+  simulateCompoundPath,
+  timeLabel,
+  withdrawalRate,
+} from "./calculatorMath";
 
 type ReferralMode = "none" | "refer3" | "custom";
 type JourneyMode = "start" | "compound" | "continuity";
 
-type CampaignLane = {
-  level: number;
-  completesOn: number;
-};
-
-type PathResult = {
-  initialCost: number;
-  threeCampaignsDay: number;
-  firstLevelSevenDay: number;
-  goalDay: number;
-};
-
-type PathInputs = {
-  startingLevel: number;
-  startingCampaigns: number;
-  people: number;
-  referralLevel: number;
-  referralCampaigns: number;
-};
-
 type HorizonResult = {
   months: number;
-  withdrawals: number;
+  cashAvailable: number;
+  activeCampaignValue: number;
   recoveredPercent: number;
-  roiPercent: number;
+  differencePercent: number;
 };
-
-const levels: Level[] = [
-  { id: 1, campaign: 13, activation: 1, earnings: 17.17, referralCommission: 1.908 },
-  { id: 2, campaign: 77, activation: 7, earnings: 101.7, referralCommission: 11.3 },
-  { id: 3, campaign: 150, activation: 15, earnings: 194.4, referralCommission: 21.6 },
-  { id: 4, campaign: 300, activation: 30, earnings: 388.8, referralCommission: 43.2 },
-  { id: 5, campaign: 600, activation: 60, earnings: 777.6, referralCommission: 86.4 },
-  { id: 6, campaign: 1200, activation: 120, earnings: 1555.2, referralCommission: 172.8 },
-  { id: 7, campaign: 2400, activation: 240, earnings: 3240, referralCommission: 360 },
-];
-
-const cycleDays = 19;
-const clickDays = 12;
-const withdrawalRate = 0.9;
-const maximumProjectionDays = 365 * 20;
 const horizonDays = [
   { months: 3, days: 90 },
   { months: 6, days: 180 },
@@ -65,166 +36,6 @@ const money = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 2,
 });
 
-function getLevel(level: number) {
-  return levels.find((item) => item.id === level) ?? levels[0];
-}
-
-function referralCommissionForDay(
-  day: number,
-  people: number,
-  level: number,
-  campaignCount: number,
-) {
-  if (people === 0) return 0;
-
-  const commissionPerCampaign = getLevel(level).referralCommission;
-  let dailyCommission = 0;
-
-  for (let campaign = 0; campaign < campaignCount; campaign += 1) {
-    const startsOn = campaign * 7 + 1;
-    if (day < startsOn) continue;
-
-    const cycleDay = (day - startsOn) % cycleDays;
-    if (cycleDay < clickDays) {
-      dailyCommission += (commissionPerCampaign / clickDays) * people;
-    }
-  }
-
-  return dailyCommission;
-}
-
-function referralCashThroughDay(
-  day: number,
-  people: number,
-  level: number,
-  campaignCount: number,
-) {
-  if (people === 0) return 0;
-
-  let total = 0;
-  for (let currentDay = 1; currentDay <= day; currentDay += 1) {
-    total += referralCommissionForDay(
-      currentDay,
-      people,
-      level,
-      campaignCount,
-    );
-  }
-  return total * withdrawalRate;
-}
-
-function simulatePath({
-  startingLevel,
-  startingCampaigns,
-  people,
-  referralLevel,
-  referralCampaigns,
-}: PathInputs): PathResult {
-  const starting = getLevel(startingLevel);
-  const campaigns: CampaignLane[] = Array.from(
-    { length: startingCampaigns },
-    (_, index) => ({
-      level: startingLevel,
-      completesOn: cycleDays + index * 7,
-    }),
-  );
-  const activatedLevels = new Set([startingLevel]);
-  let wallet = 0;
-  let threeCampaignsDay = campaigns.length === 3 ? 0 : -1;
-  let firstLevelSevenDay = campaigns.some((campaign) => campaign.level === 7)
-    ? 0
-    : -1;
-  let goalDay =
-    campaigns.length === 3 &&
-    campaigns.every((campaign) => campaign.level === 7)
-      ? 0
-      : -1;
-
-  for (let day = 1; day <= maximumProjectionDays; day += 1) {
-    wallet += referralCommissionForDay(
-      day,
-      people,
-      referralLevel,
-      referralCampaigns,
-    );
-
-    const campaignCountBeforeCompletion = campaigns.length;
-    const completing = campaigns.filter(
-      (campaign) => campaign.completesOn === day,
-    );
-
-    if (completing.length > 0) {
-      for (const campaign of completing) {
-        const index = campaigns.indexOf(campaign);
-        if (index >= 0) campaigns.splice(index, 1);
-        wallet += getLevel(campaign.level).earnings;
-      }
-
-      for (const campaign of completing) {
-        let nextLevel = campaign.level;
-
-        if (
-          campaignCountBeforeCompletion === 3 &&
-          campaign.level < levels.length
-        ) {
-          const upgrade = getLevel(campaign.level + 1);
-          const upgradeCost =
-            upgrade.campaign +
-            (activatedLevels.has(upgrade.id) ? 0 : upgrade.activation);
-
-          if (wallet + 0.0001 >= upgradeCost) nextLevel = upgrade.id;
-        }
-
-        const next = getLevel(nextLevel);
-        const purchaseCost =
-          next.campaign +
-          (activatedLevels.has(nextLevel) ? 0 : next.activation);
-
-        wallet -= purchaseCost;
-        activatedLevels.add(nextLevel);
-        campaigns.push({
-          level: nextLevel,
-          completesOn: day + cycleDays,
-        });
-      }
-    }
-
-    while (campaigns.length < 3) {
-      if (wallet + 0.0001 < starting.campaign) break;
-
-      wallet -= starting.campaign;
-      campaigns.push({
-        level: startingLevel,
-        completesOn: day + cycleDays,
-      });
-    }
-
-    if (threeCampaignsDay < 0 && campaigns.length === 3) {
-      threeCampaignsDay = day;
-    }
-    if (
-      firstLevelSevenDay < 0 &&
-      campaigns.some((campaign) => campaign.level === 7)
-    ) {
-      firstLevelSevenDay = day;
-    }
-    if (
-      campaigns.length === 3 &&
-      campaigns.every((campaign) => campaign.level === 7)
-    ) {
-      goalDay = day;
-      break;
-    }
-  }
-
-  return {
-    initialCost:
-      starting.campaign * startingCampaigns + starting.activation,
-    threeCampaignsDay,
-    firstLevelSevenDay,
-    goalDay,
-  };
-}
 
 function ChoiceButtons({
   label,
@@ -338,27 +149,6 @@ function JourneyIcon({ name }: { name: JourneyIconName }) {
   );
 }
 
-function monthNumber(day: number) {
-  if (day < 0) return -1;
-  if (day === 0) return 0;
-  return Math.ceil(day / 30);
-}
-
-function timeLabel(day: number) {
-  if (day < 0) return "Beyond this model";
-  if (day === 0) return "Starting point";
-  if (day <= 45) return `About ${day} days`;
-  const months = monthNumber(day);
-  return `About ${months} ${months === 1 ? "month" : "months"}`;
-}
-
-function milestoneLabel(day: number) {
-  const months = monthNumber(day);
-  if (months < 0) return "Not reached";
-  if (months === 0) return "Starting point";
-  return `Month ${months}`;
-}
-
 function percent(value: number) {
   const rounded = Math.round(value);
   return `${rounded > 0 ? "+" : ""}${rounded}%`;
@@ -395,7 +185,7 @@ export default function ReferralSimulator() {
 
   const baselinePath = useMemo(
     () =>
-      simulatePath({
+      simulateCompoundPath({
         startingLevel,
         startingCampaigns,
         people: 0,
@@ -407,7 +197,7 @@ export default function ReferralSimulator() {
 
   const selectedPath = useMemo(
     () =>
-      simulatePath({
+      simulateCompoundPath({
         startingLevel,
         startingCampaigns,
         people: referralPlan.people,
@@ -438,13 +228,11 @@ export default function ReferralSimulator() {
   const firstRoundDifference = firstReleaseNet - oneRoundFunds;
   const firstRoundReturn = (firstRoundDifference / oneRoundFunds) * 100;
 
-  const referralMonthlyPotential =
-    (referralPlan.people *
-      referralPlan.campaigns *
-      getLevel(referralPlan.level).referralCommission *
-      30 *
-      withdrawalRate) /
-    cycleDays;
+  const referralMonthlyPotential = monthlyReferralPotential(
+    referralPlan.people,
+    referralPlan.campaigns,
+    referralPlan.level,
+  );
   const currentRoundNetSurplus =
     (starting.earnings - starting.campaign) *
     startingCampaigns *
@@ -470,60 +258,72 @@ export default function ReferralSimulator() {
   const goalCombinedMonthlyPotential =
     goalCampaignMonthlyPotential + goalReferralMonthlyPotential;
 
-  const monthsSaved = Math.max(
-    0,
-    monthNumber(baselinePath.goalDay) - monthNumber(selectedPath.goalDay),
+  const monthsSaved =
+    baselinePath.goalDay >= 0 && selectedPath.goalDay >= 0
+      ? Math.max(
+          0,
+          Math.round((baselinePath.goalDay - selectedPath.goalDay) / 30),
+        )
+      : 0;
+
+  const cashPath = useMemo(
+    () =>
+      simulateCashPath(
+        {
+          startingLevel,
+          startingCampaigns,
+          people: referralPlan.people,
+          referralLevel: referralPlan.level,
+          referralCampaigns: referralPlan.campaigns,
+        },
+        journeyMode === "continuity" ? clickDays : cycleDays,
+      ),
+    [
+      startingLevel,
+      startingCampaigns,
+      referralPlan.people,
+      referralPlan.level,
+      referralPlan.campaigns,
+      journeyMode,
+    ],
   );
 
-  const cashPathWithdrawalAtDay = (day: number) => {
-    const rounds =
-      day < cycleDays
-        ? 0
-        : Math.floor((day - cycleDays) / currentRoundInterval) + 1;
-    const ownCash = rounds * currentRoundNetSurplus;
-    const referralCash =
-      referralCashThroughDay(
-        day,
-        referralPlan.people,
-        referralPlan.level,
-        referralPlan.campaigns,
-      ) * householdAccounts;
-    return ownCash + referralCash;
+  const cashAtDay = (day: number) => {
+    if (day < 0) return 0;
+    const index = Math.min(day, maximumProjectionDays);
+    const perAccount =
+      journeyMode === "compound"
+        ? selectedPath.cashAvailableByDay[index]
+        : cashPath.cashAvailableByDay[index];
+    return perAccount * householdAccounts;
   };
 
-  const compoundWithdrawalStartDay =
-    selectedPath.goalDay < 0 ? -1 : selectedPath.goalDay + cycleDays;
-  const compoundWithdrawalAtDay = (day: number) => {
-    if (compoundWithdrawalStartDay < 0 || day <= compoundWithdrawalStartDay) {
-      return 0;
-    }
-    return (
-      ((day - compoundWithdrawalStartDay) / 30) *
-      goalCombinedMonthlyPotential
-    );
+  const campaignValueAtDay = (day: number) => {
+    const index = Math.min(Math.max(day, 0), maximumProjectionDays);
+    const perAccount =
+      journeyMode === "compound"
+        ? selectedPath.campaignValueByDay[index]
+        : cashPath.campaignValueByDay[index];
+    return perAccount * householdAccounts;
   };
-
-  const withdrawalAtDay =
-    journeyMode === "compound"
-      ? compoundWithdrawalAtDay
-      : cashPathWithdrawalAtDay;
 
   let breakEvenDay = -1;
   for (let day = 1; day <= maximumProjectionDays; day += 1) {
-    if (withdrawalAtDay(day) + 0.0001 >= selectedStartingFunds) {
+    if (cashAtDay(day) + 0.0001 >= selectedStartingFunds) {
       breakEvenDay = day;
       break;
     }
   }
 
   const horizons: HorizonResult[] = horizonDays.map(({ months, days }) => {
-    const withdrawals = withdrawalAtDay(days);
+    const cashAvailable = cashAtDay(days);
     return {
       months,
-      withdrawals,
-      recoveredPercent: (withdrawals / selectedStartingFunds) * 100,
-      roiPercent:
-        ((withdrawals - selectedStartingFunds) / selectedStartingFunds) * 100,
+      cashAvailable,
+      activeCampaignValue: campaignValueAtDay(days),
+      recoveredPercent: (cashAvailable / selectedStartingFunds) * 100,
+      differencePercent:
+        ((cashAvailable - selectedStartingFunds) / selectedStartingFunds) * 100,
     };
   });
 
@@ -532,10 +332,6 @@ export default function ReferralSimulator() {
       ? goalCombinedMonthlyPotential
       : currentCampaignMonthlyPotential + currentReferralMonthlyPotential;
   const householdGoalCampaigns = householdAccounts * 3;
-  const activeCampaignValue =
-    journeyMode === "compound"
-      ? levelSeven.campaign * householdGoalCampaigns
-      : starting.campaign * startingCampaigns * householdAccounts;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -656,13 +452,28 @@ export default function ReferralSimulator() {
                 <div>
                   <span>Your starting amount</span>
                   <strong>{money.format(oneRoundFunds)} USDT</strong>
-                  <small>One campaign round plus level activation</small>
+                  <small>
+                    {startingCampaigns === 1
+                      ? "One campaign round plus level activation"
+                      : "Campaigns funded up front and started one week apart"}
+                  </small>
                 </div>
                 <i aria-hidden="true">→</i>
                 <div>
-                  <span>First value available</span>
+                  <span>
+                    {startingCampaigns === 1
+                      ? "First value available"
+                      : "First stagger total"}
+                  </span>
                   <strong>{money.format(firstReleaseGross)} USDT</strong>
-                  <small>After the illustrated 12-day activity + 7-day hold</small>
+                  <small>
+                    {startingCampaigns === 1
+                      ? "Day 19 after activity and hold"
+                      : `Released on days ${Array.from(
+                          { length: startingCampaigns },
+                          (_, index) => 19 + index * 7,
+                        ).join(", ")}`}
+                  </small>
                 </div>
                 <i aria-hidden="true">→</i>
                 <div className="first-step-net">
@@ -859,9 +670,8 @@ export default function ReferralSimulator() {
                 <span>Estimated cash break-even on this path</span>
                 <strong>{timeLabel(breakEvenDay)}</strong>
                 <p>
-                  Cash break-even means cumulative illustrated net withdrawals
-                  equal the selected starting funds while campaigns remain in
-                  the modeled rhythm.
+                  Cumulative illustrated net cash available equals the selected
+                  starting funds while campaigns remain active.
                 </p>
               </div>
 
@@ -909,9 +719,11 @@ export default function ReferralSimulator() {
                     {journeyMode === "continuity"
                       ? "Two rounds plus one-time activation"
                       : journeyMode === "compound"
-                        ? referralPlan.people === 0
-                          ? "Campaign activity only"
-                          : `${monthsSaved} ${monthsSaved === 1 ? "month" : "months"} sooner with selected referrals`
+                        ? selectedPath.goalDay === 0
+                          ? "Three Level 7 campaigns selected at the start"
+                          : referralPlan.people === 0
+                            ? "Campaign activity only"
+                            : `${monthsSaved} ${monthsSaved === 1 ? "month" : "months"} sooner with selected referrals`
                         : "Then choose to withdraw, restart, or grow"}
                   </small>
                 </div>
@@ -934,7 +746,7 @@ export default function ReferralSimulator() {
                         : currentCampaignMonthlyPotential,
                     )} USDT
                   </strong>
-                  <small>After campaign replacement and withdrawal fee</small>
+                  <small>30-day average after replacement and withdrawal fee</small>
                 </div>
                 <b aria-hidden="true">+</b>
                 <div className="referral-potential">
@@ -956,7 +768,7 @@ export default function ReferralSimulator() {
                 <div className="combined-potential">
                   <span>Combined</span>
                   <strong>{money.format(selectedMonthlyPotential)} USDT</strong>
-                  <small>Illustrative monthly withdrawal pace</small>
+                  <small>Illustrative 30-day cash-availability pace</small>
                 </div>
               </div>
 
@@ -1023,25 +835,29 @@ export default function ReferralSimulator() {
                     <strong>3-, 6-, and 12-month cash view</strong>
                   </div>
                   <p>
-                    Active campaign value kept separate: {money.format(activeCampaignValue)} USDT.
+                    Campaign value stays separate and is not counted as cash recovered.
                   </p>
                 </div>
                 <div className="return-horizons">
                   {horizons.map((horizon) => (
                     <div className={`return-horizon return-horizon-${horizon.months}`} key={horizon.months}>
                       <span>{horizon.months} months</span>
-                      <strong>{money.format(horizon.withdrawals)} USDT</strong>
-                      <small>illustrative net withdrawals</small>
+                      <strong>{money.format(horizon.cashAvailable)} USDT</strong>
+                      <small>illustrative net cash available</small>
                       <dl>
                         <div>
                           <dt>Starting funds recovered</dt>
                           <dd>{Math.round(horizon.recoveredPercent)}%</dd>
                         </div>
                         <div>
-                          <dt>Cash ROI</dt>
-                          <dd className={horizon.roiPercent >= 0 ? "is-positive" : "is-negative"}>
-                            {percent(horizon.roiPercent)}
+                          <dt>Cash vs. starting funds</dt>
+                          <dd className={horizon.differencePercent >= 0 ? "is-positive" : "is-negative"}>
+                            {percent(horizon.differencePercent)}
                           </dd>
+                        </div>
+                        <div>
+                          <dt>Active campaign value</dt>
+                          <dd>{money.format(horizon.activeCampaignValue)} USDT</dd>
                         </div>
                       </dl>
                     </div>
@@ -1062,21 +878,30 @@ export default function ReferralSimulator() {
                   withdrawal fee.
                 </p>
                 <p>
-                  Cash ROI equals illustrated net withdrawals minus selected
-                  starting funds, divided by those starting funds. Active
-                  campaign value is shown separately and is not counted as cash
-                  recovered.
+                  Cash vs. starting funds equals illustrated net cash available
+                  minus selected starting funds, divided by those starting
+                  funds. Active campaign value is shown separately and is not
+                  counted as recovered cash.
                 </p>
                 <p>
                   Start &amp; learn assumes campaigns restart when value becomes
                   available. Maintain continuity assumes one additional round
                   is held ready so completed campaigns can be replaced during
-                  the hold period.
+                  the hold period. Multiple selected campaigns are modeled one
+                  week apart.
                 </p>
                 <p>
                   Build momentum compounds available value, fills three
-                  campaigns at the starting level, and upgrades one campaign at
-                  a time until the Level 7 goal is reached.
+                  campaigns at the starting level, and upgrades only when the
+                  ledger can also replace every campaign due that day. Once
+                  three Level 7 campaigns are active, later release events are
+                  shown as net cash after replacement and the withdrawal fee.
+                </p>
+                <p>
+                  Referral commissions are modeled as immediately available.
+                  The official minimum, one-withdrawal-per-week limit, manual
+                  request, and processing time are not used to delay the cash
+                  dates shown here.
                 </p>
               </div>
             </details>
