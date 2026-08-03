@@ -1,8 +1,15 @@
 import Image from "next/image";
+import type { Metadata } from "next";
 import ReferralSimulator from "./ReferralSimulator";
 import cbpMark from "../public/cbp-mark.png";
+import {
+  formatPhoneForDisplay,
+  growthSignupUrl,
+  phoneHref,
+  resolveSponsorSite,
+} from "@/lib/site-config";
 
-const affiliateLink = "https://clickbaitpays.me/?ref=thinleo";
+export const dynamic = "force-dynamic";
 
 const resources = [
   {
@@ -45,11 +52,17 @@ const faqs = [
   },
 ];
 
-function JoinButton({ label = "Join ClickBaitPays" }: { label?: string }) {
+function JoinButton({
+  href,
+  label = "Join ClickBaitPays",
+}: {
+  href: string;
+  label?: string;
+}) {
   return (
     <a
       className="join-button"
-      href={affiliateLink}
+      href={href}
       target="_blank"
       rel="noopener noreferrer sponsored"
     >
@@ -67,21 +80,54 @@ function BrandMark() {
   );
 }
 
-export default function Home() {
+export async function generateMetadata(): Promise<Metadata> {
+  const site = await resolveSponsorSite();
+  return {
+    title: `Join ClickBaitPays with ${site.displayName}`,
+    description: `Explore ClickBaitPays and get started with independent sponsor ${site.displayName}.`,
+    robots: { index: false, follow: true },
+    openGraph: {
+      title: `Join ClickBaitPays with ${site.displayName}`,
+      description: `A clear, independent sponsor guide from ${site.displayName}.`,
+      type: "website",
+      images: [{ url: "/og.png", width: 1536, height: 1024 }],
+    },
+  };
+}
+
+export default async function Home() {
+  const site = await resolveSponsorSite();
+
+  if (site.status !== "active" && site.status !== "past_due") {
+    return (
+      <main className="site-unavailable">
+        <div>
+          <BrandMark />
+          <p className="eyebrow">Personal CBP Site</p>
+          <h1>This page is not currently available.</h1>
+          <p>The owner may be updating the page. Please check the address and try again later.</p>
+          <a className="join-button" href={growthSignupUrl(site.slug)}>
+            Get Your Personal CBP Site <i aria-hidden="true">↗</i>
+          </a>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main id="top">
       <header className="site-header">
-        <a className="brand" href="#top" aria-label="CBP with Lynn home">
+        <a className="brand" href="#top" aria-label={`CBP with ${site.displayName} home`}>
           <BrandMark />
           <span>
-            <strong>CBP with Lynn</strong>
+            <strong>CBP with {site.displayName}</strong>
             <small>Independent sponsor guide</small>
           </span>
         </a>
         <nav aria-label="Main navigation">
           <a href="#how">Income strategy</a>
           <a href="#calculator">Calculator</a>
-          <JoinButton />
+          <JoinButton href={site.referralUrl} />
         </nav>
       </header>
 
@@ -109,7 +155,7 @@ export default function Home() {
             <span><b>Everybody wins!</b></span>
           </div>
           <div className="hero-actions">
-            <JoinButton />
+            <JoinButton href={site.referralUrl} />
             <a className="text-link" href="#how">
               See how it works <span aria-hidden="true">↓</span>
             </a>
@@ -189,7 +235,7 @@ export default function Home() {
                 members make when campaign value becomes available.
               </p>
               <div className="strategy-support-actions">
-                <JoinButton />
+                <JoinButton href={site.referralUrl} />
                 <ReferralSimulator />
               </div>
             </div>
@@ -264,32 +310,47 @@ export default function Home() {
 
       <section className="sponsor-section">
         <div className="sponsor-copy">
-          <div className="avatar">LT</div>
+          <div className="avatar">{site.initials}</div>
           <div>
             <p className="eyebrow">Your independent sponsor</p>
-            <h2>Start with Lynn Theobald.</h2>
-            <p>Questions before joining? Lynn is here to help you find the facts and take the next step with confidence.</p>
+            <h2>Start with {site.displayName}.</h2>
+            <p>{site.bio}</p>
             <div className="contact-links">
-              <a href="mailto:lynntheo@gmail.com">
-                <i className="contact-icon" aria-hidden="true">✉</i>
-                lynntheo@gmail.com
-              </a>
-              <a href="tel:80171705630">
-                <i className="contact-icon" aria-hidden="true">☎</i>
-                801-7170-5630
-              </a>
+              {site.showEmail ? (
+                <a href={`mailto:${site.publicEmail}`}>
+                  <i className="contact-icon" aria-hidden="true">✉</i>
+                  {site.publicEmail}
+                </a>
+              ) : null}
+              {site.showPhone ? (
+                <a href={phoneHref(site.publicPhone)}>
+                  <i className="contact-icon" aria-hidden="true">☎</i>
+                  {formatPhoneForDisplay(site.publicPhone)}
+                </a>
+              ) : null}
             </div>
           </div>
         </div>
         <div className="sponsor-action">
-          <JoinButton />
+          <JoinButton href={site.referralUrl} />
         </div>
+      </section>
+
+      <section className="replicated-site-cta" aria-label="Get your own sponsor site">
+        <div>
+          <p className="eyebrow">A professional page of your own</p>
+          <h2>Want a page like this?</h2>
+          <p>Get your own personalized CBP sharing site in minutes.</p>
+        </div>
+        <a className="replicated-site-button" href={growthSignupUrl(site.slug)}>
+          Get Your Personal CBP Site <span aria-hidden="true">↗</span>
+        </a>
       </section>
 
       <footer>
         <div className="footer-brand">
           <BrandMark />
-          <span><strong>CBP with Lynn</strong><small>Independent sponsor guide</small></span>
+          <span><strong>CBP with {site.displayName}</strong><small>Independent sponsor guide</small></span>
         </div>
         <p>
           Independent affiliate site—not operated by ClickBaitPays. Participation
@@ -299,13 +360,14 @@ export default function Home() {
         <div className="footer-links">
           <a href="https://clickbaitpays.me/terms.php" target="_blank" rel="noopener noreferrer">Terms</a>
           <a href="https://clickbaitpays.me/privacy.php" target="_blank" rel="noopener noreferrer">Privacy</a>
-          <a href="mailto:lynntheo@gmail.com">Contact Lynn</a>
+          {site.showEmail ? <a href={`mailto:${site.publicEmail}`}>Contact {site.displayName}</a> : null}
+          <a href={growthSignupUrl(site.slug)}>Get Your Personal CBP Site</a>
         </div>
       </footer>
 
       <a
         className="mobile-join"
-        href={affiliateLink}
+        href={site.referralUrl}
         target="_blank"
         rel="noopener noreferrer sponsored"
       >

@@ -18,21 +18,24 @@ const siteUrl =
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: "Join ClickBaitPays with Lynn Theobald",
+  title: {
+    default: "Personal CBP Sites | ProNeurs",
+    template: "%s | ProNeurs",
+  },
   description:
-    "Explore ClickBaitPays campaign strategies, model illustrative direct-referral commissions, and get started with Lynn Theobald.",
+    "Professional, personalized ClickBaitPays sponsor pages from ProNeurs.",
   openGraph: {
-    title: "Join ClickBaitPays with Lynn Theobald",
+    title: "Personal CBP Sites by ProNeurs",
     description:
-      "See the three-campaign rhythm and model illustrative direct-referral commissions.",
+      "A professional ClickBaitPays sponsor page with your referral link and contact information.",
     type: "website",
     images: [{ url: "/og.png", width: 1536, height: 1024 }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Join ClickBaitPays with Lynn Theobald",
+    title: "Personal CBP Sites by ProNeurs",
     description:
-      "Campaign rhythm and referral potential, explained in plain English.",
+      "Your professional, personalized ClickBaitPays sharing page.",
     images: ["/og.png"],
   },
 };
