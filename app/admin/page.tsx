@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, like, or } from "drizzle-orm";
 import Link from "next/link";
 import { getDb } from "@/db";
 import { sites, subscriptions, users } from "@/db/schema";
@@ -21,7 +21,11 @@ type AdminRow = {
   createdAt: Date;
 };
 
-export default async function AdminPage() {
+export default async function AdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
   const admin = await requireAdmin("/admin");
   if (!admin) {
     return (
@@ -36,6 +40,7 @@ export default async function AdminPage() {
     );
   }
 
+  const query = (await searchParams).q?.trim().slice(0, 100) ?? "";
   let rows: AdminRow[] = [];
   let databaseMessage = "";
   try {
@@ -55,6 +60,17 @@ export default async function AdminPage() {
       .from(sites)
       .innerJoin(users, eq(users.id, sites.userId))
       .leftJoin(subscriptions, eq(subscriptions.siteId, sites.id))
+      .where(
+        query
+          ? or(
+              like(sites.displayName, `%${query}%`),
+              like(sites.slug, `%${query}%`),
+              like(users.email, `%${query}%`),
+              like(users.phone, `%${query}%`),
+              like(users.stripeCustomerId, `%${query}%`),
+            )
+          : undefined,
+      )
       .orderBy(desc(sites.createdAt));
   } catch {
     databaseMessage = "The account database will appear here after the first hosted migration is applied.";
@@ -91,7 +107,12 @@ export default async function AdminPage() {
 
       <section className="admin-table-panel">
         <div className="admin-panel-heading">
-          <div><h2>Customer accounts</h2><p>Search, billing links, profile editing, and email actions follow in the next increment.</p></div>
+          <div><h2>Customer accounts</h2><p>Search by customer, email, phone, site address, or Stripe customer ID.</p></div>
+          <form className="admin-search-form" action="/admin" method="get">
+            <label><span className="sr-only">Search customer accounts</span><input name="q" defaultValue={query} placeholder="Search accounts" /></label>
+            <button type="submit">Search</button>
+            {query ? <Link href="/admin">Clear</Link> : null}
+          </form>
           <span>{rows.length} records</span>
         </div>
         {databaseMessage ? <p className="admin-empty-state">{databaseMessage}</p> : null}
@@ -103,7 +124,7 @@ export default async function AdminPage() {
               <tbody>
                 {rows.map((row) => (
                   <tr key={row.siteId}>
-                    <td><strong>{row.displayName}</strong><span>{row.email}</span><span>{row.phone}</span></td>
+                    <td><Link className="admin-customer-link" href={`/admin/sites/${row.siteId}`}>{row.displayName} →</Link><span>{row.email}</span><span>{row.phone}</span></td>
                     <td><a href={siteUrl(row.slug)} target="_blank" rel="noreferrer">cbp-{row.slug}.proneurs.org ↗</a></td>
                     <td><strong>{row.plan ?? "—"}</strong><span>{row.subscriptionStatus ?? "No subscription"}</span></td>
                     <td>{row.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</td>

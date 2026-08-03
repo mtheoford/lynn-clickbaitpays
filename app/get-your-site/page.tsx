@@ -43,7 +43,10 @@ export default async function GetYourSitePage({
           <span>PN</span>
           <div><strong>ProNeurs</strong><small>Personal CBP Sites</small></div>
         </Link>
-        <a href="#build">Build my page</a>
+        <nav className="marketing-account-links" aria-label="Personal site account">
+          <Link href="/manage">Manage my page</Link>
+          <a href="#build">Build my page</a>
+        </nav>
       </header>
 
       <section className="marketing-hero">
@@ -122,6 +125,7 @@ export default async function GetYourSitePage({
       <footer className="marketing-footer">
         <span>ProNeurs Personal CBP Sites</span>
         <p>Independent website service—not operated by ClickBaitPays. Participation involves financial and cryptocurrency risk. Earnings are not guaranteed.</p>
+        <Link href="/manage">Manage my page</Link>
       </footer>
     </main>
   );

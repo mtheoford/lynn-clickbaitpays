@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { Metadata } from "next";
 import ReferralSimulator from "./ReferralSimulator";
+import { SiteViewTracker, TrackedLink } from "./SiteAnalytics";
 import cbpMark from "../public/cbp-mark.png";
 import {
   formatPhoneForDisplay,
@@ -54,21 +55,25 @@ const faqs = [
 
 function JoinButton({
   href,
+  siteSlug,
   label = "Join ClickBaitPays",
 }: {
   href: string;
+  siteSlug: string;
   label?: string;
 }) {
   return (
-    <a
+    <TrackedLink
       className="join-button"
       href={href}
+      siteSlug={siteSlug}
+      eventType="referral_click"
       target="_blank"
       rel="noopener noreferrer sponsored"
     >
       <span>{label}</span>
       <i aria-hidden="true">↗</i>
-    </a>
+    </TrackedLink>
   );
 }
 
@@ -116,6 +121,7 @@ export default async function Home() {
 
   return (
     <main id="top">
+      <SiteViewTracker siteSlug={site.slug} />
       <header className="site-header">
         <a className="brand" href="#top" aria-label={`CBP with ${site.displayName} home`}>
           <BrandMark />
@@ -127,7 +133,7 @@ export default async function Home() {
         <nav aria-label="Main navigation">
           <a href="#how">Income strategy</a>
           <a href="#calculator">Calculator</a>
-          <JoinButton href={site.referralUrl} />
+          <JoinButton href={site.referralUrl} siteSlug={site.slug} />
         </nav>
       </header>
 
@@ -155,7 +161,7 @@ export default async function Home() {
             <span><b>Everybody wins!</b></span>
           </div>
           <div className="hero-actions">
-            <JoinButton href={site.referralUrl} />
+            <JoinButton href={site.referralUrl} siteSlug={site.slug} />
             <a className="text-link" href="#how">
               See how it works <span aria-hidden="true">↓</span>
             </a>
@@ -235,7 +241,7 @@ export default async function Home() {
                 members make when campaign value becomes available.
               </p>
               <div className="strategy-support-actions">
-                <JoinButton href={site.referralUrl} />
+                <JoinButton href={site.referralUrl} siteSlug={site.slug} />
                 <ReferralSimulator />
               </div>
             </div>
@@ -332,7 +338,7 @@ export default async function Home() {
           </div>
         </div>
         <div className="sponsor-action">
-          <JoinButton href={site.referralUrl} />
+          <JoinButton href={site.referralUrl} siteSlug={site.slug} />
         </div>
       </section>
 
@@ -342,9 +348,9 @@ export default async function Home() {
           <h2>Want a page like this?</h2>
           <p>Get your own personalized CBP sharing site in minutes.</p>
         </div>
-        <a className="replicated-site-button" href={growthSignupUrl(site.slug)}>
+        <TrackedLink className="replicated-site-button" href={growthSignupUrl(site.slug)} siteSlug={site.slug} eventType="growth_click">
           Get Your Personal CBP Site <span aria-hidden="true">↗</span>
-        </a>
+        </TrackedLink>
       </section>
 
       <footer>
@@ -361,18 +367,20 @@ export default async function Home() {
           <a href="https://clickbaitpays.me/terms.php" target="_blank" rel="noopener noreferrer">Terms</a>
           <a href="https://clickbaitpays.me/privacy.php" target="_blank" rel="noopener noreferrer">Privacy</a>
           {site.showEmail ? <a href={`mailto:${site.publicEmail}`}>Contact {site.displayName}</a> : null}
-          <a href={growthSignupUrl(site.slug)}>Get Your Personal CBP Site</a>
+          <TrackedLink href={growthSignupUrl(site.slug)} siteSlug={site.slug} eventType="growth_click">Get Your Personal CBP Site</TrackedLink>
         </div>
       </footer>
 
-      <a
+      <TrackedLink
         className="mobile-join"
         href={site.referralUrl}
+        siteSlug={site.slug}
+        eventType="referral_click"
         target="_blank"
         rel="noopener noreferrer sponsored"
       >
         Join ClickBaitPays <span aria-hidden="true">↗</span>
-      </a>
+      </TrackedLink>
     </main>
   );
 }

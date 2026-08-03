@@ -126,7 +126,14 @@ or participation.
 
 ## Customer access
 
-Customer profile editing uses passwordless email access:
+The first hosted customer dashboard uses Sites-supported Sign in with ChatGPT.
+The signed-in email must match the email used to purchase the site. This keeps
+authentication and session security in the hosting platform while the product
+is piloted.
+
+Before general availability, decide whether requiring a ChatGPT account is
+acceptable for the target audience. If it is not, replace the pilot login with
+transactional-email magic links that provide:
 
 - Short-lived, single-use login links
 - Hashed tokens stored in the database
@@ -215,8 +222,9 @@ owner's behalf; it includes legal attestations the owner must review and accept.
 
 ### Increment 2 — customer self-service
 
-- Passwordless customer login and site editing.
-- Welcome and login emails from a verified ProNeurs sender domain.
+- Sites-supported customer login and site editing for the pilot.
+- Optional transactional-email magic links from a verified ProNeurs sender
+  domain before general availability.
 - Stripe customer-portal access.
 - QR code and expanded social-sharing actions.
 
@@ -241,4 +249,3 @@ Do not accept live subscriptions until all of these are complete:
 6. Payment success, failed renewal, cancellation, webhook replay, login-link,
    duplicate-slug, and admin-authorization paths have been tested.
 7. Transactional email authentication and delivery are verified.
-
