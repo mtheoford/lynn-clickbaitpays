@@ -51,11 +51,15 @@ export function growthSignupUrl(slug: string): string {
   return url.toString();
 }
 
-export async function resolveSponsorSite(): Promise<PublicSponsorSite> {
+export async function resolveSponsorSite(
+  explicitSlug?: string | null,
+): Promise<PublicSponsorSite> {
   const requestHeaders = await headers();
-  const requestedSlug = slugFromHost(
-    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host"),
-  );
+  const requestedSlug = explicitSlug
+    ? normalizeSiteSlug(explicitSlug)
+    : slugFromHost(
+        requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host"),
+      );
 
   const siteSlug = requestedSlug ?? defaultSponsorSite.slug;
 

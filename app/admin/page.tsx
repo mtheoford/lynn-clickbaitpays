@@ -2,7 +2,11 @@ import { desc, eq, like, or } from "drizzle-orm";
 import Link from "next/link";
 import { getDb } from "@/db";
 import { sites, subscriptions, users } from "@/db/schema";
-import { adminSignOutPath, requireAdmin } from "@/lib/admin-auth";
+import {
+  adminSignInPath,
+  adminSignOutPath,
+  requireAdmin,
+} from "@/lib/admin-auth";
 import { siteUrl } from "@/lib/site-config";
 import SiteStatusActions from "./SiteStatusActions";
 
@@ -28,13 +32,15 @@ export default async function AdminPage({
   const admin = await requireAdmin("/admin");
   const signOutPath = await adminSignOutPath("/admin");
   if (!admin) {
+    const signInPath = await adminSignInPath("/admin");
     return (
       <main className="admin-access-page">
         <div>
           <p className="eyebrow">ProNeurs administration</p>
           <h1>This account is not authorized.</h1>
           <p>Add the signed-in email to the protected administrator allowlist before using this page.</p>
-          <Link href={signOutPath}>Sign out and use another account</Link>
+          <Link href={signInPath}>Sign in with an administrator account</Link>
+          {signInPath !== signOutPath ? <Link href={signOutPath}>Sign out and use another account</Link> : null}
         </div>
       </main>
     );
@@ -125,7 +131,7 @@ export default async function AdminPage({
                 {rows.map((row) => (
                   <tr key={row.siteId}>
                     <td><Link className="admin-customer-link" href={`/admin/sites/${row.siteId}`}>{row.displayName} →</Link><span>{row.email}</span><span>{row.phone}</span></td>
-                    <td><a href={siteUrl(row.slug)} target="_blank" rel="noreferrer">{row.slug}.cbp.proneurs.org ↗</a></td>
+                    <td><a href={siteUrl(row.slug)} target="_blank" rel="noreferrer">{siteUrl(row.slug).replace(/^https?:\/\//, "")} ↗</a></td>
                     <td><strong>{row.plan ?? "—"}</strong><span>{row.subscriptionStatus ?? "No subscription"}</span></td>
                     <td>{row.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</td>
                     <td><SiteStatusActions siteId={row.siteId} status={row.status} /></td>

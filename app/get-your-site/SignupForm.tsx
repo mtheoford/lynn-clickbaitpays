@@ -14,7 +14,15 @@ function slugify(value: string) {
     .slice(0, 48);
 }
 
-export default function SignupForm({ source = "" }: { source?: string }) {
+export default function SignupForm({
+  source = "",
+  addressPrefix = "https://",
+  addressSuffix = ".cbp.proneurs.org",
+}: {
+  source?: string;
+  addressPrefix?: string;
+  addressSuffix?: string;
+}) {
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
@@ -102,13 +110,13 @@ export default function SignupForm({ source = "" }: { source?: string }) {
             placeholder="your-name"
             required
           />
-          <b>.cbp.proneurs.org</b>
+          <b>{addressSuffix || " on this site"}</b>
         </span>
       </label>
 
       <div className="signup-url-preview" aria-live="polite">
         <small>Your new sharing page</small>
-        <strong>https://{effectiveSlug || "your-name"}.cbp.proneurs.org</strong>
+        <strong>{addressPrefix}{effectiveSlug || "your-name"}{addressSuffix}</strong>
       </div>
 
       <label>

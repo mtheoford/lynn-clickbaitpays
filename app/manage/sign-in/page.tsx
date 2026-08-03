@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { chatGPTSignInPath } from "@/app/chatgpt-auth";
+import { runtimeValue } from "@/lib/runtime";
 import SignInForm from "./SignInForm";
 
 export const metadata = {
@@ -6,7 +8,21 @@ export const metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function CustomerSignInPage() {
+export default async function CustomerSignInPage() {
+  let showChatGPTPilotSignIn = false;
+  let emailSignInConfigured = false;
+  try {
+    const [appEnv, resendApiKey, emailFrom] = await Promise.all([
+      runtimeValue("APP_ENV"),
+      runtimeValue("RESEND_API_KEY"),
+      runtimeValue("EMAIL_FROM"),
+    ]);
+    showChatGPTPilotSignIn = appEnv !== "production" && appEnv !== "staging";
+    emailSignInConfigured = Boolean(resendApiKey && emailFrom);
+  } catch {
+    showChatGPTPilotSignIn = true;
+  }
+
   return (
     <main className="marketing-page">
       <header className="marketing-header">
@@ -19,9 +35,25 @@ export default function CustomerSignInPage() {
         <div className="builder-copy">
           <p className="eyebrow">Customer access</p>
           <h1>Manage your personal site.</h1>
-          <p>Enter the email used during purchase. We’ll send a secure, single-use sign-in link—no password or ChatGPT account required.</p>
+          <p>
+            {emailSignInConfigured
+              ? "Enter the email used during purchase. We’ll send a secure, single-use sign-in link—no password required."
+              : "Pilot customers can sign in securely with the ChatGPT account that uses the same email address as their purchase."}
+          </p>
         </div>
-        <SignInForm />
+        <div>
+          {emailSignInConfigured ? <SignInForm /> : null}
+          {showChatGPTPilotSignIn ? (
+            <Link className="signup-submit" href={chatGPTSignInPath("/manage")}>
+              Sign in with ChatGPT <span aria-hidden="true">→</span>
+            </Link>
+          ) : (
+            <p className="signup-error" role="status">
+              Email sign-in is temporarily unavailable. Contact ProNeurs support for account access.
+            </p>
+          )}
+          {showChatGPTPilotSignIn ? <p className="signup-safe-note">Use the same email address used during purchase.</p> : null}
+        </div>
       </section>
     </main>
   );

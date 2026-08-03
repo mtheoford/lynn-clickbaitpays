@@ -92,11 +92,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function Home() {
-  const surface = await requestSurface();
-  if (surface === "marketing") redirect("/get-your-site");
-  if (surface === "admin") redirect("/admin");
-  const site = await resolveSponsorSite();
+export async function SponsorSitePage({ slug }: { slug?: string }) {
+  const site = await resolveSponsorSite(slug);
   const incomeStrategyApproved =
     process.env.ENABLE_APPROVED_INCOME_STRATEGY_CONTENT === "true";
 
@@ -385,4 +382,11 @@ export default async function Home() {
       </TrackedLink>
     </main>
   );
+}
+
+export default async function Home() {
+  const surface = await requestSurface();
+  if (surface === "marketing") redirect("/get-your-site");
+  if (surface === "admin") redirect("/admin");
+  return <SponsorSitePage />;
 }

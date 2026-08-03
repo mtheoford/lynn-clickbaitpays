@@ -37,6 +37,21 @@ test("renders the marketing and signup page", async () => {
   assert.match(html, /secure Stripe Checkout/i);
 });
 
+test("renders a replicated site through the pilot path route", async () => {
+  const response = await render("/s/lynn-theobald");
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /Join ClickBaitPays with Lynn Theobald/);
+  assert.match(html, /Get Your Personal CBP Site/);
+});
+
+test("does not publish an unknown replicated path", async () => {
+  const response = await render("/s/unknown-customer");
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /This page is not currently available/);
+});
+
 test("does not publish an unknown replicated subdomain", async () => {
   const response = await render("/", { host: "unknown.cbp.proneurs.org" });
   assert.equal(response.status, 200);

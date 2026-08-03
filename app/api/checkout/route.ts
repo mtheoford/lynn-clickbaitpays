@@ -89,10 +89,29 @@ export async function POST(request: Request) {
     .limit(1);
 
   const [existingUser] = await db
-    .select({ id: users.id, email: users.email })
+    .select({
+      id: users.id,
+      email: users.email,
+      stripeCustomerId: users.stripeCustomerId,
+    })
     .from(users)
     .where(eq(users.email, email))
     .limit(1);
+
+  const [existingOwnedSite] = existingUser
+    ? await db
+        .select({ id: sites.id, slug: sites.slug })
+        .from(sites)
+        .where(eq(sites.userId, existingUser.id))
+        .limit(1)
+    : [];
+
+  if (existingOwnedSite && existingOwnedSite.id !== existingSite?.id) {
+    return error(
+      `That email already manages ${existingOwnedSite.slug}. Sign in to update or reactivate the existing site.`,
+      409,
+    );
+  }
 
   const reservationDecision = checkoutReservationDecision(
     existingSite,
@@ -149,6 +168,7 @@ export async function POST(request: Request) {
     bio: `Questions before joining? ${name} is here to help you understand the information and take your next step with confidence.`,
     referralUrl,
     status: "pending" as const,
+    publicationOverride: null,
     sourceSiteId: sourceSite?.id ?? null,
     reservationExpiresAt,
     updatedAt: now,
@@ -169,7 +189,9 @@ export async function POST(request: Request) {
   const session = await stripe.checkout.sessions.create(
     {
       mode: "subscription",
-      customer_email: email,
+      ...(existingUser?.stripeCustomerId
+        ? { customer: existingUser.stripeCustomerId }
+        : { customer_email: email }),
       client_reference_id: siteId,
       line_items: [{ price: await priceForPlan(plan), quantity: 1 }],
       allow_promotion_codes: true,

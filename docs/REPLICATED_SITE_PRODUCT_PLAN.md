@@ -1,6 +1,6 @@
 # ProNeurs Replicated CBP Site Product Plan
 
-Status: production-stack implementation complete; account provisioning and launch validation pending
+Status: hosted pilot workflow implemented; deployment and live payment validation pending
 Last updated: 2026-08-03  
 Working product name: **Personal CBP Site**
 
@@ -28,6 +28,10 @@ not copy, deploy, or maintain a separate codebase for each customer.
 The first deployment may use path-based equivalents while wildcard-domain and
 custom-domain support are configured. The data model and host parser must remain
 subdomain-ready.
+
+The current Sites pilot uses `/s/{slug}` addresses. The Cloudflare environments
+switch to wildcard tenant subdomains through configuration, with no data or
+template migration required.
 
 ## Customer journey
 

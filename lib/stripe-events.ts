@@ -12,6 +12,7 @@ import {
 import {
   gracePeriodEnd,
   siteStatusForSubscription,
+  siteStatusWithPublicationOverride,
   subscriptionPeriodEnd,
 } from "@/lib/billing-lifecycle";
 import { sendWelcomeEmail } from "@/lib/email";
@@ -78,7 +79,14 @@ export async function processBillingMessages(
     try {
       await processStripeEvent(message.body.stripeEventId);
       message.ack();
-    } catch {
+    } catch (error) {
+      console.error(
+        JSON.stringify({
+          message: "billing queue message failed",
+          stripeEventId: message.body.stripeEventId,
+          error: error instanceof Error ? error.message : "Unknown queue failure",
+        }),
+      );
       message.retry();
     }
   }
@@ -167,9 +175,28 @@ async function applyCompletedCheckout(session: Stripe.Checkout.Session): Promise
   const stripe = await getStripe();
   const remoteSubscription = await stripe.subscriptions.retrieve(subscriptionId);
   const currentPeriodEnd = subscriptionPeriodEnd(remoteSubscription);
-  const siteStatus = siteStatusForSubscription(remoteSubscription.status, currentPeriodEnd);
+  const billingStatus = siteStatusForSubscription(remoteSubscription.status, currentPeriodEnd);
   const now = new Date();
   const db = await getDb();
+
+  const [reservation] = await db
+    .select({ id: sites.id, publicationOverride: sites.publicationOverride })
+    .from(sites)
+    .where(
+      and(
+        eq(sites.id, siteId),
+        eq(sites.userId, userId),
+        eq(sites.stripeCheckoutSessionId, session.id),
+      ),
+    )
+    .limit(1);
+  if (!reservation) {
+    throw new Error("Completed Checkout session does not match the current site reservation.");
+  }
+  const siteStatus = siteStatusWithPublicationOverride(
+    billingStatus,
+    reservation.publicationOverride,
+  );
 
   await db
     .update(users)
@@ -184,33 +211,35 @@ async function applyCompletedCheckout(session: Stripe.Checkout.Session): Promise
       updatedAt: now,
     })
     .where(eq(sites.id, siteId));
-  await db
-    .insert(subscriptions)
-    .values({
+  const subscriptionValues = {
+    userId,
+    siteId,
+    stripeCustomerId: customerId,
+    stripeSubscriptionId: subscriptionId,
+    plan,
+    status: remoteSubscription.status,
+    cancelAtPeriodEnd: remoteSubscription.cancel_at_period_end,
+    currentPeriodEnd,
+    graceEndsAt: siteStatus === "past_due" ? gracePeriodEnd(now) : null,
+    updatedAt: now,
+  };
+  const [existingSubscription] = await db
+    .select({ id: subscriptions.id })
+    .from(subscriptions)
+    .where(eq(subscriptions.siteId, siteId))
+    .limit(1);
+  if (existingSubscription) {
+    await db
+      .update(subscriptions)
+      .set(subscriptionValues)
+      .where(eq(subscriptions.id, existingSubscription.id));
+  } else {
+    await db.insert(subscriptions).values({
       id: crypto.randomUUID(),
-      userId,
-      siteId,
-      stripeCustomerId: customerId,
-      stripeSubscriptionId: subscriptionId,
-      plan,
-      status: remoteSubscription.status,
-      cancelAtPeriodEnd: remoteSubscription.cancel_at_period_end,
-      currentPeriodEnd,
-      graceEndsAt:
-        siteStatus === "past_due" ? gracePeriodEnd(now) : null,
+      ...subscriptionValues,
       createdAt: now,
-      updatedAt: now,
-    })
-    .onConflictDoUpdate({
-      target: subscriptions.stripeSubscriptionId,
-      set: {
-        status: remoteSubscription.status,
-        cancelAtPeriodEnd: remoteSubscription.cancel_at_period_end,
-        currentPeriodEnd,
-        graceEndsAt: siteStatus === "past_due" ? gracePeriodEnd(now) : null,
-        updatedAt: now,
-      },
     });
+  }
 
   if (siteStatus === "active") {
     const [account] = await db
@@ -222,13 +251,23 @@ async function applyCompletedCheckout(session: Stripe.Checkout.Session): Promise
     if (account) {
       const marketingUrl =
         process.env.NEXT_PUBLIC_MARKETING_URL ?? "https://cbp.proneurs.org";
-      await sendWelcomeEmail({
-        email: account.email,
-        name: account.name,
-        publicUrl: siteUrl(account.slug),
-        manageUrl: new URL("/manage", marketingUrl).toString(),
-        siteId,
-      });
+      try {
+        await sendWelcomeEmail({
+          email: account.email,
+          name: account.name,
+          publicUrl: siteUrl(account.slug),
+          manageUrl: new URL("/manage", marketingUrl).toString(),
+          siteId,
+        });
+      } catch (error) {
+        console.error(
+          JSON.stringify({
+            message: "welcome email delivery failed after site activation",
+            siteId,
+            error: error instanceof Error ? error.message : "Unknown email failure",
+          }),
+        );
+      }
     }
   }
 }
@@ -252,15 +291,24 @@ async function applySubscription(
 ): Promise<void> {
   const db = await getDb();
   const [local] = await db
-    .select({ siteId: subscriptions.siteId, graceEndsAt: subscriptions.graceEndsAt })
+    .select({
+      siteId: subscriptions.siteId,
+      graceEndsAt: subscriptions.graceEndsAt,
+      publicationOverride: sites.publicationOverride,
+    })
     .from(subscriptions)
+    .innerJoin(sites, eq(sites.id, subscriptions.siteId))
     .where(eq(subscriptions.stripeSubscriptionId, subscription.id))
     .limit(1);
   if (!local) return;
 
   const now = new Date();
   const currentPeriodEnd = subscriptionPeriodEnd(subscription);
-  const siteStatus = siteStatusForSubscription(subscription.status, currentPeriodEnd, now);
+  const billingStatus = siteStatusForSubscription(subscription.status, currentPeriodEnd, now);
+  const siteStatus = siteStatusWithPublicationOverride(
+    billingStatus,
+    local.publicationOverride,
+  );
   const graceEndsAt =
     siteStatus === "past_due"
       ? local.graceEndsAt ?? gracePeriodEnd(now)
@@ -292,8 +340,12 @@ export async function enforceScheduledBillingState(now = new Date()): Promise<vo
   await db.delete(magicLinkTokens).where(lte(magicLinkTokens.expiresAt, now));
 
   const overdue = await db
-    .select({ siteId: subscriptions.siteId })
+    .select({
+      siteId: subscriptions.siteId,
+      publicationOverride: sites.publicationOverride,
+    })
     .from(subscriptions)
+    .innerJoin(sites, eq(sites.id, subscriptions.siteId))
     .where(
       and(
         or(eq(subscriptions.status, "past_due"), eq(subscriptions.status, "unpaid")),
@@ -303,13 +355,23 @@ export async function enforceScheduledBillingState(now = new Date()): Promise<vo
   for (const item of overdue) {
     await db
       .update(sites)
-      .set({ status: "suspended", updatedAt: now })
+      .set({
+        status: siteStatusWithPublicationOverride(
+          "suspended",
+          item.publicationOverride,
+        ),
+        updatedAt: now,
+      })
       .where(eq(sites.id, item.siteId));
   }
 
   const ended = await db
-    .select({ siteId: subscriptions.siteId })
+    .select({
+      siteId: subscriptions.siteId,
+      publicationOverride: sites.publicationOverride,
+    })
     .from(subscriptions)
+    .innerJoin(sites, eq(sites.id, subscriptions.siteId))
     .where(
       and(
         eq(subscriptions.status, "canceled"),
@@ -319,7 +381,13 @@ export async function enforceScheduledBillingState(now = new Date()): Promise<vo
   for (const item of ended) {
     await db
       .update(sites)
-      .set({ status: "canceled", updatedAt: now })
+      .set({
+        status: siteStatusWithPublicationOverride(
+          "canceled",
+          item.publicationOverride,
+        ),
+        updatedAt: now,
+      })
       .where(eq(sites.id, item.siteId));
   }
 }

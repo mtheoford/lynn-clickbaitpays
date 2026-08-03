@@ -38,6 +38,9 @@ export const sites = sqliteTable(
     })
       .notNull()
       .default("pending"),
+    publicationOverride: text("publication_override", {
+      enum: ["suspended", "canceled"],
+    }),
     sourceSiteId: text("source_site_id"),
     stripeCheckoutSessionId: text("stripe_checkout_session_id"),
     publishedAt: integer("published_at", { mode: "timestamp_ms" }),

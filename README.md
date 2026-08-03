@@ -28,6 +28,10 @@ One application serves all surfaces:
 The existing OpenAI Sites configuration remains in the repository as a rollback
 path until Cloudflare production cutover is complete.
 
+The hosted pilot uses `/s/{slug}` tenant addresses on its Sites hostname. When
+`NEXT_PUBLIC_TENANT_BASE_DOMAIN` is configured in Cloudflare, the same records
+automatically use `{slug}.cbp.proneurs.org` without changing customer data.
+
 ## Local development
 
 Use Node.js 22.13 or newer.
@@ -147,6 +151,9 @@ out-of-order delivery safe. A cron job enforces grace-period and paid-through
 expiration every 15 minutes.
 
 Verify the Resend sending domain before testing welcome and magic-link email.
+Until Resend is configured, the hosted pilot exposes Sign in with ChatGPT as a
+customer and administrator fallback; the account email must match the purchase
+or administrator allowlist email.
 
 ## Operations and recovery
 

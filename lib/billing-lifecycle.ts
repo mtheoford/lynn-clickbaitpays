@@ -7,6 +7,15 @@ export type PublishableSiteStatus =
   | "suspended"
   | "canceled";
 
+export type PublicationOverride = "suspended" | "canceled" | null;
+
+export function siteStatusWithPublicationOverride(
+  billingStatus: PublishableSiteStatus,
+  publicationOverride: PublicationOverride,
+): PublishableSiteStatus {
+  return publicationOverride ?? billingStatus;
+}
+
 export function stripeTimestamp(value: number | null | undefined): Date | null {
   return typeof value === "number" ? new Date(value * 1000) : null;
 }

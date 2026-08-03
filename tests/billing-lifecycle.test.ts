@@ -6,6 +6,7 @@ import {
   gracePeriodEnd,
   paidThroughHasExpired,
   siteStatusForSubscription,
+  siteStatusWithPublicationOverride,
   stripeTimestamp,
 } from "../lib/billing-lifecycle.ts";
 
@@ -23,6 +24,12 @@ test("maps Stripe lifecycle states to publishable site states", () => {
     siteStatusForSubscription("canceled", new Date("2026-08-02T12:00:00.000Z"), now),
     "canceled",
   );
+});
+
+test("keeps an administrator publication block across billing updates", () => {
+  assert.equal(siteStatusWithPublicationOverride("active", "suspended"), "suspended");
+  assert.equal(siteStatusWithPublicationOverride("active", "canceled"), "canceled");
+  assert.equal(siteStatusWithPublicationOverride("past_due", null), "past_due");
 });
 
 test("computes Stripe timestamps and grace windows", () => {

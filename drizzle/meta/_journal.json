@@ -15,6 +15,13 @@
       "when": 1785785128481,
       "tag": "0001_graceful_the_hand",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1785787147516,
+      "tag": "0002_magical_wendell_vaughn",
+      "breakpoints": true
     }
   ]
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { siteUrl } from "@/lib/site-config";
 import SignupForm from "./SignupForm";
 
 export const metadata: Metadata = {
@@ -20,21 +21,23 @@ export const metadata: Metadata = {
   },
 };
 
-const features = [
-  "Your own name.cbp.proneurs.org address",
-  "Your referral link on every ClickBaitPays button",
-  "Personal contact section and sponsor introduction",
-  "Mobile-ready design, videos, FAQs, and resources",
-  "Centrally maintained content and disclosures",
-  "Sharing tools and basic page analytics",
-];
-
 export default async function GetYourSitePage({
   searchParams,
 }: {
   searchParams: Promise<{ source?: string; checkout?: string }>;
 }) {
   const params = await searchParams;
+  const exampleSiteUrl = siteUrl("your-name");
+  const [addressPrefix, addressSuffix = ""] = exampleSiteUrl.split("your-name");
+  const addressLabel = exampleSiteUrl.replace(/^https?:\/\//, "");
+  const features = [
+    `Your own ${addressLabel} address`,
+    "Your referral link on every ClickBaitPays button",
+    "Personal contact section and sponsor introduction",
+    "Mobile-ready design, videos, FAQs, and resources",
+    "Centrally maintained content and disclosures",
+    "Sharing tools and basic page analytics",
+  ];
 
   return (
     <main className="marketing-page">
@@ -63,7 +66,7 @@ export default async function GetYourSitePage({
           <a className="join-button" href="#build">Create my page <i aria-hidden="true">↓</i></a>
         </div>
         <div className="marketing-site-preview" aria-label="Example personal site address">
-          <div className="preview-browser-bar"><i /><i /><i /><span>your-name.cbp.proneurs.org</span></div>
+          <div className="preview-browser-bar"><i /><i /><i /><span>{addressLabel}</span></div>
           <div className="preview-content">
             <small>Your independent sponsor guide</small>
             <h2>Start with<br /><em>Your Name.</em></h2>
@@ -109,7 +112,11 @@ export default async function GetYourSitePage({
             <span><b>✓</b> No wallet credentials collected</span>
           </div>
         </div>
-        <SignupForm source={params.source} />
+        <SignupForm
+          source={params.source}
+          addressPrefix={addressPrefix}
+          addressSuffix={addressSuffix}
+        />
       </section>
 
       <section className="marketing-faq">

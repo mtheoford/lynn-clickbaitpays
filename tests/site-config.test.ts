@@ -25,6 +25,30 @@ test("builds the configured tenant URL", () => {
   assert.equal(siteUrl("Lynn Theobald"), "https://lynn-theobald.cbp.proneurs.org");
 });
 
+test("builds a path-based tenant URL when the pilot host has no wildcard domain", () => {
+  const originalTenantDomain = process.env.NEXT_PUBLIC_TENANT_BASE_DOMAIN;
+  const originalPrimaryDomain = process.env.NEXT_PUBLIC_PRIMARY_DOMAIN;
+  try {
+    Reflect.deleteProperty(process.env, "NEXT_PUBLIC_TENANT_BASE_DOMAIN");
+    process.env.NEXT_PUBLIC_PRIMARY_DOMAIN = "personal-sites.example.com";
+    assert.equal(
+      siteUrl("Lynn Theobald"),
+      "https://personal-sites.example.com/s/lynn-theobald",
+    );
+  } finally {
+    if (originalTenantDomain === undefined) {
+      Reflect.deleteProperty(process.env, "NEXT_PUBLIC_TENANT_BASE_DOMAIN");
+    } else {
+      process.env.NEXT_PUBLIC_TENANT_BASE_DOMAIN = originalTenantDomain;
+    }
+    if (originalPrimaryDomain === undefined) {
+      Reflect.deleteProperty(process.env, "NEXT_PUBLIC_PRIMARY_DOMAIN");
+    } else {
+      process.env.NEXT_PUBLIC_PRIMARY_DOMAIN = originalPrimaryDomain;
+    }
+  }
+});
+
 test("accepts only official ClickBaitPays referral links with a ref code", () => {
   assert.equal(validateReferralUrl("https://clickbaitpays.me/?ref=thinleo"), null);
   assert.match(validateReferralUrl("https://example.com/?ref=thinleo") ?? "", /official/);
