@@ -50,15 +50,12 @@
   "env": {
     "staging": {
       "name": "proneurs-personal-cbp-sites-staging",
-      "routes": [
-        { "pattern": "cbp-staging.proneurs.org/*", "zone_name": "proneurs.org" },
-        { "pattern": "*.cbp-staging.proneurs.org/*", "zone_name": "proneurs.org" }
-      ],
+      "workers_dev": true,
       "d1_databases": [
         {
           "binding": "DB",
           "database_name": "proneurs-cbp-staging",
-          "database_id": "00000000-0000-4000-8000-000000000001",
+          "database_id": "e0ea1a0a-28d6-4721-bfb5-a643ab9c3143",
           "migrations_dir": "drizzle"
         }
       ],
@@ -82,9 +79,10 @@
       },
       "vars": {
         "APP_ENV": "staging",
-        "NEXT_PUBLIC_SITE_URL": "https://cbp-staging.proneurs.org",
-        "NEXT_PUBLIC_MARKETING_URL": "https://cbp-staging.proneurs.org",
-        "NEXT_PUBLIC_TENANT_BASE_DOMAIN": "cbp-staging.proneurs.org"
+        "NEXT_PUBLIC_SITE_URL": "https://proneurs-personal-cbp-sites-staging.mtheoford.workers.dev",
+        "NEXT_PUBLIC_MARKETING_URL": "https://proneurs-personal-cbp-sites-staging.mtheoford.workers.dev",
+        "NEXT_PUBLIC_TENANT_BASE_DOMAIN": "",
+        "NEXT_PUBLIC_PRIMARY_DOMAIN": "proneurs-personal-cbp-sites-staging.mtheoford.workers.dev"
       }
     },
     "production": {
