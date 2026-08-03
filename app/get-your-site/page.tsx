@@ -1,5 +1,5 @@
-import type { CSSProperties } from "react";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { siteUrl } from "@/lib/site-config";
 import SignupDialog from "./SignupDialog";
@@ -22,21 +22,6 @@ export const metadata: Metadata = {
     images: ["/og-personal-cbp-sites-v3.png"],
   },
 };
-
-const videoCards = [
-  {
-    title: "CBP introduction",
-    image: "https://i.vimeocdn.com/video/2180934020-571137cdb14ff374c76cf4d3f2dba75212431898bba3a02a05b1187c3495ba86-d_295x166?region=us",
-  },
-  {
-    title: "Income strategies",
-    image: "https://i.vimeocdn.com/video/2180932614-2c1ab32ecf01a052ad89314e0ec1267e7232251b4bd6963394c7d15095f4587f-d_295x166?region=us",
-  },
-  {
-    title: "Back-office tour",
-    image: "https://i.vimeocdn.com/video/2181701812-191f55968a0ca9aea81275a9dece5b1b49400411dcfa04ac740d26c98d67eb38-d_295x166?region=us",
-  },
-];
 
 const features = [
   { icon: "▶", label: "Videos" },
@@ -74,38 +59,23 @@ export default async function GetYourSitePage({
         </div>
 
         <div className="compact-device-scene" aria-label="Preview of a personal CBP site">
-          <div className="compact-device compact-device-back" aria-hidden="true">
-            <div className="compact-window-bar"><i /><i /><i /><span /></div>
-            <div className="compact-back-layout">
-              <div className="compact-sidebar"><b /><b /><b /><b /></div>
-              <div className="compact-back-content">
-                <div className="compact-wave" />
-                <div className="compact-back-cards"><i /><i /><i /></div>
-                <div className="compact-back-lines"><b /><b /><b /></div>
-              </div>
+          <figure className="compact-site-browser">
+            <div className="compact-site-browser-bar">
+              <span className="compact-site-dots"><i /><i /><i /></span>
+              <span className="compact-site-address">your-name.cbp.proneurs.org</span>
+              <span className="compact-site-menu" aria-hidden="true">≡</span>
             </div>
-          </div>
-
-          <div className="compact-device compact-device-front">
-            <div className="compact-window-bar"><i /><i /><i /><span /></div>
-            <div className="compact-front-content">
-              <div className="compact-front-wave" />
-              <div className="compact-video-grid">
-                {videoCards.map((video, index) => (
-                  <article key={video.title} aria-label={video.title}>
-                    <div
-                      className="compact-video-thumb"
-                      style={{ "--video-image": `url(${video.image})` } as CSSProperties}
-                    >
-                      <span aria-hidden="true">▶</span>
-                    </div>
-                    <div className="compact-video-meta"><i /><span><b /><b /></span></div>
-                    <small>{String(index + 1).padStart(2, "0")}</small>
-                  </article>
-                ))}
-              </div>
+            <div className="compact-site-screenshot">
+              <Image
+                src="/replicated-site-hero.jpg"
+                alt="Actual personalized ClickBaitPays replicated website"
+                fill
+                priority
+                sizes="(max-width: 720px) 88vw, 42vw"
+              />
             </div>
-          </div>
+            <figcaption><span>Actual replicated site</span><strong>Personalized with your information</strong></figcaption>
+          </figure>
         </div>
 
         <aside className="compact-sales-offer" aria-label="Personal site features and price">

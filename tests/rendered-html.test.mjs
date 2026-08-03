@@ -33,7 +33,8 @@ test("renders the marketing and signup page", async () => {
   const html = await response.text();
   assert.match(html, /Your own CBP page/);
   assert.match(html, /Ready to share/);
-  assert.match(html, /Income strategies/);
+  assert.match(html, /Actual personalized ClickBaitPays replicated website/);
+  assert.match(html, /Personalized with your information/);
   assert.match(html, /Your referral link/);
   assert.match(html, /Continue with \$9\/month/);
   assert.match(html, /Secure billing through Stripe/i);

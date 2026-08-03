@@ -5335,6 +5335,85 @@ body:has(.marketing-one-page) {
   z-index: 2;
 }
 
+.compact-site-browser {
+  width: min(94%, 650px);
+  aspect-ratio: .84 / 1;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(103, 151, 255, .7);
+  border-radius: 20px;
+  background: #070a16;
+  box-shadow:
+    0 45px 100px rgba(0, 0, 0, .6),
+    0 0 65px rgba(52, 123, 255, .16),
+    inset 0 1px 0 rgba(255,255,255,.05);
+  transform: rotate(-1.3deg);
+}
+
+.compact-site-browser::after {
+  content: "";
+  position: absolute;
+  inset: 42px 0 auto;
+  height: 25%;
+  z-index: 3;
+  background: linear-gradient(115deg, rgba(255,255,255,.045), transparent 47%);
+  pointer-events: none;
+}
+
+.compact-site-browser-bar {
+  height: 42px;
+  padding: 0 15px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 13px;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  background: linear-gradient(180deg, #111629, #0b0f1d);
+}
+
+.compact-site-dots { display: flex; gap: 6px; }
+.compact-site-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); }
+.compact-site-dots i:first-child { background: #ff648d; }
+.compact-site-dots i:nth-child(2) { background: #ffca62; }
+.compact-site-address {
+  min-width: 0;
+  height: 21px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: 7px;
+  color: #6f7892;
+  background: #151b2d;
+  font-size: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.compact-site-menu { color: #aeb5c8; font-size: 18px; line-height: 1; }
+.compact-site-screenshot { height: calc(100% - 42px); position: relative; overflow: hidden; }
+.compact-site-screenshot img { object-fit: cover; object-position: top center; }
+.compact-site-browser figcaption {
+  padding: 12px 14px;
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  left: 14px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border: 1px solid rgba(46,231,242,.26);
+  border-radius: 11px;
+  background: rgba(5, 8, 20, .84);
+  box-shadow: 0 16px 32px rgba(0,0,0,.32);
+  backdrop-filter: blur(12px);
+}
+.compact-site-browser figcaption span { color: var(--cyan); font-size: 8px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+.compact-site-browser figcaption strong { color: #c7ccda; font-size: 8px; font-weight: 750; text-align: right; }
+
 .compact-device {
   position: absolute;
   overflow: hidden;
@@ -5507,6 +5586,16 @@ body:has(.marketing-one-page) {
   .compact-sales-copy h1 { font-size: clamp(48px, 14vw, 65px); }
   .compact-sales-copy p { font-size: clamp(31px, 9vw, 42px); }
   .compact-device-scene { min-height: 0; height: 450px; }
+  .compact-site-browser { width: min(88%, 350px); border-radius: 15px; }
+  .compact-site-browser-bar { height: 32px; padding-inline: 10px; gap: 8px; }
+  .compact-site-browser::after { inset-block-start: 32px; }
+  .compact-site-screenshot { height: calc(100% - 32px); }
+  .compact-site-dots { gap: 4px; }
+  .compact-site-dots i { width: 6px; height: 6px; }
+  .compact-site-address { height: 17px; font-size: 6px; }
+  .compact-site-menu { font-size: 14px; }
+  .compact-site-browser figcaption { right: 9px; bottom: 9px; left: 9px; padding: 9px; }
+  .compact-site-browser figcaption strong { display: none; }
   .compact-device-back { width: 72%; height: 65%; }
   .compact-device-front { width: 77%; height: 62%; }
   .compact-sales-offer { grid-column: 1; grid-template-columns: 1fr; }
