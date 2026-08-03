@@ -32,7 +32,8 @@ test("renders the marketing and signup page", async () => {
   assert.equal(response.status, 200);
   const html = await response.text();
   assert.match(html, /Your own CBP page/);
-  assert.match(html, /Interactive calculator/);
+  assert.match(html, /Model scenarios and explore the program/);
+  assert.match(html, /explains CBP, models its potential/);
   assert.match(html, /your-name\.cbp\.proneurs\.org/);
   assert.match(html, /Continue with \$9\/month/);
   assert.match(html, /Secure billing through Stripe/i);
