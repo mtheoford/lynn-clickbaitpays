@@ -1,5 +1,5 @@
+import type { CSSProperties } from "react";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { siteUrl } from "@/lib/site-config";
 import SignupDialog from "./SignupDialog";
@@ -7,39 +7,42 @@ import SignupDialog from "./SignupDialog";
 export const metadata: Metadata = {
   title: "Your Personal CBP Site",
   description:
-    "Replace a bare ClickBaitPays referral link with a polished personal page featuring your referral link, contact information, videos, calculator, FAQs, and resources.",
+    "Your own polished ClickBaitPays page with videos, calculator, FAQs, and your official referral link.",
   robots: { index: true, follow: true },
   openGraph: {
     title: "Your own CBP page—ready to share",
-    description:
-      "Your referral link, videos, calculator, resources, and contact details in one professional page for $9/month.",
+    description: "Everything your prospects need in one professional page for $9/month.",
     type: "website",
     images: [{ url: "/og-personal-cbp-sites-v3.png", width: 1734, height: 907 }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Your own CBP page—ready to share",
-    description: "Everything your prospects need in one polished personal page.",
+    description: "Everything your prospects need in one professional page.",
     images: ["/og-personal-cbp-sites-v3.png"],
   },
 };
 
-const heroFeatures = [
-  { icon: "▶", title: "Videos", body: "A guided introduction and member tour" },
-  { icon: "123", title: "Calculator", body: "Model scenarios and explore the program’s potential" },
-  { icon: "?", title: "FAQs & resources", body: "Answers and official links in one place" },
-  { icon: "↗", title: "Your referral link", body: "Built into every important action" },
+const videoCards = [
+  {
+    title: "CBP introduction",
+    image: "https://i.vimeocdn.com/video/2180934020-571137cdb14ff374c76cf4d3f2dba75212431898bba3a02a05b1187c3495ba86-d_295x166?region=us",
+  },
+  {
+    title: "Income strategies",
+    image: "https://i.vimeocdn.com/video/2180932614-2c1ab32ecf01a052ad89314e0ec1267e7232251b4bd6963394c7d15095f4587f-d_295x166?region=us",
+  },
+  {
+    title: "Back-office tour",
+    image: "https://i.vimeocdn.com/video/2181701812-191f55968a0ca9aea81275a9dece5b1b49400411dcfa04ac740d26c98d67eb38-d_295x166?region=us",
+  },
 ];
 
-const included = [
-  "Your own personalized page address",
-  "Your official referral link on every join button",
-  "Sponsor introduction and contact information",
-  "Welcome video and member dashboard tour",
-  "Calculator for modeling campaign and referral scenarios",
-  "FAQs, official resources, and sharing tools",
-  "Mobile-ready design maintained for you",
-  "Basic page-view and referral-click analytics",
+const features = [
+  { icon: "▶", label: "Videos" },
+  { icon: "123", label: "Calculator" },
+  { icon: "?", label: "FAQs" },
+  { icon: "↗", label: "Your referral link" },
 ];
 
 export default async function GetYourSitePage({
@@ -50,167 +53,84 @@ export default async function GetYourSitePage({
   const params = await searchParams;
   const exampleSiteUrl = siteUrl("your-name");
   const [addressPrefix, addressSuffix = ""] = exampleSiteUrl.split("your-name");
-  const signupProps = {
-    source: params.source,
-    addressPrefix,
-    addressSuffix,
-    checkoutCanceled: params.checkout === "canceled",
-  };
 
   return (
-    <main className="marketing-page sales-page">
-      <header className="marketing-header sales-header" id="top">
-        <Link href="/" className="marketing-brand">
-          <span>PN</span>
-          <div>
-            <strong>ProNeurs</strong>
-            <small>Personal CBP Sites</small>
-          </div>
-        </Link>
-        <nav className="marketing-account-links" aria-label="Personal site account">
-          <Link href="/manage">Manage my page</Link>
-          <a href="#pricing">Get my page</a>
-        </nav>
-      </header>
+    <main className="compact-sales-page">
+      <section className="compact-sales-card" id="build" aria-labelledby="compact-sales-title">
+        <header className="compact-sales-brand-row">
+          <Link href="/" className="compact-sales-brand" aria-label="ProNeurs Personal CBP Sites">
+            <span>PN</span>
+            <div><strong>Pro<span>Neurs</span></strong><small>Personal CBP Sites</small></div>
+          </Link>
+          <Link href="/manage" className="compact-manage-link">Manage my page</Link>
+        </header>
 
-      <section className="sales-hero" id="build" aria-labelledby="sales-title">
-        <div className="sales-hero-glow sales-hero-glow-one" aria-hidden="true" />
-        <div className="sales-hero-glow sales-hero-glow-two" aria-hidden="true" />
-
-        <div className="sales-hero-copy">
-          <p className="eyebrow">Built for ClickBaitPays members</p>
-          <h1 id="sales-title">
-            Your own CBP page. <em>Ready to share.</em>
-          </h1>
-          <p>
-            Share one polished page that explains CBP, models its potential,
-            answers common questions, and keeps your official referral link at
-            the center.
-          </p>
-          <div className="sales-personalized-row" aria-label="Personalized page features">
-            <span>Your name</span><i>•</i><span>Your link</span><i>•</i><span>Your contact info</span>
-          </div>
-          <div className="sales-hero-actions" id="top-offer">
-            <SignupDialog {...signupProps} dialogId="hero-signup" triggerLabel="Build my page" />
-            <Link className="sales-secondary-link" href="/s/lynn-theobald">
-              View a live example <span aria-hidden="true">↗</span>
-            </Link>
-          </div>
-          <p className="sales-safe-note">No setup fee · Cancel anytime · Secure Stripe billing</p>
+        <div className="compact-sales-copy">
+          <h1 id="compact-sales-title">Your own<br />CBP page.</h1>
+          <p>Ready to share.</p>
         </div>
 
-        <div className="sales-hero-preview" aria-label="Example personalized CBP site">
-          <div className="sales-preview-label"><span className="pulse-dot" /> Actual replicated site</div>
-          <figure className="sales-preview sales-preview-main">
-            <div className="sales-browser-bar"><i /><i /><i /><span>your-name.cbp.proneurs.org</span></div>
-            <div className="sales-preview-image">
-              <Image
-                src="/replicated-site-hero.jpg"
-                alt="Example personalized ClickBaitPays sponsor site"
-                fill
-                priority
-                sizes="(max-width: 760px) 82vw, 35vw"
-              />
+        <div className="compact-device-scene" aria-label="Preview of a personal CBP site">
+          <div className="compact-device compact-device-back" aria-hidden="true">
+            <div className="compact-window-bar"><i /><i /><i /><span /></div>
+            <div className="compact-back-layout">
+              <div className="compact-sidebar"><b /><b /><b /><b /></div>
+              <div className="compact-back-content">
+                <div className="compact-wave" />
+                <div className="compact-back-cards"><i /><i /><i /></div>
+                <div className="compact-back-lines"><b /><b /><b /></div>
+              </div>
             </div>
-          </figure>
-          <figure className="sales-preview sales-preview-detail">
-            <div className="sales-browser-bar"><i /><i /><i /><span>Member tour</span></div>
-            <div className="sales-preview-image">
-              <Image
-                src="/replicated-site-features.jpg"
-                alt="Member dashboard walkthrough on a replicated site"
-                fill
-                sizes="(max-width: 760px) 52vw, 21vw"
-              />
+          </div>
+
+          <div className="compact-device compact-device-front">
+            <div className="compact-window-bar"><i /><i /><i /><span /></div>
+            <div className="compact-front-content">
+              <div className="compact-front-wave" />
+              <div className="compact-video-grid">
+                {videoCards.map((video, index) => (
+                  <article key={video.title} aria-label={video.title}>
+                    <div
+                      className="compact-video-thumb"
+                      style={{ "--video-image": `url(${video.image})` } as CSSProperties}
+                    >
+                      <span aria-hidden="true">▶</span>
+                    </div>
+                    <div className="compact-video-meta"><i /><span><b /><b /></span></div>
+                    <small>{String(index + 1).padStart(2, "0")}</small>
+                  </article>
+                ))}
+              </div>
             </div>
-          </figure>
+          </div>
         </div>
 
-        <aside className="sales-feature-rail" aria-label="Core replicated site features">
-          <div className="sales-feature-list">
-            {heroFeatures.map((feature) => (
-              <article key={feature.title}>
+        <aside className="compact-sales-offer" aria-label="Personal site features and price">
+          <div className="compact-feature-list">
+            {features.map((feature) => (
+              <div key={feature.label}>
                 <span>{feature.icon}</span>
-                <div><strong>{feature.title}</strong><small>{feature.body}</small></div>
-              </article>
+                <strong>{feature.label}</strong>
+              </div>
             ))}
           </div>
-          <div className="sales-price-card">
+          <div className="compact-price-box">
             <div><strong>$9</strong><span>/month</span></div>
-            <small>or $79 annually · save $29</small>
+            <SignupDialog
+              source={params.source}
+              addressPrefix={addressPrefix}
+              addressSuffix={addressSuffix}
+              checkoutCanceled={params.checkout === "canceled"}
+              dialogId="compact-signup"
+              triggerLabel="Get my page"
+            />
           </div>
         </aside>
       </section>
 
-      <section className="sales-proof-bar" aria-label="Service highlights">
-        <span><b>✓</b> Personalized for you</span>
-        <span><b>✓</b> Mobile-ready</span>
-        <span><b>✓</b> Maintained by ProNeurs</span>
-        <span><b>✓</b> Your referral link stays yours</span>
-      </section>
-
-      <section className="sales-included" aria-labelledby="included-title">
-        <div className="sales-included-preview">
-          <div className="sales-included-browser-bar"><i /><i /><i /><span>your-name.cbp.proneurs.org</span></div>
-          <Image
-            src="/replicated-site-features.jpg"
-            alt="Example replicated site member tour and dashboard content"
-            fill
-            sizes="(max-width: 840px) 92vw, 49vw"
-          />
-          <div className="sales-included-caption">
-            <strong>Built around your identity</strong>
-            <span>Your name, referral link, and contact details stay front and center.</span>
-          </div>
-        </div>
-        <div className="sales-included-copy">
-          <p className="eyebrow">More than a referral link</p>
-          <h2 id="included-title">A better way to explain CBP—without becoming a web designer.</h2>
-          <p>
-            Give prospects the context they need to understand the program and
-            explore its potential. Add your information once; ProNeurs handles
-            the design, core content, hosting, and maintenance.
-          </p>
-          <ul>
-            {included.map((item) => <li key={item}><span>✓</span>{item}</li>)}
-          </ul>
-        </div>
-      </section>
-
-      <section className="sales-pricing" id="pricing" aria-labelledby="pricing-title">
-        <div className="sales-pricing-copy">
-          <p className="eyebrow">Simple, member-friendly pricing</p>
-          <h2 id="pricing-title">Put your name on something worth sharing.</h2>
-          <p>Choose monthly flexibility or save with the annual plan. No setup fee.</p>
-          <div className="sales-pricing-assurances">
-            <span>✓ Cancel anytime</span>
-            <span>✓ Update your information later</span>
-            <span>✓ No CBP password or wallet details needed</span>
-          </div>
-        </div>
-        <div className="sales-pricing-card">
-          <p>Personal CBP Site</p>
-          <div><strong>$9</strong><span>/month</span></div>
-          <small>or $79/year · save $29</small>
-          <SignupDialog {...signupProps} dialogId="pricing-signup" triggerLabel="Create my personal page" />
-          <p className="sales-pricing-fine">Secure checkout through Stripe</p>
-        </div>
-      </section>
-
-      <section className="sales-faq" aria-labelledby="faq-title">
-        <div><p className="eyebrow">Good to know</p><h2 id="faq-title">Clear answers before you subscribe.</h2></div>
-        <div className="sales-faq-list">
-          <details><summary>Is this operated by ClickBaitPays?<span>+</span></summary><p>No. ProNeurs provides an independent website and sharing service.</p></details>
-          <details><summary>Can I update my information?<span>+</span></summary><p>Yes. Secure account access lets you update your contact details and official referral link.</p></details>
-          <details><summary>Does the site guarantee referrals or earnings?<span>+</span></summary><p>No. The site gives you a professional sharing resource. Traffic, referrals, participation, and earnings are never guaranteed.</p></details>
-        </div>
-      </section>
-
-      <footer className="marketing-footer sales-footer">
-        <span>ProNeurs Personal CBP Sites</span>
-        <p>Independent website service—not operated by ClickBaitPays. Participation involves financial and cryptocurrency risk. Earnings are not guaranteed.</p>
-        <div><Link href="/manage">Manage my page</Link> · <Link href="/terms">Terms</Link> · <Link href="/privacy">Privacy</Link> · <Link href="/acceptable-use">Acceptable use</Link></div>
-      </footer>
+      <p className="compact-sales-note">
+        Independent ProNeurs website service · No setup fee · Cancel anytime
+      </p>
     </main>
   );
 }
