@@ -5607,3 +5607,450 @@ body:has(.marketing-one-page) {
   .compact-sales-footer { grid-column: 1; align-items: start; flex-direction: column; gap: 8px; }
   .compact-sales-footer p { max-width: 300px; line-height: 1.45; }
 }
+
+/* Premium short-form Personal CBP Sites offer */
+.cbp-offer {
+  --offer-ink: #11131a;
+  --offer-muted: #656875;
+  --offer-paper: #f4f1eb;
+  --offer-blue: #5247ef;
+  min-height: 100vh;
+  overflow: hidden;
+  position: relative;
+  color: var(--offer-ink);
+  background:
+    linear-gradient(rgba(17, 19, 26, .032) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 19, 26, .032) 1px, transparent 1px),
+    var(--offer-paper);
+  background-size: 48px 48px;
+}
+
+.cbp-offer-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+.cbp-offer-glow-one {
+  width: 520px;
+  height: 520px;
+  top: -330px;
+  right: 12%;
+  background: radial-gradient(circle, rgba(130, 109, 255, .19), rgba(130, 109, 255, 0) 70%);
+}
+
+.cbp-offer-glow-two {
+  width: 440px;
+  height: 440px;
+  left: -280px;
+  top: 520px;
+  background: radial-gradient(circle, rgba(40, 200, 220, .14), rgba(40, 200, 220, 0) 70%);
+}
+
+.cbp-offer-header,
+.cbp-offer-hero,
+.cbp-offer-benefits,
+.cbp-offer-close,
+.cbp-offer-footer {
+  width: min(1240px, calc(100% - 48px));
+  margin-inline: auto;
+  position: relative;
+  z-index: 2;
+}
+
+.cbp-offer-header {
+  min-height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  border-bottom: 1px solid rgba(17, 19, 26, .12);
+}
+
+.cbp-offer-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--offer-ink);
+}
+
+.cbp-offer-brand > span {
+  width: 43px;
+  height: 43px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--offer-ink);
+  border-radius: 12px;
+  color: #fff;
+  background: var(--offer-ink);
+  font-family: var(--font-manrope), sans-serif;
+  font-size: 14px;
+  font-style: italic;
+  font-weight: 900;
+  box-shadow: 5px 5px 0 #a9f1ed;
+}
+
+.cbp-offer-brand strong,
+.cbp-offer-brand small { display: block; }
+.cbp-offer-brand strong { font-family: var(--font-manrope), sans-serif; font-size: 14px; letter-spacing: -.02em; }
+.cbp-offer-brand small { margin-top: 2px; color: #777a84; font-size: 8px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.cbp-offer-header nav { display: flex; align-items: center; gap: 24px; }
+.cbp-offer-header nav a { color: #686b74; font-size: 11px; font-weight: 750; }
+.cbp-offer-header nav a:first-child { color: var(--offer-ink); }
+.cbp-offer-header nav a span { margin-left: 5px; color: var(--offer-blue); }
+
+.cbp-offer-hero {
+  min-height: 720px;
+  padding: 78px 0 88px;
+  display: grid;
+  grid-template-columns: .87fr 1.13fr;
+  align-items: center;
+  gap: clamp(56px, 7vw, 110px);
+}
+
+.cbp-offer-copy { position: relative; z-index: 3; }
+.cbp-offer-kicker {
+  margin: 0 0 22px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #5c5f68;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.cbp-offer-kicker span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2ccfc3;
+  box-shadow: 0 0 0 5px rgba(44, 207, 195, .12);
+}
+
+.cbp-offer-copy h1 {
+  max-width: 620px;
+  margin: 0;
+  font-family: var(--font-manrope), sans-serif;
+  font-size: clamp(54px, 5.7vw, 78px);
+  font-weight: 720;
+  line-height: .94;
+  letter-spacing: -.064em;
+}
+
+.cbp-offer-copy h1 em {
+  position: relative;
+  color: var(--offer-blue);
+  font-style: normal;
+  white-space: nowrap;
+}
+
+.cbp-offer-copy h1 em::after {
+  content: "";
+  height: 8px;
+  position: absolute;
+  right: 1px;
+  bottom: -3px;
+  left: 4px;
+  border-radius: 50%;
+  background: #9fe8e3;
+  transform: rotate(-1deg);
+  opacity: .85;
+}
+
+.cbp-offer-lead {
+  max-width: 560px;
+  margin: 29px 0 0;
+  color: var(--offer-muted);
+  font-size: 16px;
+  line-height: 1.67;
+}
+
+.cbp-offer-actions {
+  margin-top: 34px;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.cbp-offer .sales-button {
+  min-height: 56px;
+  padding: 0 23px;
+  gap: 28px;
+  border: 1px solid #151826;
+  border-radius: 12px;
+  color: #fff;
+  background: #151826;
+  box-shadow: 7px 7px 0 #a9f1ed;
+  font-size: 11px;
+  letter-spacing: .01em;
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.cbp-offer .sales-button:hover {
+  background: var(--offer-blue);
+  box-shadow: 4px 4px 0 #a9f1ed;
+  transform: translate(3px, 3px);
+}
+
+.cbp-offer-demo-link { color: #343741; font-size: 11px; font-weight: 850; }
+.cbp-offer-demo-link span { margin-left: 5px; color: var(--offer-blue); }
+.cbp-offer-price-line {
+  margin-top: 26px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 11px;
+  color: #767983;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.cbp-offer-price-line strong { color: var(--offer-ink); font-family: var(--font-manrope), sans-serif; font-size: 18px; }
+.cbp-offer-price-line strong span { margin-left: 2px; color: #747780; font-size: 9px; }
+.cbp-offer-price-line i { width: 3px; height: 3px; border-radius: 50%; background: #b3b1ab; }
+
+.cbp-offer-product {
+  min-width: 0;
+  height: 560px;
+  position: relative;
+}
+
+.cbp-product-browser {
+  width: 92%;
+  height: 520px;
+  margin: 0 0 0 auto;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 20px;
+  background: #090b16;
+  box-shadow:
+    0 36px 80px rgba(25, 27, 40, .25),
+    16px 18px 0 rgba(82, 71, 239, .12),
+    -11px -11px 0 #d8d5ce;
+  transform: rotate(1deg);
+}
+
+.cbp-product-browser-bar {
+  height: 46px;
+  padding: 0 15px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 13px;
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+  background: #111523;
+}
+
+.cbp-product-dots { display: flex; gap: 6px; }
+.cbp-product-dots i { width: 7px; height: 7px; border-radius: 50%; background: #5be1d7; }
+.cbp-product-dots i:first-child { background: #ff728e; }
+.cbp-product-dots i:nth-child(2) { background: #ffc864; }
+.cbp-product-address {
+  min-width: 0;
+  height: 24px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .07);
+  border-radius: 7px;
+  color: #858ca1;
+  background: rgba(255, 255, 255, .035);
+  font-size: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cbp-product-live { display: flex; align-items: center; gap: 5px; color: #aeb5c9; font-size: 7px; font-weight: 800; text-transform: uppercase; }
+.cbp-product-live i { width: 6px; height: 6px; border-radius: 50%; background: #48dec6; box-shadow: 0 0 10px rgba(72, 222, 198, .7); }
+.cbp-product-screen { height: calc(100% - 46px); position: relative; overflow: hidden; }
+.cbp-product-screen::after { content: ""; position: absolute; inset: 0; background: linear-gradient(120deg, rgba(255, 255, 255, .055), transparent 35%); pointer-events: none; }
+.cbp-product-screen img { object-fit: cover; object-position: top center; }
+.cbp-product-browser figcaption {
+  min-height: 68px;
+  padding: 13px 16px;
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  left: 14px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 12px;
+  color: #fff;
+  background: rgba(8, 11, 24, .86);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .26);
+  backdrop-filter: blur(14px);
+}
+
+.cbp-product-browser figcaption div span,
+.cbp-product-browser figcaption div strong { display: block; }
+.cbp-product-browser figcaption div span { color: #6fe9df; font-size: 7px; font-weight: 900; letter-spacing: .11em; text-transform: uppercase; }
+.cbp-product-browser figcaption div strong { margin-top: 5px; font-size: 11px; }
+.cbp-product-browser figcaption > a { padding: 9px 11px; border: 1px solid rgba(255, 255, 255, .14); border-radius: 8px; color: #dce0ea; font-size: 8px; font-weight: 850; white-space: nowrap; }
+.cbp-product-browser figcaption > a span { margin-left: 5px; color: #6fe9df; }
+
+.cbp-product-note {
+  padding: 10px 13px;
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid rgba(17, 19, 26, .14);
+  border-radius: 11px;
+  background: rgba(250, 248, 244, .91);
+  box-shadow: 0 14px 32px rgba(27, 29, 40, .12);
+  backdrop-filter: blur(10px);
+}
+
+.cbp-product-note span { width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; color: #fff; background: var(--offer-blue); font-size: 7px; font-weight: 900; }
+.cbp-product-note strong { font-size: 8px; letter-spacing: .02em; }
+.cbp-product-note-brand { left: 0; top: 68px; }
+.cbp-product-note-link { right: -12px; bottom: 49px; }
+
+.cbp-offer-benefits {
+  padding: 74px 0 82px;
+  display: grid;
+  grid-template-columns: .82fr 1.18fr;
+  align-items: start;
+  gap: clamp(55px, 8vw, 120px);
+  border-top: 1px solid rgba(17, 19, 26, .13);
+}
+
+.cbp-benefits-heading > p,
+.cbp-offer-close > div:first-child > p {
+  margin: 0 0 14px;
+  color: var(--offer-blue);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.cbp-benefits-heading h2,
+.cbp-offer-close h2 {
+  max-width: 500px;
+  margin: 0;
+  font-family: var(--font-manrope), sans-serif;
+  font-size: clamp(38px, 4vw, 55px);
+  line-height: .98;
+  letter-spacing: -.055em;
+}
+
+.cbp-benefit-grid { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid rgba(17, 19, 26, .16); }
+.cbp-benefit-grid article { min-height: 230px; padding: 20px 23px 18px 0; }
+.cbp-benefit-grid article + article { padding-left: 23px; border-left: 1px solid rgba(17, 19, 26, .12); }
+.cbp-benefit-grid article > span { color: var(--offer-blue); font-size: 8px; font-weight: 950; }
+.cbp-benefit-grid h3 { margin: 74px 0 10px; font-family: var(--font-manrope), sans-serif; font-size: 16px; letter-spacing: -.025em; }
+.cbp-benefit-grid p { margin: 0; color: var(--offer-muted); font-size: 10px; line-height: 1.65; }
+
+.cbp-offer-close {
+  min-height: 270px;
+  padding: 48px 55px;
+  display: grid;
+  grid-template-columns: 1.25fr .75fr;
+  align-items: center;
+  gap: 70px;
+  overflow: hidden;
+  border-radius: 24px;
+  color: #f8f8fb;
+  background:
+    radial-gradient(circle at 88% 12%, rgba(123, 96, 255, .42), transparent 21rem),
+    radial-gradient(circle at 16% 115%, rgba(45, 221, 209, .18), transparent 23rem),
+    #111522;
+  box-shadow: 0 30px 70px rgba(23, 25, 37, .2);
+}
+
+.cbp-offer-close > div:first-child > p { color: #78e7df; }
+.cbp-offer-close h2 { color: #fff; }
+.cbp-close-action { display: grid; justify-items: stretch; }
+.cbp-close-action > span { margin-bottom: 13px; color: #b8bdcd; font-size: 11px; }
+.cbp-close-action > span strong { margin-right: 3px; color: #fff; font-family: var(--font-manrope), sans-serif; font-size: 34px; letter-spacing: -.05em; }
+.cbp-offer-close .sales-button { width: 100%; color: #10131a; background: #a9f1ed; box-shadow: 6px 6px 0 #6658f1; }
+.cbp-offer-close .sales-button:hover { color: #fff; background: #6658f1; box-shadow: 3px 3px 0 #a9f1ed; }
+.cbp-close-action small { margin-top: 12px; color: #777f96; font-size: 8px; text-align: center; }
+
+.cbp-offer-footer {
+  min-height: 105px;
+  padding: 25px 0 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.cbp-offer-footer p { max-width: 650px; margin: 0; color: #85868c; font-size: 8px; line-height: 1.55; }
+.cbp-offer-footer nav { display: flex; align-items: center; gap: 16px; }
+.cbp-offer-footer nav a { color: #6e7078; font-size: 8px; font-weight: 800; }
+
+.cbp-offer a:focus-visible,
+.cbp-offer button:focus-visible { outline: 3px solid rgba(82, 71, 239, .35); outline-offset: 4px; }
+
+@media (max-width: 1020px) {
+  .cbp-offer-hero { grid-template-columns: .8fr 1.2fr; gap: 42px; }
+  .cbp-offer-product { height: 500px; }
+  .cbp-product-browser { width: 96%; height: 465px; }
+  .cbp-offer-benefits { grid-template-columns: 1fr; gap: 42px; }
+}
+
+@media (max-width: 760px) {
+  .cbp-offer { background-size: 34px 34px; }
+  .cbp-offer-header,
+  .cbp-offer-hero,
+  .cbp-offer-benefits,
+  .cbp-offer-close,
+  .cbp-offer-footer { width: calc(100% - 30px); }
+  .cbp-offer-header { min-height: 72px; }
+  .cbp-offer-brand > span { width: 38px; height: 38px; box-shadow: 3px 3px 0 #a9f1ed; }
+  .cbp-offer-brand strong { font-size: 12px; }
+  .cbp-offer-brand small { font-size: 6px; }
+  .cbp-offer-header nav { gap: 12px; }
+  .cbp-offer-header nav a { font-size: 8px; }
+  .cbp-offer-header nav a:first-child { display: none; }
+  .cbp-offer-hero { min-height: 0; padding: 54px 0 64px; grid-template-columns: 1fr; gap: 54px; }
+  .cbp-offer-kicker { margin-bottom: 17px; font-size: 8px; }
+  .cbp-offer-copy h1 { max-width: 600px; font-size: clamp(48px, 14.2vw, 68px); }
+  .cbp-offer-lead { margin-top: 23px; font-size: 14px; }
+  .cbp-offer-actions { align-items: stretch; flex-direction: column; }
+  .cbp-offer .sales-button { width: 100%; }
+  .cbp-offer-demo-link { text-align: center; }
+  .cbp-offer-price-line { justify-content: center; }
+  .cbp-offer-product { height: min(116vw, 555px); }
+  .cbp-product-browser { width: 96%; height: calc(100% - 25px); margin: 0 auto; border-radius: 15px; box-shadow: 10px 12px 0 rgba(82, 71, 239, .13), -7px -7px 0 #d8d5ce; transform: none; }
+  .cbp-product-browser-bar { height: 39px; padding-inline: 10px; gap: 8px; }
+  .cbp-product-address { font-size: 6px; }
+  .cbp-product-live { display: none; }
+  .cbp-product-screen { height: calc(100% - 39px); }
+  .cbp-product-browser figcaption { min-height: 58px; right: 9px; bottom: 9px; left: 9px; padding: 10px 11px; }
+  .cbp-product-browser figcaption div strong { font-size: 9px; }
+  .cbp-product-browser figcaption > a { display: none; }
+  .cbp-product-note { padding: 7px 9px; }
+  .cbp-product-note span { width: 18px; height: 18px; font-size: 6px; }
+  .cbp-product-note strong { font-size: 7px; }
+  .cbp-product-note-brand { left: -4px; top: 57px; }
+  .cbp-product-note-link { right: -5px; bottom: 5px; }
+  .cbp-offer-benefits { padding: 58px 0 62px; gap: 35px; }
+  .cbp-benefit-grid { grid-template-columns: 1fr; }
+  .cbp-benefit-grid article { min-height: 0; padding: 23px 0; display: grid; grid-template-columns: 28px 1fr; column-gap: 10px; }
+  .cbp-benefit-grid article + article { padding-left: 0; border-top: 1px solid rgba(17, 19, 26, .12); border-left: 0; }
+  .cbp-benefit-grid article > span { grid-row: 1 / 3; padding-top: 4px; }
+  .cbp-benefit-grid h3 { margin: 0 0 7px; }
+  .cbp-benefit-grid p { max-width: 440px; }
+  .cbp-offer-close { min-height: 0; padding: 37px 23px; grid-template-columns: 1fr; gap: 34px; border-radius: 18px; }
+  .cbp-offer-close h2 { font-size: 39px; }
+  .cbp-offer-footer { min-height: 130px; padding: 26px 0 35px; align-items: flex-start; flex-direction: column; gap: 19px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cbp-offer *,
+  .cbp-offer *::before,
+  .cbp-offer *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
