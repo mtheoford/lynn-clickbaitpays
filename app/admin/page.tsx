@@ -1,12 +1,9 @@
 import { desc, eq, like, or } from "drizzle-orm";
 import Link from "next/link";
+import { chatGPTSignInPath, chatGPTSignOutPath } from "@/app/chatgpt-auth";
 import { getDb } from "@/db";
 import { sites, subscriptions, users } from "@/db/schema";
-import {
-  adminSignInPath,
-  adminSignOutPath,
-  requireAdmin,
-} from "@/lib/admin-auth";
+import { adminSignOutPath, requireAdmin } from "@/lib/admin-auth";
 import { siteUrl } from "@/lib/site-config";
 import SiteStatusActions from "./SiteStatusActions";
 
@@ -29,10 +26,20 @@ export default async function AdminPage({
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
-  const admin = await requireAdmin("/admin");
-  const signOutPath = await adminSignOutPath("/admin");
+  let admin = null;
+  try {
+    admin = await requireAdmin("/admin");
+  } catch (error) {
+    console.error(
+      JSON.stringify({
+        message: "administrator authentication context failed",
+        error: error instanceof Error ? error.message : "Unknown authentication failure",
+      }),
+    );
+  }
   if (!admin) {
-    const signInPath = await adminSignInPath("/admin");
+    const signInPath = chatGPTSignInPath("/admin");
+    const signOutPath = chatGPTSignOutPath("/admin");
     return (
       <main className="admin-access-page">
         <div>
@@ -44,6 +51,13 @@ export default async function AdminPage({
         </div>
       </main>
     );
+  }
+
+  let signOutPath = chatGPTSignOutPath("/admin");
+  try {
+    signOutPath = await adminSignOutPath("/admin");
+  } catch {
+    // The direct ChatGPT sign-out path remains available on the hosted pilot.
   }
 
   const query = (await searchParams).q?.trim().slice(0, 100) ?? "";

@@ -1,3 +1,5 @@
+import { platformRuntimeEnv } from "@runtime-platform";
+
 export type BillingQueueMessage = {
   stripeEventId: string;
 };
@@ -21,18 +23,10 @@ export type RuntimeEnv = {
 };
 
 export async function getRuntimeEnv(): Promise<RuntimeEnv> {
-  try {
-    const { getCloudflareContext } = await import("@opennextjs/cloudflare");
-    const context = await getCloudflareContext({ async: true });
-    return context.env as unknown as RuntimeEnv;
-  } catch {
-    // The existing OpenAI Sites deployment uses the Cloudflare module directly.
-    // Keep the module name computed so OpenNext does not try to resolve this
-    // Sites-only compatibility path while building its server bundle.
-    const sitesModuleName = ["cloudflare", "workers"].join(":");
-    const sitesRuntime = (await import(sitesModuleName)) as { env: unknown };
-    return sitesRuntime.env as RuntimeEnv;
-  }
+  const runtime = await platformRuntimeEnv();
+  return runtime && typeof runtime === "object"
+    ? (runtime as RuntimeEnv)
+    : {};
 }
 
 export async function runtimeValue(name: keyof RuntimeEnv): Promise<string> {

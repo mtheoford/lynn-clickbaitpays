@@ -20,7 +20,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@runtime-platform": ["./lib/runtime-platform.ts"]
     }
   },
   "include": [

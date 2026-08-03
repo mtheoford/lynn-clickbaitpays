@@ -1,10 +1,6 @@
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import { headers } from "next/headers";
-import {
-  chatGPTSignInPath,
-  getChatGPTUser,
-  chatGPTSignOutPath,
-} from "@/app/chatgpt-auth";
+import { getChatGPTUser, chatGPTSignOutPath } from "@/app/chatgpt-auth";
 import { runtimeValue } from "@/lib/runtime";
 
 export type AdminIdentity = {
@@ -76,9 +72,4 @@ export async function adminSignOutPath(returnTo = "/"): Promise<string> {
   const teamDomain = await runtimeValue("CF_ACCESS_TEAM_DOMAIN");
   if (teamDomain) return "/cdn-cgi/access/logout";
   return chatGPTSignOutPath(returnTo);
-}
-
-export async function adminSignInPath(returnTo = "/admin"): Promise<string> {
-  const teamDomain = await runtimeValue("CF_ACCESS_TEAM_DOMAIN");
-  return teamDomain ? returnTo : chatGPTSignInPath(returnTo);
 }

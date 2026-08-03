@@ -59,3 +59,10 @@ test("does not publish an unknown replicated subdomain", async () => {
   assert.match(html, /This page is not currently available/);
   assert.doesNotMatch(html, /Advertise\.\s*<!-- -->Participate/);
 });
+
+test("renders a safe administrator sign-in prompt without hosted identity", async () => {
+  const response = await render("/admin");
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /Sign in with an administrator account/);
+});
