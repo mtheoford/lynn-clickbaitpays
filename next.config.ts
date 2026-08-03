@@ -1,16 +1,12 @@
 import type { NextConfig } from "next";
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
-const isGitHubPages = process.env.GITHUB_PAGES === "true";
+if (process.env.SITES_BUILD !== "true") {
+  initOpenNextCloudflareForDev();
+}
 
 const nextConfig: NextConfig = {
-  ...(isGitHubPages
-    ? {
-        output: "export",
-        basePath: "/lynn-clickbaitpays",
-        assetPrefix: "/lynn-clickbaitpays",
-        trailingSlash: true,
-      }
-    : {}),
+  serverExternalPackages: ["jose"],
   images: {
     unoptimized: true,
   },

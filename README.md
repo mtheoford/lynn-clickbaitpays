@@ -1,98 +1,171 @@
-# vinext-starter
+# ProNeurs Personal CBP Sites
 
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
+A multi-tenant subscription application for centrally managed, personalized
+ClickBaitPays education and referral sites.
 
-## Prerequisites
+## Production architecture
 
-- Node.js `>=22.13.0`
+- Next.js 16 and React 19
+- Cloudflare Workers via OpenNext
+- Cloudflare D1 with Drizzle migrations
+- Cloudflare Queues for durable Stripe event processing
+- Cloudflare Cron Triggers for billing-state enforcement
+- Cloudflare Access plus an application-level administrator allowlist
+- Application-owned email magic links for customer access
+- Stripe Checkout, subscriptions, customer portal, and signed webhooks
+- Resend transactional email
+- GitHub Actions for CI, staging deployment, and protected production deployment
 
-## Quick Start
+One application serves all surfaces:
+
+| Surface | Production address |
+| --- | --- |
+| Marketing and signup | `https://cbp.proneurs.org` |
+| Customer site | `https://{slug}.cbp.proneurs.org` |
+| Customer management | `https://cbp.proneurs.org/manage` |
+| Administration | `https://admin.cbp.proneurs.org/admin` |
+
+The existing OpenAI Sites configuration remains in the repository as a rollback
+path until Cloudflare production cutover is complete.
+
+## Local development
+
+Use Node.js 22.13 or newer.
 
 ```bash
+cp .env.example .env.local
 npm install
 npm run dev
-npm run build
 ```
 
-This starter does not use `wrangler.jsonc`.
+For a local Worker/D1 integration preview:
 
-## Included Shape
-
-- edit site code under `app/`
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
-
-## Workspace Auth Headers
-
-OpenAI workspace sites can read the current user's email from
-`oai-authenticated-user-email`.
-
-SIWC-authenticated workspace sites may also receive
-`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
-`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
-`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
-
-Treat the full name as optional and fall back to email when it is absent:
-
-```tsx
-import { headers } from "next/headers";
-
-export default async function Home() {
-  const requestHeaders = await headers();
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
-
-  const displayName = fullName ?? email;
-  // ...
-}
+```bash
+npx wrangler d1 migrations apply proneurs-cbp-local --local
+npm run preview
 ```
 
-## Optional Dispatch-Owned ChatGPT Sign-In
+Useful verification commands:
 
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs
-optional or required ChatGPT sign-in:
+```bash
+npm run lint
+npm run typecheck
+npm test
+npm run build:worker
+```
 
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send
-  anonymous visitors through Sign in with ChatGPT.
-- Use `chatGPTSignInPath(returnTo)` and `chatGPTSignOutPath(returnTo)` for
-  browser links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in
-  or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because
-  they depend on per-request identity headers.
+After changing `db/schema.ts`, generate and inspect a forward-only migration:
 
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
-OAuth cookies, and identity header injection. Do not implement app routes for
-those reserved paths. Routes that do not import and call the helper remain
-anonymous-compatible.
+```bash
+npm run db:generate
+```
 
-SIWC establishes identity only; it does not prove workspace membership. Use the
-Sites hosting platform's access policy controls for workspace-wide restrictions,
-or enforce explicit server-side membership or allowlist checks.
+Never place account secrets in `.env.example`, `wrangler.jsonc`, or GitHub-tracked
+files.
 
-Use SIWC for account pages, user-specific dashboards, saved records, and write
-actions tied to the current ChatGPT user. Leave public content anonymous.
+## Cloudflare bootstrap
 
-## Useful Commands
+Add `proneurs.org` to the Cloudflare account and reproduce its existing DNS
+records before changing the domain's authoritative nameservers. Keep the current
+Sites records in place during this step so the live preview is not interrupted.
+Workers routes require the domain to be an active Cloudflare zone.
 
-- `npm run dev`: start local development
-- `npm run build`: verify the vinext build output
-- `npm test`: build the starter and verify its rendered loading skeleton
-- `npm run db:generate`: generate Drizzle migrations after schema changes
+Create separate staging and production resources before the first deployment:
 
-## Learn More
+```bash
+npx wrangler login
+npx wrangler d1 create proneurs-cbp-staging
+npx wrangler d1 create proneurs-cbp-production
+npx wrangler queues create proneurs-cbp-billing-staging
+npx wrangler queues create proneurs-cbp-billing-staging-dead-letter
+npx wrangler queues create proneurs-cbp-billing-production
+npx wrangler queues create proneurs-cbp-billing-production-dead-letter
+```
 
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+Replace only the two non-local placeholder D1 IDs in `wrangler.jsonc` with the
+IDs returned by Cloudflare. The GitHub workflow instead injects each environment's
+`D1_DATABASE_ID` at deployment time, so committed placeholders are intentional.
+
+In Cloudflare DNS, configure proxied records that cover `cbp`, `cbp-staging`, and
+the corresponding wildcard tenant hosts. Worker routes are already declared for:
+
+- `cbp.proneurs.org/*`
+- `*.cbp.proneurs.org/*`
+- `cbp-staging.proneurs.org/*`
+- `*.cbp-staging.proneurs.org/*`
+
+Create a Cloudflare Access self-hosted application for the admin route, then set
+its audience (`CF_ACCESS_AUD`), team domain, and the explicit `ADMIN_EMAILS`
+allowlist. Access authentication is verified again inside the application.
+
+## GitHub environments
+
+Create `staging` and `production` GitHub environments. Put these values in each
+environment, using test-mode Stripe values in staging and live values only after
+all launch gates pass.
+
+Environment variable:
+
+- `D1_DATABASE_ID`
+
+Environment secrets:
+
+- `CLOUDFLARE_ACCOUNT_ID`
+- `CLOUDFLARE_API_TOKEN`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `STRIPE_PRICE_MONTHLY`
+- `STRIPE_PRICE_ANNUAL`
+- `RESEND_API_KEY`
+- `EMAIL_FROM`
+- `ADMIN_EMAILS`
+- `CF_ACCESS_AUD`
+- `CF_ACCESS_TEAM_DOMAIN`
+
+Protect the production environment with required reviewers. CI runs on pull
+requests and `main`; a successful `main` CI run deploys staging. Production is a
+manual workflow dispatch and must pass the environment approval gate.
+
+## Stripe and email
+
+Configure one webhook per environment at:
+
+`https://{environment-host}/api/stripe/webhook`
+
+Subscribe to:
+
+- `checkout.session.completed`
+- `checkout.session.expired`
+- `invoice.paid`
+- `invoice.payment_failed`
+- `customer.subscription.updated`
+- `customer.subscription.deleted`
+
+The HTTP handler verifies Stripe's signature, persists the event, and enqueues
+its ID. The queue consumer reconciles current Stripe state, making replay and
+out-of-order delivery safe. A cron job enforces grace-period and paid-through
+expiration every 15 minutes.
+
+Verify the Resend sending domain before testing welcome and magic-link email.
+
+## Operations and recovery
+
+- D1 Time Travel provides point-in-time restore for accidental data changes;
+  record the database bookmark before and after production migrations.
+- Failed billing messages are retried five times and then moved to the configured
+  dead-letter queue for manual inspection and replay.
+- Worker observability is enabled. Add alerting for webhook 5xx responses, queue
+  failures, and elevated application errors before the pilot.
+- Keep the previous Sites deployment and DNS values documented until production
+  smoke tests and the pilot acceptance window have passed.
+
+## Launch gates
+
+Do not enable live billing until branding permission, legal/claims review,
+privacy and subscription policies, wildcard TLS, Stripe business approval,
+transactional email, and end-to-end failure/replay testing are complete. Keep
+`ENABLE_APPROVED_INCOME_STRATEGY_CONTENT=false` unless the hidden simulator and
+related claims receive explicit approval.
+
+The fuller product and cutover checklist is in
+[`docs/REPLICATED_SITE_PRODUCT_PLAN.md`](docs/REPLICATED_SITE_PRODUCT_PLAN.md).

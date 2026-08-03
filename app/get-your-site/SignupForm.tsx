@@ -92,7 +92,6 @@ export default function SignupForm({ source = "" }: { source?: string }) {
       <label>
         Your page address
         <span className="slug-input">
-          <b>cbp-</b>
           <input
             name="slug"
             value={slug}
@@ -103,13 +102,13 @@ export default function SignupForm({ source = "" }: { source?: string }) {
             placeholder="your-name"
             required
           />
-          <b>.proneurs.org</b>
+          <b>.cbp.proneurs.org</b>
         </span>
       </label>
 
       <div className="signup-url-preview" aria-live="polite">
         <small>Your new sharing page</small>
-        <strong>https://cbp-{effectiveSlug || "your-name"}.proneurs.org</strong>
+        <strong>https://{effectiveSlug || "your-name"}.cbp.proneurs.org</strong>
       </div>
 
       <label>
@@ -145,8 +144,7 @@ export default function SignupForm({ source = "" }: { source?: string }) {
       <label className="signup-consent">
         <input name="acceptedTerms" type="checkbox" required />
         <span>
-          I agree to the subscription terms and understand this is an independent website service,
-          not a ClickBaitPays membership or earnings guarantee.
+          I agree to the <a href="/terms" target="_blank">subscription terms</a>, <a href="/privacy" target="_blank">privacy policy</a>, and <a href="/refund-policy" target="_blank">cancellation and refund policy</a>. I understand this is an independent website service, not a ClickBaitPays membership or earnings guarantee.
         </span>
       </label>
 
@@ -160,4 +158,3 @@ export default function SignupForm({ source = "" }: { source?: string }) {
     </form>
   );
 }
-

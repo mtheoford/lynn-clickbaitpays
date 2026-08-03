@@ -1,6 +1,6 @@
 # ProNeurs Replicated CBP Site Product Plan
 
-Status: development foundation in progress  
+Status: production-stack implementation complete; account provisioning and launch validation pending
 Last updated: 2026-08-03  
 Working product name: **Personal CBP Site**
 
@@ -11,7 +11,7 @@ subscription product. A customer supplies their contact details and official
 ClickBaitPays referral URL, pays for a subscription, and receives a personalized
 site at a ProNeurs subdomain such as:
 
-`https://cbp-lynn-theobald.proneurs.org`
+`https://lynn-theobald.cbp.proneurs.org`
 
 The product must use one centrally maintained application and template. It must
 not copy, deploy, or maintain a separate codebase for each customer.
@@ -21,9 +21,9 @@ not copy, deploy, or maintain a separate codebase for each customer.
 | Surface | Initial URL | Purpose |
 | --- | --- | --- |
 | Marketing and signup | `https://cbp.proneurs.org` | Sell the subscription and collect onboarding details |
-| Replicated sponsor site | `https://cbp-{slug}.proneurs.org` | Personalized public ClickBaitPays education and referral page |
-| Customer account | `https://manage.proneurs.org` | Edit site details, share the site, view basic analytics, and manage billing |
-| Internal administration | `https://admin.proneurs.org` | Manage users, sites, billing status, publication, and support actions |
+| Replicated sponsor site | `https://{slug}.cbp.proneurs.org` | Personalized public ClickBaitPays education and referral page |
+| Customer account | `https://cbp.proneurs.org/manage` | Edit site details, share the site, view basic analytics, and manage billing |
+| Internal administration | `https://admin.cbp.proneurs.org/admin` | Manage users, sites, billing status, publication, and support actions |
 
 The first deployment may use path-based equivalents while wildcard-domain and
 custom-domain support are configured. The data model and host parser must remain
@@ -74,7 +74,7 @@ confused with the sponsor's "Join ClickBaitPays" buttons.
 ## Subdomain rules
 
 - DNS labels are lowercase and use ASCII letters, digits, and single hyphens.
-- Customer URLs begin with `cbp-`.
+- Customer URLs use a slug below the dedicated `cbp.proneurs.org` tenant zone.
 - Spaces become hyphens; unsupported punctuation is removed.
 - Reserved labels include `admin`, `api`, `billing`, `cbp`, `manage`, `support`,
   `www`, and infrastructure names.
@@ -83,7 +83,7 @@ confused with the sponsor's "Join ClickBaitPays" buttons.
 - Unknown or inactive subdomains return a neutral unavailable page rather than
   leaking account state.
 
-The production domain requires wildcard DNS and TLS for `*.proneurs.org`.
+The production domain requires wildcard DNS and TLS for `*.cbp.proneurs.org`.
 Creating a customer must not require an individual DNS change.
 
 ## Subscription and publication lifecycle
@@ -126,20 +126,19 @@ or participation.
 
 ## Customer access
 
-The first hosted customer dashboard uses Sites-supported Sign in with ChatGPT.
-The signed-in email must match the email used to purchase the site. This keeps
-authentication and session security in the hosting platform while the product
-is piloted.
-
-Before general availability, decide whether requiring a ChatGPT account is
-acceptable for the target audience. If it is not, replace the pilot login with
-transactional-email magic links that provide:
+The Cloudflare-hosted customer dashboard uses transactional-email magic links.
+The signed-in email must match the email used to purchase the site. The flow
+provides:
 
 - Short-lived, single-use login links
 - Hashed tokens stored in the database
 - Secure, HTTP-only, same-site session cookies
 - Generic responses that do not reveal whether an email has an account
-- Rate limiting before public launch
+- Per-account issuance rate limiting
+
+The Sites-supported Sign in with ChatGPT path remains only as a temporary
+compatibility fallback during cutover and should be removed after rollback is no
+longer required.
 
 Billing changes are delegated to Stripe's customer portal.
 

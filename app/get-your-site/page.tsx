@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 };
 
 const features = [
-  "Your own cbp-name.proneurs.org address",
+  "Your own name.cbp.proneurs.org address",
   "Your referral link on every ClickBaitPays button",
   "Personal contact section and sponsor introduction",
   "Mobile-ready design, videos, FAQs, and resources",
@@ -63,7 +63,7 @@ export default async function GetYourSitePage({
           <a className="join-button" href="#build">Create my page <i aria-hidden="true">↓</i></a>
         </div>
         <div className="marketing-site-preview" aria-label="Example personal site address">
-          <div className="preview-browser-bar"><i /><i /><i /><span>cbp-your-name.proneurs.org</span></div>
+          <div className="preview-browser-bar"><i /><i /><i /><span>your-name.cbp.proneurs.org</span></div>
           <div className="preview-content">
             <small>Your independent sponsor guide</small>
             <h2>Start with<br /><em>Your Name.</em></h2>
@@ -101,7 +101,7 @@ export default async function GetYourSitePage({
         <div className="builder-copy">
           <p className="eyebrow">See your address take shape</p>
           <h2>Build your personal CBP site.</h2>
-          <p>Checkout activates after Stripe completes its account review. Until then, the form safely previews the finished onboarding experience without saving information.</p>
+          <p>Enter your details, choose a billing plan, and continue to Stripe’s secure checkout. Your site activates only after a signed Stripe webhook confirms the subscription.</p>
           {params.checkout === "canceled" ? <p className="checkout-note">Checkout was canceled. Your page has not been activated.</p> : null}
           <div className="builder-assurances">
             <span><b>✓</b> Your referral link stays yours</span>
@@ -125,7 +125,7 @@ export default async function GetYourSitePage({
       <footer className="marketing-footer">
         <span>ProNeurs Personal CBP Sites</span>
         <p>Independent website service—not operated by ClickBaitPays. Participation involves financial and cryptocurrency risk. Earnings are not guaranteed.</p>
-        <Link href="/manage">Manage my page</Link>
+        <div><Link href="/manage">Manage my page</Link> · <Link href="/terms">Terms</Link> · <Link href="/privacy">Privacy</Link> · <Link href="/acceptable-use">Acceptable use</Link></div>
       </footer>
     </main>
   );

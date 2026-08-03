@@ -32,13 +32,13 @@ test("renders the marketing and signup page", async () => {
   assert.equal(response.status, 200);
   const html = await response.text();
   assert.match(html, /Share ClickBaitPays with a page that feels like/);
-  assert.match(html, /cbp-your-name\.proneurs\.org/);
+  assert.match(html, /your-name\.cbp\.proneurs\.org/);
   assert.match(html, /Continue with \$9\/month/);
   assert.match(html, /secure Stripe Checkout/i);
 });
 
 test("does not publish an unknown replicated subdomain", async () => {
-  const response = await render("/", { host: "cbp-unknown.proneurs.org" });
+  const response = await render("/", { host: "unknown.cbp.proneurs.org" });
   assert.equal(response.status, 200);
   const html = await response.text();
   assert.match(html, /This page is not currently available/);

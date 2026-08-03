@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getDb } from "@/db";
 import { auditLogs, sites } from "@/db/schema";
 import { getAdmin } from "@/lib/admin-auth";
+import { isSameOriginMutation } from "@/lib/request-security";
 
 const ALLOWED_STATUSES = new Set(["active", "suspended", "canceled"]);
 
@@ -10,6 +11,7 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  if (!isSameOriginMutation(request)) return NextResponse.json({ error: "Request origin could not be verified." }, { status: 403 });
   const admin = await getAdmin();
   if (!admin) return NextResponse.json({ error: "Not authorized." }, { status: 403 });
 

@@ -58,7 +58,7 @@ export default async function AdminSiteDetailPage({ params }: { params: Promise<
       </header>
 
       <section className="admin-detail-title">
-        <div><p className="eyebrow">Customer account</p><h1>{account.displayName}</h1><p>cbp-{account.slug}.proneurs.org · Created {account.createdAt.toLocaleDateString()}</p></div>
+        <div><p className="eyebrow">Customer account</p><h1>{account.displayName}</h1><p>{account.slug}.cbp.proneurs.org · Created {account.createdAt.toLocaleDateString()}</p></div>
         <div><a href={siteUrl(account.slug)} target="_blank" rel="noreferrer">View public page ↗</a><SiteStatusActions siteId={account.siteId} status={account.siteStatus} /></div>
       </section>
 
@@ -92,4 +92,3 @@ export default async function AdminSiteDetailPage({ params }: { params: Promise<
     </main>
   );
 }
-

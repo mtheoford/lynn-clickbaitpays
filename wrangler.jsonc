@@ -1,0 +1,130 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "proneurs-personal-cbp-sites-local",
+  "workers_dev": false,
+  "main": "./worker/cloudflare-entry.ts",
+  "compatibility_date": "2026-08-03",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "proneurs-cbp-local",
+      "database_id": "00000000-0000-4000-8000-000000000000",
+      "migrations_dir": "drizzle"
+    }
+  ],
+  "queues": {
+    "producers": [
+      {
+        "binding": "BILLING_QUEUE",
+        "queue": "proneurs-cbp-billing-local"
+      }
+    ],
+    "consumers": [
+      {
+        "queue": "proneurs-cbp-billing-local",
+        "max_batch_size": 10,
+        "max_batch_timeout": 5,
+        "max_concurrency": 1,
+        "max_retries": 5,
+        "dead_letter_queue": "proneurs-cbp-billing-local-dead-letter"
+      }
+    ]
+  },
+  "triggers": {
+    "crons": ["*/15 * * * *"]
+  },
+  "vars": {
+    "APP_ENV": "local",
+    "NEXT_PUBLIC_SITE_URL": "http://localhost:8787",
+    "NEXT_PUBLIC_MARKETING_URL": "http://localhost:8787",
+    "NEXT_PUBLIC_TENANT_BASE_DOMAIN": "cbp.localhost"
+  },
+  "env": {
+    "staging": {
+      "name": "proneurs-personal-cbp-sites-staging",
+      "routes": [
+        { "pattern": "cbp-staging.proneurs.org/*", "zone_name": "proneurs.org" },
+        { "pattern": "*.cbp-staging.proneurs.org/*", "zone_name": "proneurs.org" }
+      ],
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "proneurs-cbp-staging",
+          "database_id": "00000000-0000-4000-8000-000000000001",
+          "migrations_dir": "drizzle"
+        }
+      ],
+      "queues": {
+        "producers": [
+          {
+            "binding": "BILLING_QUEUE",
+            "queue": "proneurs-cbp-billing-staging"
+          }
+        ],
+        "consumers": [
+          {
+            "queue": "proneurs-cbp-billing-staging",
+            "max_batch_size": 10,
+            "max_batch_timeout": 5,
+            "max_concurrency": 1,
+            "max_retries": 5,
+            "dead_letter_queue": "proneurs-cbp-billing-staging-dead-letter"
+          }
+        ]
+      },
+      "vars": {
+        "APP_ENV": "staging",
+        "NEXT_PUBLIC_SITE_URL": "https://cbp-staging.proneurs.org",
+        "NEXT_PUBLIC_MARKETING_URL": "https://cbp-staging.proneurs.org",
+        "NEXT_PUBLIC_TENANT_BASE_DOMAIN": "cbp-staging.proneurs.org"
+      }
+    },
+    "production": {
+      "name": "proneurs-personal-cbp-sites",
+      "routes": [
+        { "pattern": "cbp.proneurs.org/*", "zone_name": "proneurs.org" },
+        { "pattern": "*.cbp.proneurs.org/*", "zone_name": "proneurs.org" }
+      ],
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "proneurs-cbp-production",
+          "database_id": "00000000-0000-4000-8000-000000000002",
+          "migrations_dir": "drizzle"
+        }
+      ],
+      "queues": {
+        "producers": [
+          {
+            "binding": "BILLING_QUEUE",
+            "queue": "proneurs-cbp-billing-production"
+          }
+        ],
+        "consumers": [
+          {
+            "queue": "proneurs-cbp-billing-production",
+            "max_batch_size": 10,
+            "max_batch_timeout": 5,
+            "max_concurrency": 1,
+            "max_retries": 5,
+            "dead_letter_queue": "proneurs-cbp-billing-production-dead-letter"
+          }
+        ]
+      },
+      "vars": {
+        "APP_ENV": "production",
+        "NEXT_PUBLIC_SITE_URL": "https://cbp.proneurs.org",
+        "NEXT_PUBLIC_MARKETING_URL": "https://cbp.proneurs.org",
+        "NEXT_PUBLIC_TENANT_BASE_DOMAIN": "cbp.proneurs.org"
+      }
+    }
+  }
+}

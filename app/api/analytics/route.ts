@@ -3,10 +3,12 @@ import { NextResponse } from "next/server";
 import { getDb } from "@/db";
 import { analyticsEvents, sites } from "@/db/schema";
 import { normalizeSiteSlug } from "@/lib/site-config";
+import { isSameOriginMutation } from "@/lib/request-security";
 
 const ALLOWED_EVENTS = new Set(["page_view", "referral_click", "growth_click"]);
 
 export async function POST(request: Request) {
+  if (!isSameOriginMutation(request)) return new Response(null, { status: 204 });
   let input: { siteSlug?: string; eventType?: string };
   try {
     input = await request.json();
@@ -53,4 +55,3 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ recorded: true });
 }
-

@@ -1,8 +1,9 @@
 import { count, eq } from "drizzle-orm";
 import Link from "next/link";
-import { requireChatGPTUser, chatGPTSignOutPath } from "@/app/chatgpt-auth";
+import { redirect } from "next/navigation";
 import { getDb } from "@/db";
 import { analyticsEvents, sites, subscriptions, users } from "@/db/schema";
+import { customerSignOutPath, getSignedInCustomer } from "@/lib/customer-auth";
 import { siteUrl } from "@/lib/site-config";
 import ManageSiteForm from "./ManageSiteForm";
 import ShareTools from "./ShareTools";
@@ -11,7 +12,9 @@ import BillingPortalButton from "./BillingPortalButton";
 export const dynamic = "force-dynamic";
 
 export default async function ManagePage() {
-  const identity = await requireChatGPTUser("/manage");
+  const signedIn = await getSignedInCustomer();
+  if (!signedIn) redirect("/manage/sign-in");
+  const { identity, customer } = signedIn;
   const db = await getDb();
   const [account] = await db
     .select({
@@ -34,7 +37,7 @@ export default async function ManagePage() {
     .from(users)
     .innerJoin(sites, eq(sites.userId, users.id))
     .leftJoin(subscriptions, eq(subscriptions.siteId, sites.id))
-    .where(eq(users.email, identity.email.toLowerCase()))
+    .where(eq(users.id, customer.id))
     .limit(1);
 
   if (!account) {
@@ -44,7 +47,7 @@ export default async function ManagePage() {
           <p className="eyebrow">Personal CBP Sites</p>
           <h1>We couldn’t find a site for this email.</h1>
           <p>Sign in with the same email address used during purchase, or contact ProNeurs support for help connecting your account.</p>
-          <Link href={chatGPTSignOutPath("/manage")}>Sign out and use another account</Link>
+          <Link href="/manage/sign-in">Return to sign in</Link>
         </div>
       </main>
     );
@@ -62,7 +65,10 @@ export default async function ManagePage() {
     <main className="manage-page">
       <header className="manage-header">
         <div><span>PN</span><div><strong>Personal CBP Sites</strong><small>Customer account</small></div></div>
-        <div><span>{identity.email}</span><Link href={chatGPTSignOutPath("/")}>Sign out</Link></div>
+        <div>
+          <span>{identity.email}</span>
+          <form action={customerSignOutPath()} method="post"><button type="submit">Sign out</button></form>
+        </div>
       </header>
 
       <section className="manage-welcome">

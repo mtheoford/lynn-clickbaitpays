@@ -2,6 +2,18 @@ import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { getDb } from "@/db";
 import { sites } from "@/db/schema";
+import {
+  normalizeSiteSlug,
+  slugFromHost,
+} from "@/lib/site-routing";
+
+export {
+  normalizeSiteSlug,
+  siteUrl,
+  slugFromHost,
+  validateReferralUrl,
+  validateSiteSlug,
+} from "@/lib/site-routing";
 
 export type PublicSponsorSite = {
   id: string;
@@ -23,71 +35,13 @@ export const defaultSponsorSite: PublicSponsorSite = {
   displayName: "Lynn Theobald",
   initials: "LT",
   publicEmail: "lynntheo@gmail.com",
-  publicPhone: "80171705630",
+  publicPhone: "8017170563",
   showEmail: true,
   showPhone: true,
   bio: "Questions before joining? Lynn is here to help you find the facts and take the next step with confidence.",
   referralUrl: "https://clickbaitpays.me/?ref=thinleo",
   status: "active",
 };
-
-const RESERVED_SLUGS = new Set([
-  "admin",
-  "api",
-  "billing",
-  "cbp",
-  "manage",
-  "signin-with-chatgpt",
-  "signout-with-chatgpt",
-  "support",
-  "www",
-]);
-
-export function normalizeSiteSlug(value: string): string {
-  return value
-    .trim()
-    .toLowerCase()
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .replace(/-{2,}/g, "-")
-    .slice(0, 48);
-}
-
-export function validateSiteSlug(value: string): string | null {
-  const slug = normalizeSiteSlug(value);
-  if (slug.length < 3) return "Choose a site name with at least three characters.";
-  if (RESERVED_SLUGS.has(slug)) return "That site name is reserved. Please choose another.";
-  if (!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(slug)) {
-    return "Use letters, numbers, and single hyphens only.";
-  }
-  return null;
-}
-
-export function validateReferralUrl(value: string): string | null {
-  let url: URL;
-  try {
-    url = new URL(value);
-  } catch {
-    return "Enter your complete ClickBaitPays referral link.";
-  }
-
-  if (url.protocol !== "https:" || url.hostname.toLowerCase() !== "clickbaitpays.me") {
-    return "Use an official https://clickbaitpays.me referral link.";
-  }
-
-  if (!url.searchParams.get("ref")) {
-    return "Your ClickBaitPays link must include its referral code.";
-  }
-
-  return null;
-}
-
-export function siteUrl(slug: string): string {
-  const domain = process.env.NEXT_PUBLIC_PRIMARY_DOMAIN ?? "proneurs.org";
-  return `https://cbp-${normalizeSiteSlug(slug)}.${domain}`;
-}
 
 export function growthSignupUrl(slug: string): string {
   const marketingUrl =
@@ -97,23 +51,13 @@ export function growthSignupUrl(slug: string): string {
   return url.toString();
 }
 
-export function slugFromHost(host: string | null): string | null {
-  if (!host) return null;
-  const hostname = host.split(":")[0].toLowerCase();
-  const firstLabel = hostname.split(".")[0];
-  if (!firstLabel.startsWith("cbp-") || firstLabel.length <= 4) return null;
-  return normalizeSiteSlug(firstLabel.slice(4));
-}
-
 export async function resolveSponsorSite(): Promise<PublicSponsorSite> {
   const requestHeaders = await headers();
   const requestedSlug = slugFromHost(
     requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host"),
   );
 
-  if (!requestedSlug || requestedSlug === defaultSponsorSite.slug) {
-    return defaultSponsorSite;
-  }
+  const siteSlug = requestedSlug ?? defaultSponsorSite.slug;
 
   try {
     const db = await getDb();
@@ -132,13 +76,36 @@ export async function resolveSponsorSite(): Promise<PublicSponsorSite> {
         status: sites.status,
       })
       .from(sites)
-      .where(eq(sites.slug, requestedSlug))
+      .where(eq(sites.slug, siteSlug))
       .limit(1);
 
-    return site ?? { ...defaultSponsorSite, slug: requestedSlug, status: "suspended" };
+    if (site) return site;
   } catch {
-    return { ...defaultSponsorSite, slug: requestedSlug, status: "suspended" };
+    // The hardcoded Lynn profile keeps the existing preview available during cutover.
   }
+  if (siteSlug === defaultSponsorSite.slug) return defaultSponsorSite;
+  return { ...defaultSponsorSite, slug: siteSlug, status: "suspended" };
+}
+
+export async function requestHostname(): Promise<string> {
+  const requestHeaders = await headers();
+  return (
+    requestHeaders.get("x-forwarded-host") ??
+    requestHeaders.get("host") ??
+    ""
+  )
+    .split(":")[0]
+    .toLowerCase();
+}
+
+export async function requestSurface(): Promise<"marketing" | "admin" | "tenant"> {
+  const hostname = await requestHostname();
+  const marketingHost = new URL(
+    process.env.NEXT_PUBLIC_MARKETING_URL ?? "https://cbp.proneurs.org",
+  ).hostname;
+  if (hostname === marketingHost) return "marketing";
+  if (hostname === `admin.${marketingHost}`) return "admin";
+  return "tenant";
 }
 
 export function formatPhoneForDisplay(value: string): string {

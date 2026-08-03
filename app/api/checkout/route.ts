@@ -13,6 +13,8 @@ import {
   priceForPlan,
   type BillingPlan,
 } from "@/lib/stripe";
+import { isSameOriginMutation } from "@/lib/request-security";
+import { checkoutReservationDecision } from "@/lib/checkout-reservation";
 
 type CheckoutInput = {
   name?: string;
@@ -41,7 +43,8 @@ function error(message: string, status = 400) {
 }
 
 export async function POST(request: Request) {
-  if (!isBillingConfigured()) {
+  if (!isSameOriginMutation(request)) return error("Request origin could not be verified.", 403);
+  if (!(await isBillingConfigured())) {
     return error(
       "Checkout is being connected now. Your information has not been submitted or saved.",
       503,
@@ -74,7 +77,6 @@ export async function POST(request: Request) {
 
   const db = await getDb();
   const now = new Date();
-  const reservationExpiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000);
   const [existingSite] = await db
     .select({
       id: sites.id,
@@ -92,14 +94,22 @@ export async function POST(request: Request) {
     .where(eq(users.email, email))
     .limit(1);
 
-  const reservationIsReusable =
-    existingSite?.status === "pending" &&
-    existingSite.reservationExpiresAt !== null &&
-    existingSite.reservationExpiresAt.getTime() < now.getTime();
-
-  if (existingSite && !reservationIsReusable && existingSite.userId !== existingUser?.id) {
+  const reservationDecision = checkoutReservationDecision(
+    existingSite,
+    existingUser?.id,
+    now,
+  );
+  if (reservationDecision === "retained") {
+    return error("That site address already belongs to an active or retained account.", 409);
+  }
+  if (reservationDecision === "reserved") {
     return error("That site address is already reserved. Please choose another.", 409);
   }
+
+  const reservationExpiresAt =
+    existingSite && reservationDecision === "reuse"
+      ? existingSite.reservationExpiresAt!
+      : new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
   const userId = existingUser?.id ?? crypto.randomUUID();
   const siteId = existingSite?.id ?? crypto.randomUUID();
@@ -154,21 +164,23 @@ export async function POST(request: Request) {
     });
   }
 
-  const stripe = getStripe();
+  const stripe = await getStripe();
   const origin = new URL(request.url).origin;
   const session = await stripe.checkout.sessions.create(
     {
       mode: "subscription",
       customer_email: email,
       client_reference_id: siteId,
-      line_items: [{ price: priceForPlan(plan), quantity: 1 }],
+      line_items: [{ price: await priceForPlan(plan), quantity: 1 }],
       allow_promotion_codes: true,
       success_url: `${origin}/get-your-site/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/get-your-site?checkout=canceled&site=${encodeURIComponent(slug)}`,
       metadata: { siteId, userId, plan, sourceSlug },
       subscription_data: { metadata: { siteId, userId, plan, sourceSlug } },
     },
-    { idempotencyKey: `site-checkout-${siteId}-${plan}` },
+    {
+      idempotencyKey: `site-checkout-${siteId}-${plan}-${reservationExpiresAt.getTime()}`,
+    },
   );
 
   if (!session.url) return error("Stripe did not return a checkout address.", 502);

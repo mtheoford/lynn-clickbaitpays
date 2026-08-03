@@ -68,6 +68,9 @@ export const subscriptions = sqliteTable(
     stripeSubscriptionId: text("stripe_subscription_id").notNull(),
     plan: text("plan", { enum: ["monthly", "annual", "complimentary"] }).notNull(),
     status: text("status").notNull(),
+    cancelAtPeriodEnd: integer("cancel_at_period_end", { mode: "boolean" })
+      .notNull()
+      .default(false),
     currentPeriodEnd: integer("current_period_end", { mode: "timestamp_ms" }),
     graceEndsAt: integer("grace_ends_at", { mode: "timestamp_ms" }),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
@@ -143,7 +146,14 @@ export const analyticsEvents = sqliteTable(
 export const stripeEvents = sqliteTable("stripe_events", {
   id: text("id").primaryKey(),
   eventType: text("event_type").notNull(),
-  processedAt: integer("processed_at", { mode: "timestamp_ms" }).notNull(),
+  status: text("status", { enum: ["pending", "processing", "completed", "failed"] })
+    .notNull()
+    .default("pending"),
+  payloadJson: text("payload_json").notNull(),
+  attempts: integer("attempts").notNull().default(0),
+  lastError: text("last_error"),
+  receivedAt: integer("received_at", { mode: "timestamp_ms" }).notNull(),
+  processedAt: integer("processed_at", { mode: "timestamp_ms" }),
 });
 
 export const auditLogs = sqliteTable(
