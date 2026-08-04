@@ -43,7 +43,7 @@ export default async function AdminPage({
     return (
       <main className="admin-access-page">
         <div>
-          <p className="eyebrow">ProNeurs administration</p>
+          <p className="eyebrow">ProNeurs™ administration</p>
           <h1>This account is not authorized.</h1>
           <p>Add the signed-in email to the protected administrator allowlist before using this page.</p>
           <Link href={signInPath}>Sign in with an administrator account</Link>

@@ -350,8 +350,8 @@ export async function SponsorSitePage({ slug }: { slug?: string }) {
           Review official terms before participating.
         </p>
         <div className="footer-links">
-          <a href="/terms">ProNeurs terms</a>
-          <a href="/privacy">ProNeurs privacy</a>
+          <a href="/terms">ProNeurs™ terms</a>
+          <a href="/privacy">ProNeurs™ privacy</a>
           <a href="https://clickbaitpays.me/terms.php" target="_blank" rel="noopener noreferrer">ClickBaitPays terms</a>
           <a href="/affiliate-disclosure">Affiliate disclosure</a>
           {site.showEmail ? <a href={`mailto:${site.publicEmail}`}>Contact {site.displayName}</a> : null}

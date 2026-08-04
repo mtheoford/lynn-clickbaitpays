@@ -16,7 +16,7 @@ export default function LegalPage({
     <main className="policy-page">
       <header>
         <Link href="/get-your-site" className="marketing-brand">
-          <span>PN</span><div><strong>ProNeurs</strong><small>Personal CBP Sites</small></div>
+          <span>PN</span><div><strong>ProNeurs™</strong><small>Personal CBP Sites</small></div>
         </Link>
         <Link href="/get-your-site">← Back to Personal CBP Sites</Link>
       </header>

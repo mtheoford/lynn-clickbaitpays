@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Manrope } from "next/font/google";
+import SiteCopyright from "./SiteCopyright";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -19,13 +20,13 @@ const siteUrl =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "ClickBaitPays Replicated Sites | ProNeurs",
-    template: "%s | ProNeurs",
+    default: "ClickBaitPays Replicated Sites | ProNeurs™",
+    template: "%s | ProNeurs™",
   },
   description:
     "Personalized ClickBaitPays replicated sites with your referral link and ready-to-share marketing materials.",
   openGraph: {
-    title: "ClickBaitPays Replicated Sites by ProNeurs",
+    title: "ClickBaitPays Replicated Sites by ProNeurs™",
     description:
       "Your custom CBP growth hub with a referral link, videos, resources, and marketing materials.",
     type: "website",
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "ClickBaitPays Replicated Sites by ProNeurs",
+    title: "ClickBaitPays Replicated Sites by ProNeurs™",
     description:
       "Your personalized ClickBaitPays replicated site—ready to share.",
     images: ["/og.png"],
@@ -51,6 +52,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${manrope.variable}`}
       >
         {children}
+        <SiteCopyright />
       </body>
     </html>
   );

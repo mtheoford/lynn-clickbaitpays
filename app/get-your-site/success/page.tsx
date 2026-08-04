@@ -16,7 +16,7 @@ export default async function CheckoutSuccessPage({
         <p className="eyebrow">Payment received</p>
         <h1>Your personal site is being activated.</h1>
         <p>
-          Stripe has returned you safely to ProNeurs. The signed payment notification is now
+          Stripe has returned you safely to ProNeurs™. The signed payment notification is now
           completing your site setup. You will receive your public URL and secure management link by email.
         </p>
         {sessionId ? (

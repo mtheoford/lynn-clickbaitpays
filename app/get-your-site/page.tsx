@@ -63,10 +63,10 @@ export default async function GetYourSitePage({
       <div className="cbp-offer-glow cbp-offer-glow-two" />
 
       <header className="cbp-offer-header">
-        <Link href="#top" className="cbp-offer-brand" aria-label="ProNeurs Personal CBP Sites home">
+        <Link href="#top" className="cbp-offer-brand" aria-label="ProNeurs trademark Personal CBP Sites home">
           <span aria-hidden="true">PN</span>
           <div>
-            <strong>ProNeurs</strong>
+            <strong>ProNeurs™</strong>
             <small>ClickBaitPays Replicated Sites</small>
           </div>
         </Link>

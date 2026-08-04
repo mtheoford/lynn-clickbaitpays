@@ -51,7 +51,7 @@ export default async function ManagePage() {
         <div>
           <p className="eyebrow">Personal CBP Sites</p>
           <h1>We couldn’t find a site for this email.</h1>
-          <p>Sign in with the same email address used during purchase, or contact ProNeurs support for help connecting your account.</p>
+          <p>Sign in with the same email address used during purchase, or contact ProNeurs™ support for help connecting your account.</p>
           <Link href="/manage/sign-in">Return to sign in</Link>
         </div>
       </main>
@@ -109,7 +109,7 @@ export default async function ManagePage() {
         <aside className="manage-account-panel">
           <div><span>Subscription</span><strong>{account.plan ?? "Not active"}</strong><small>{account.subscriptionStatus ?? "No Stripe subscription is connected."}</small></div>
           <BillingPortalButton enabled={Boolean(account.stripeCustomerId && account.plan)} />
-          <p>Billing changes are completed securely on Stripe. ProNeurs never displays or stores your payment-card details.</p>
+          <p>Billing changes are completed securely on Stripe. ProNeurs™ never displays or stores your payment-card details.</p>
         </aside>
       </section>
     </main>

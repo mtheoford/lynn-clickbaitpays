@@ -17,7 +17,7 @@ export default function AcceptableUsePage() {
         <li>Removing or obscuring centrally managed risk, affiliate, privacy, or independent-site disclosures.</li>
       </ul>
       <h2>Enforcement</h2>
-      <p>ProNeurs may correct content, disable links, suspend a site, or terminate service when reasonably necessary to protect visitors, providers, or the business. Urgent concerns may be reported to <SupportContact />.</p>
+      <p>ProNeurs™ may correct content, disable links, suspend a site, or terminate service when reasonably necessary to protect visitors, providers, or the business. Urgent concerns may be reported to <SupportContact />.</p>
     </LegalPage>
   );
 }

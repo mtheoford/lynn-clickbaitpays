@@ -3695,6 +3695,25 @@ footer {
 footer > p { margin: 0; color: #7e87a5; font-size: 11px; line-height: 1.55; }
 .footer-links { display: flex; justify-content: flex-end; gap: 18px; color: #a4abc3; font-size: 11px; }
 .footer-links a:hover { color: var(--cyan); }
+
+footer.site-copyright {
+  width: 100%;
+  margin: 0;
+  padding: 14px clamp(24px, 6vw, 88px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: #050b15;
+  color: #8e98b2;
+  text-align: center;
+}
+
+.site-copyright small {
+  font-size: 11px;
+  line-height: 1.5;
+}
 .mobile-join { display: none; }
 
 @keyframes attention-pulse {

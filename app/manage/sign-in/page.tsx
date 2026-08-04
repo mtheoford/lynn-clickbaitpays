@@ -28,7 +28,7 @@ export default async function CustomerSignInPage() {
       <header className="marketing-header">
         <Link href="/get-your-site" className="marketing-brand">
           <span>PN</span>
-          <div><strong>ProNeurs</strong><small>Personal CBP Sites</small></div>
+          <div><strong>ProNeurs™</strong><small>Personal CBP Sites</small></div>
         </Link>
       </header>
       <section className="marketing-builder">
@@ -49,7 +49,7 @@ export default async function CustomerSignInPage() {
             </Link>
           ) : !emailSignInConfigured ? (
             <p className="signup-error" role="status">
-              Email sign-in is temporarily unavailable. Contact ProNeurs support for account access.
+              Email sign-in is temporarily unavailable. Contact ProNeurs™ support for account access.
             </p>
           ) : null}
           {showChatGPTPilotSignIn ? <p className="signup-safe-note">Use the same email address used during purchase.</p> : null}
