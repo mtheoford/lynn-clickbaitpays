@@ -191,7 +191,7 @@ export default function SignupForm({
         </label>
       </div>
 
-      <label>
+      <label className="signup-compact-field">
         Company Name <span className="signup-optional">Optional</span>
         <input
           name="companyName"
@@ -277,7 +277,7 @@ export default function SignupForm({
         </label>
       </div>
 
-      <label>
+      <label className="signup-compact-field">
         ClickBaitPays User Name
         <input
           name="referralUsername"
