@@ -3,7 +3,10 @@
 import { FormEvent, useState } from "react";
 
 type SiteForm = {
-  displayName: string;
+  firstName: string;
+  lastName: string;
+  companyName: string;
+  displayNameType: "personal" | "business";
   publicEmail: string;
   publicPhone: string;
   bio: string;
@@ -21,6 +24,12 @@ export default function ManageSiteForm({ initial }: { initial: SiteForm }) {
   function field<K extends keyof SiteForm>(key: K, value: SiteForm[K]) {
     setForm((current) => ({ ...current, [key]: value }));
   }
+
+  const personalName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim();
+  const displayName =
+    form.companyName.trim() && form.displayNameType === "business"
+      ? form.companyName.trim()
+      : personalName;
 
   async function save(event: FormEvent) {
     event.preventDefault();
@@ -53,9 +62,37 @@ export default function ManageSiteForm({ initial }: { initial: SiteForm }) {
 
       <div className="manage-form-grid">
         <label>
-          Display name
-          <input value={form.displayName} onChange={(event) => field("displayName", event.target.value)} required maxLength={80} />
+          First name
+          <input value={form.firstName} onChange={(event) => field("firstName", event.target.value)} required maxLength={60} autoComplete="given-name" />
         </label>
+        <label>
+          Last name
+          <input value={form.lastName} onChange={(event) => field("lastName", event.target.value)} required maxLength={60} autoComplete="family-name" />
+        </label>
+        <label className="manage-wide-field">
+          Company name <span className="signup-optional">Optional</span>
+          <input
+            value={form.companyName}
+            onChange={(event) => {
+              const companyName = event.target.value;
+              setForm((current) => ({
+                ...current,
+                companyName,
+                displayNameType: companyName.trim() ? current.displayNameType : "personal",
+              }));
+            }}
+            maxLength={120}
+            autoComplete="organization"
+          />
+        </label>
+        {form.companyName.trim() ? (
+          <fieldset className="manage-display-choice manage-wide-field">
+            <legend>Public name on your replicated site</legend>
+            <label><input type="radio" name="displayNameType" checked={form.displayNameType === "personal"} onChange={() => field("displayNameType", "personal")} /><span>Personal — {personalName || "Your name"}</span></label>
+            <label><input type="radio" name="displayNameType" checked={form.displayNameType === "business"} onChange={() => field("displayNameType", "business")} /><span>Business — {form.companyName.trim()}</span></label>
+            <small>Visitors will see: <strong>{displayName}</strong></small>
+          </fieldset>
+        ) : null}
         <label>
           Public email
           <input type="email" value={form.publicEmail} onChange={(event) => field("publicEmail", event.target.value)} required />
@@ -86,4 +123,3 @@ export default function ManageSiteForm({ initial }: { initial: SiteForm }) {
     </form>
   );
 }
-

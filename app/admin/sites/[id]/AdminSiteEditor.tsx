@@ -3,7 +3,10 @@
 import { FormEvent, useState } from "react";
 
 type AdminSiteForm = {
-  displayName: string;
+  firstName: string;
+  lastName: string;
+  companyName: string;
+  displayNameType: "personal" | "business";
   loginEmail: string;
   publicEmail: string;
   publicPhone: string;
@@ -22,6 +25,12 @@ export default function AdminSiteEditor({ siteId, initial }: { siteId: string; i
   function field<K extends keyof AdminSiteForm>(key: K, value: AdminSiteForm[K]) {
     setForm((current) => ({ ...current, [key]: value }));
   }
+
+  const personalName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim();
+  const displayName =
+    form.companyName.trim() && form.displayNameType === "business"
+      ? form.companyName.trim()
+      : personalName;
 
   async function save(event: FormEvent) {
     event.preventDefault();
@@ -52,7 +61,20 @@ export default function AdminSiteEditor({ siteId, initial }: { siteId: string; i
         <button type="submit" disabled={saving}>{saving ? "Saving…" : "Save changes"}</button>
       </div>
       <div className="manage-form-grid">
-        <label>Display name<input value={form.displayName} onChange={(event) => field("displayName", event.target.value)} required maxLength={80} /></label>
+        <label>First name<input value={form.firstName} onChange={(event) => field("firstName", event.target.value)} required maxLength={60} /></label>
+        <label>Last name<input value={form.lastName} onChange={(event) => field("lastName", event.target.value)} required maxLength={60} /></label>
+        <label className="manage-wide-field">Company name <span className="signup-optional">Optional</span><input value={form.companyName} onChange={(event) => {
+          const companyName = event.target.value;
+          setForm((current) => ({ ...current, companyName, displayNameType: companyName.trim() ? current.displayNameType : "personal" }));
+        }} maxLength={120} /></label>
+        {form.companyName.trim() ? (
+          <fieldset className="manage-display-choice manage-wide-field">
+            <legend>Public name on the replicated site</legend>
+            <label><input type="radio" name="displayNameType" checked={form.displayNameType === "personal"} onChange={() => field("displayNameType", "personal")} /><span>Personal — {personalName || "Customer name"}</span></label>
+            <label><input type="radio" name="displayNameType" checked={form.displayNameType === "business"} onChange={() => field("displayNameType", "business")} /><span>Business — {form.companyName.trim()}</span></label>
+            <small>Visitors will see: <strong>{displayName}</strong></small>
+          </fieldset>
+        ) : null}
         <label>Login email<input type="email" value={form.loginEmail} onChange={(event) => field("loginEmail", event.target.value)} required /><small>Changing this changes which ChatGPT sign-in can manage the site.</small></label>
         <label>Public email<input type="email" value={form.publicEmail} onChange={(event) => field("publicEmail", event.target.value)} required /></label>
         <label>Public phone<input type="tel" value={form.publicPhone} onChange={(event) => field("publicPhone", event.target.value)} required /></label>
@@ -68,4 +90,3 @@ export default function AdminSiteEditor({ siteId, initial }: { siteId: string; i
     </form>
   );
 }
-

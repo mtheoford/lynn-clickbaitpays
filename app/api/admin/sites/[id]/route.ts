@@ -4,6 +4,7 @@ import { getDb } from "@/db";
 import { auditLogs, sites, users } from "@/db/schema";
 import { getAdmin } from "@/lib/admin-auth";
 import { validateReferralUrl } from "@/lib/site-config";
+import { resolveSiteIdentity } from "@/lib/site-identity";
 import { isSameOriginMutation } from "@/lib/request-security";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -14,7 +15,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (!admin) return NextResponse.json({ error: "Not authorized." }, { status: 403 });
   const { id } = await params;
   const input = (await request.json()) as {
-    displayName?: string;
+    firstName?: string;
+    lastName?: string;
+    companyName?: string;
+    displayNameType?: string;
     loginEmail?: string;
     publicEmail?: string;
     publicPhone?: string;
@@ -23,14 +27,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     showEmail?: boolean;
     showPhone?: boolean;
   };
-  const displayName = input.displayName?.trim() ?? "";
+  const identityResult = resolveSiteIdentity(input);
+  if (!identityResult.identity) return NextResponse.json({ error: identityResult.error }, { status: 400 });
+  const identity = identityResult.identity;
   const loginEmail = input.loginEmail?.trim().toLowerCase() ?? "";
   const publicEmail = input.publicEmail?.trim().toLowerCase() ?? "";
   const publicPhone = input.publicPhone?.trim() ?? "";
   const bio = input.bio?.trim() ?? "";
   const referralUrl = input.referralUrl?.trim() ?? "";
 
-  if (displayName.length < 2 || displayName.length > 80) return NextResponse.json({ error: "Enter a valid display name." }, { status: 400 });
   if (!EMAIL_PATTERN.test(loginEmail) || !EMAIL_PATTERN.test(publicEmail)) return NextResponse.json({ error: "Enter valid login and public email addresses." }, { status: 400 });
   if (publicPhone.replace(/\D/g, "").length < 10) return NextResponse.json({ error: "Enter a valid public phone number." }, { status: 400 });
   if (bio.length < 20 || bio.length > 400) return NextResponse.json({ error: "Keep the introduction between 20 and 400 characters." }, { status: 400 });
@@ -44,18 +49,17 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (existingEmail && existingEmail.id !== site.userId) return NextResponse.json({ error: "That login email already belongs to another account." }, { status: 409 });
 
   const now = new Date();
-  const initials = displayName.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "CB";
   const [beforeUser] = await db.select().from(users).where(eq(users.id, site.userId)).limit(1);
-  await db.update(users).set({ email: loginEmail, name: displayName, phone: publicPhone, updatedAt: now }).where(eq(users.id, site.userId));
-  await db.update(sites).set({ displayName, initials, publicEmail, publicPhone, bio, referralUrl, showEmail: Boolean(input.showEmail), showPhone: Boolean(input.showPhone), updatedAt: now }).where(eq(sites.id, id));
+  await db.update(users).set({ email: loginEmail, name: identity.fullName, firstName: identity.firstName, lastName: identity.lastName, phone: publicPhone, updatedAt: now }).where(eq(users.id, site.userId));
+  await db.update(sites).set({ displayName: identity.displayName, companyName: identity.companyName, displayNameType: identity.displayNameType, initials: identity.initials, publicEmail, publicPhone, bio, referralUrl, showEmail: Boolean(input.showEmail), showPhone: Boolean(input.showPhone), updatedAt: now }).where(eq(sites.id, id));
   await db.insert(auditLogs).values({
     id: crypto.randomUUID(),
     actorEmail: admin.email,
     action: "site.profile.admin_updated",
     targetType: "site",
     targetId: id,
-    beforeJson: JSON.stringify({ loginEmail: beforeUser?.email, displayName: site.displayName, publicEmail: site.publicEmail, publicPhone: site.publicPhone, bio: site.bio, referralUrl: site.referralUrl, showEmail: site.showEmail, showPhone: site.showPhone }),
-    afterJson: JSON.stringify({ loginEmail, displayName, publicEmail, publicPhone, bio, referralUrl, showEmail: Boolean(input.showEmail), showPhone: Boolean(input.showPhone) }),
+    beforeJson: JSON.stringify({ loginEmail: beforeUser?.email, firstName: beforeUser?.firstName, lastName: beforeUser?.lastName, displayName: site.displayName, companyName: site.companyName, displayNameType: site.displayNameType, publicEmail: site.publicEmail, publicPhone: site.publicPhone, bio: site.bio, referralUrl: site.referralUrl, showEmail: site.showEmail, showPhone: site.showPhone }),
+    afterJson: JSON.stringify({ loginEmail, firstName: identity.firstName, lastName: identity.lastName, displayName: identity.displayName, companyName: identity.companyName, displayNameType: identity.displayNameType, publicEmail, publicPhone, bio, referralUrl, showEmail: Boolean(input.showEmail), showPhone: Boolean(input.showPhone) }),
     createdAt: now,
   });
   return NextResponse.json({ saved: true });

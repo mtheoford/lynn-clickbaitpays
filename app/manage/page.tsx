@@ -24,6 +24,11 @@ export default async function ManagePage() {
       siteId: sites.id,
       slug: sites.slug,
       displayName: sites.displayName,
+      firstName: users.firstName,
+      lastName: users.lastName,
+      fullName: users.name,
+      companyName: sites.companyName,
+      displayNameType: sites.displayNameType,
       publicEmail: sites.publicEmail,
       publicPhone: sites.publicPhone,
       showEmail: sites.showEmail,
@@ -89,7 +94,10 @@ export default async function ManagePage() {
 
       <section className="manage-content-grid">
         <ManageSiteForm initial={{
-          displayName: account.displayName,
+          firstName: account.firstName ?? account.fullName,
+          lastName: account.lastName ?? "",
+          companyName: account.companyName ?? "",
+          displayNameType: account.displayNameType,
           publicEmail: account.publicEmail,
           publicPhone: account.publicPhone,
           showEmail: account.showEmail,

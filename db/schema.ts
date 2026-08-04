@@ -6,6 +6,8 @@ export const users = sqliteTable(
     id: text("id").primaryKey(),
     email: text("email").notNull(),
     name: text("name").notNull(),
+    firstName: text("first_name"),
+    lastName: text("last_name"),
     phone: text("phone").notNull(),
     stripeCustomerId: text("stripe_customer_id"),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
@@ -26,6 +28,12 @@ export const sites = sqliteTable(
       .references(() => users.id, { onDelete: "cascade" }),
     slug: text("slug").notNull(),
     displayName: text("display_name").notNull(),
+    companyName: text("company_name"),
+    displayNameType: text("display_name_type", {
+      enum: ["personal", "business"],
+    })
+      .notNull()
+      .default("personal"),
     initials: text("initials").notNull(),
     publicEmail: text("public_email").notNull(),
     publicPhone: text("public_phone").notNull(),

@@ -27,7 +27,10 @@ export default function SignupForm({
   addressPrefix?: string;
   addressSuffix?: string;
 }) {
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [displayNameType, setDisplayNameType] = useState<"" | "personal" | "business">("");
   const [email, setEmail] = useState("");
   const [referralUsername, setReferralUsername] = useState("");
   const [plan, setPlan] = useState<"monthly" | "annual">("monthly");
@@ -38,7 +41,12 @@ export default function SignupForm({
     state: "idle" | "checking" | "available" | "unavailable" | "error";
     message: string;
   }>({ state: "idle", message: "" });
-  const effectiveSlug = useMemo(() => slugify(name), [name]);
+  const personalName = `${firstName.trim()} ${lastName.trim()}`.trim();
+  const effectiveDisplayName =
+    companyName.trim() && displayNameType === "business"
+      ? companyName.trim()
+      : personalName;
+  const effectiveSlug = useMemo(() => slugify(effectiveDisplayName), [effectiveDisplayName]);
   const replicatedSiteUrl = `${addressPrefix}${effectiveSlug || "your-name"}${addressSuffix}`;
   const referralUrl = referralUsername.trim() ? referralUrlFor(referralUsername) : "";
 
@@ -81,8 +89,15 @@ export default function SignupForm({
     setStatus("submitting");
     setMessage("");
     const form = new FormData(event.currentTarget);
-    const submittedName = String(form.get("name") ?? "");
-    const submittedSlug = slugify(submittedName);
+    const submittedFirstName = String(form.get("firstName") ?? "");
+    const submittedLastName = String(form.get("lastName") ?? "");
+    const submittedCompanyName = String(form.get("companyName") ?? "");
+    const submittedDisplayNameType = String(form.get("displayNameType") ?? "personal");
+    const submittedDisplayName =
+      submittedCompanyName.trim() && submittedDisplayNameType === "business"
+        ? submittedCompanyName.trim()
+        : `${submittedFirstName.trim()} ${submittedLastName.trim()}`.trim();
+    const submittedSlug = slugify(submittedDisplayName);
     const submittedReferralUsername = String(form.get("referralUsername") ?? "");
     const submittedReferralUrl = referralUrlFor(submittedReferralUsername);
 
@@ -91,7 +106,10 @@ export default function SignupForm({
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          name: submittedName,
+          firstName: submittedFirstName,
+          lastName: submittedLastName,
+          companyName: submittedCompanyName,
+          displayNameType: submittedDisplayNameType,
           email: form.get("email"),
           phone: form.get("phone"),
           slug: submittedSlug,
@@ -138,28 +156,100 @@ export default function SignupForm({
         <span>Personalize your site</span>
       </div>
 
+      <div className="signup-field-row">
+        <label>
+          First Name
+          <input
+            name="firstName"
+            autoComplete="given-name"
+            value={firstName}
+            onChange={(event) => {
+              setFirstName(event.currentTarget.value);
+              setAvailability({ state: "idle", message: "" });
+              setCopyStatus("idle");
+            }}
+            placeholder="First name"
+            required
+            maxLength={60}
+          />
+        </label>
+        <label>
+          Last Name
+          <input
+            name="lastName"
+            autoComplete="family-name"
+            value={lastName}
+            onChange={(event) => {
+              setLastName(event.currentTarget.value);
+              setAvailability({ state: "idle", message: "" });
+              setCopyStatus("idle");
+            }}
+            placeholder="Last name"
+            required
+            maxLength={60}
+          />
+        </label>
+      </div>
+
       <label>
-        Name / Business Name
+        Company Name <span className="signup-optional">Optional</span>
         <input
-          name="name"
-          autoComplete="name"
-          value={name}
+          name="companyName"
+          autoComplete="organization"
+          value={companyName}
           onChange={(event) => {
-            setName(event.currentTarget.value);
+            const nextCompanyName = event.currentTarget.value;
+            setCompanyName(nextCompanyName);
+            setDisplayNameType((current) => {
+              if (!nextCompanyName.trim()) return "";
+              return companyName.trim() ? current : "";
+            });
             setAvailability({ state: "idle", message: "" });
             setCopyStatus("idle");
           }}
-          onInput={(event) => {
-            setName(event.currentTarget.value);
-            setAvailability({ state: "idle", message: "" });
-            setCopyStatus("idle");
-          }}
-          placeholder="Name/Business Name"
-          required
-          maxLength={80}
+          placeholder="Company or business name"
+          maxLength={120}
         />
-        <small>This is the name visitors will see on your replicated site.</small>
+        <small>Leave blank if you want your personal name displayed.</small>
       </label>
+
+      {companyName.trim() ? (
+        <fieldset className="signup-display-choice">
+          <legend>Which name should appear on your replicated site?</legend>
+          <label>
+            <input
+              name="displayNameType"
+              type="radio"
+              value="personal"
+              checked={displayNameType === "personal"}
+              onChange={() => {
+                setDisplayNameType("personal");
+                setAvailability({ state: "idle", message: "" });
+                setCopyStatus("idle");
+              }}
+              required
+            />
+            <span><strong>Personal</strong><small>{personalName || "Your personal name"}</small></span>
+          </label>
+          <label>
+            <input
+              name="displayNameType"
+              type="radio"
+              value="business"
+              checked={displayNameType === "business"}
+              onChange={() => {
+                setDisplayNameType("business");
+                setAvailability({ state: "idle", message: "" });
+                setCopyStatus("idle");
+              }}
+              required
+            />
+            <span><strong>Business</strong><small>{companyName.trim()}</small></span>
+          </label>
+        </fieldset>
+      ) : (
+        <input name="displayNameType" type="hidden" value="personal" />
+      )}
 
       <div className="signup-field-row">
         <label>

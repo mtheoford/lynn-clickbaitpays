@@ -26,6 +26,11 @@ export default async function AdminSiteDetailPage({ params }: { params: Promise<
       userId: users.id,
       slug: sites.slug,
       displayName: sites.displayName,
+      firstName: users.firstName,
+      lastName: users.lastName,
+      fullName: users.name,
+      companyName: sites.companyName,
+      displayNameType: sites.displayNameType,
       loginEmail: users.email,
       publicEmail: sites.publicEmail,
       publicPhone: sites.publicPhone,
@@ -85,7 +90,10 @@ export default async function AdminSiteDetailPage({ params }: { params: Promise<
 
       <section className="admin-detail-content">
         <AdminSiteEditor siteId={account.siteId} initial={{
-          displayName: account.displayName,
+          firstName: account.firstName ?? account.fullName,
+          lastName: account.lastName ?? "",
+          companyName: account.companyName ?? "",
+          displayNameType: account.displayNameType,
           loginEmail: account.loginEmail,
           publicEmail: account.publicEmail,
           publicPhone: account.publicPhone,

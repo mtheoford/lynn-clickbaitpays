@@ -4098,7 +4098,8 @@ footer > p { margin: 0; color: #7e87a5; font-size: 11px; line-height: 1.55; }
 .signup-form-heading strong { color: #9198b2; font-size: 10px; }
 .site-signup-form label,
 .signup-plan-picker legend { display: grid; gap: 8px; color: #cfd3e4; font-size: 10px; font-weight: 800; letter-spacing: .035em; }
-.site-signup-form input:not([type="checkbox"]) { width: 100%; height: 49px; padding: 0 14px; border: 1px solid rgba(255,255,255,.12); border-radius: 11px; outline: none; color: var(--white); background: rgba(255,255,255,.035); font: inherit; font-size: 12px; font-weight: 500; transition: border-color 160ms ease, box-shadow 160ms ease; }
+.signup-optional { margin-left: 5px; color: #7f88a5; font-size: 9px; font-weight: 600; }
+.site-signup-form input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]) { width: 100%; height: 49px; padding: 0 14px; border: 1px solid rgba(255,255,255,.12); border-radius: 11px; outline: none; color: var(--white); background: rgba(255,255,255,.035); font: inherit; font-size: 12px; font-weight: 500; transition: border-color 160ms ease, box-shadow 160ms ease; }
 .site-signup-form input:focus { border-color: rgba(46,231,242,.52); box-shadow: 0 0 0 3px rgba(46,231,242,.08); }
 .site-signup-form label > small { color: #929ab5; font-size: 10px; font-weight: 700; line-height: 1.4; }
 .signup-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -4106,6 +4107,14 @@ footer > p { margin: 0; color: #7e87a5; font-size: 11px; line-height: 1.55; }
 .signup-referral-preview small { color: #929ab5; font-size: 9px; font-weight: 700; }
 .signup-referral-preview a { overflow: hidden; color: var(--cyan); font-size: 10px; font-weight: 800; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
 .signup-referral-preview a:hover { text-decoration: underline; }
+.signup-display-choice { margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border: 0; }
+.signup-display-choice legend { grid-column: 1 / -1; margin-bottom: 8px; color: #cfd3e4; font-size: 10px; font-weight: 800; letter-spacing: .035em; }
+.signup-display-choice label { min-width: 0; padding: 12px 13px; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 10px; border: 1px solid rgba(255,255,255,.11); border-radius: 11px; background: rgba(255,255,255,.025); cursor: pointer; }
+.signup-display-choice label:has(input:checked) { border-color: rgba(46,231,242,.45); background: rgba(46,231,242,.065); }
+.signup-display-choice input { accent-color: var(--cyan); }
+.signup-display-choice span { min-width: 0; display: grid; gap: 3px; }
+.signup-display-choice strong { color: var(--white); font-size: 10px; }
+.signup-display-choice small { overflow: hidden; color: #8992ad; font-size: 9px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .signup-url-preview { padding: 13px 15px; overflow: hidden; border: 1px solid rgba(46,231,242,.17); border-radius: 11px; background: rgba(46,231,242,.045); }
 .signup-url-preview-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; }
 .signup-url-preview-row > div { min-width: 0; }
@@ -4280,6 +4289,7 @@ footer > p { margin: 0; color: #7e87a5; font-size: 11px; line-height: 1.55; }
   .site-signup-form { padding: 23px 18px; border-radius: 18px; }
   .signup-form-heading { align-items: flex-start; flex-direction: column; gap: 5px; }
   .signup-field-row { grid-template-columns: 1fr; }
+  .signup-display-choice { grid-template-columns: 1fr; }
   .signup-plan-picker { grid-template-columns: 1fr; }
   .marketing-faq { padding: 75px 0; }
   .marketing-footer { grid-template-columns: 1fr; gap: 15px; }
@@ -4342,14 +4352,21 @@ footer > p { margin: 0; color: #7e87a5; font-size: 11px; line-height: 1.55; }
 .manage-panel-heading button:disabled { opacity: .6; cursor: wait; }
 .manage-form-grid { padding: 22px 20px 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 17px 14px; }
 .manage-editor label { display: grid; gap: 8px; color: #bcc2d6; font-size: 9px; font-weight: 800; letter-spacing: .03em; }
-.manage-editor input:not([type="checkbox"]),
+.manage-editor input:not([type="checkbox"]):not([type="radio"]),
 .manage-editor textarea { width: 100%; padding: 0 13px; border: 1px solid rgba(255,255,255,.11); border-radius: 10px; outline: none; color: var(--white); background: rgba(255,255,255,.025); font: inherit; font-size: 11px; font-weight: 500; }
-.manage-editor input:not([type="checkbox"]) { height: 45px; }
+.manage-editor input:not([type="checkbox"]):not([type="radio"]) { height: 45px; }
 .manage-editor textarea { padding-block: 12px; line-height: 1.6; resize: vertical; }
 .manage-editor input:focus,
 .manage-editor textarea:focus { border-color: rgba(46,231,242,.48); box-shadow: 0 0 0 3px rgba(46,231,242,.06); }
 .manage-editor label small { color: #6e7792; font-size: 8px; font-weight: 500; }
 .manage-wide-field { grid-column: 1 / -1; }
+.manage-display-choice { margin: 0; padding: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border: 1px solid rgba(46,231,242,.15); border-radius: 10px; background: rgba(46,231,242,.035); }
+.manage-display-choice legend { padding: 0 6px; color: #aeb5ca; font-size: 9px; font-weight: 800; }
+.manage-display-choice label { padding: 10px; display: flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,.09); border-radius: 9px; cursor: pointer; }
+.manage-display-choice label:has(input:checked) { border-color: rgba(46,231,242,.42); background: rgba(46,231,242,.06); }
+.manage-display-choice input { accent-color: var(--cyan); }
+.manage-display-choice > small { grid-column: 1 / -1; color: #8d96b1; font-size: 9px; }
+.manage-display-choice > small strong { color: var(--cyan); }
 .manage-visibility { margin: 0 20px; padding: 17px 0; display: flex; gap: 22px; border: 0; border-top: 1px solid var(--line); }
 .manage-visibility legend { width: 100%; padding: 0 0 12px; color: #777f99; font-size: 8px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
 .manage-visibility label { display: flex; align-items: center; gap: 8px; color: #aeb5ca; font-size: 9px; font-weight: 600; }
@@ -4392,6 +4409,8 @@ footer > p { margin: 0; color: #7e87a5; font-size: 11px; line-height: 1.55; }
   .manage-metric-grid { grid-template-columns: 1fr; }
   .manage-form-grid { grid-template-columns: 1fr; }
   .manage-wide-field { grid-column: auto; }
+  .manage-display-choice { grid-template-columns: 1fr; }
+  .manage-display-choice > small { grid-column: auto; }
   .manage-visibility { flex-direction: column; gap: 12px; }
 }
 

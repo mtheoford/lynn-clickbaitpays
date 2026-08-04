@@ -19,9 +19,13 @@ import {
   ownedReservationDecision,
 } from "@/lib/checkout-reservation";
 import { purgeExpiredCheckoutReservations } from "@/lib/checkout-cleanup";
+import { resolveSiteIdentity } from "@/lib/site-identity";
 
 type CheckoutInput = {
-  name?: string;
+  firstName?: string;
+  lastName?: string;
+  companyName?: string;
+  displayNameType?: string;
   email?: string;
   phone?: string;
   slug?: string;
@@ -32,15 +36,6 @@ type CheckoutInput = {
 };
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function initialsFor(name: string): string {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("") || "CB";
-}
 
 type CheckoutErrorCode = "email_has_site" | "site_unavailable" | "checkout_processing";
 
@@ -64,15 +59,16 @@ export async function POST(request: Request) {
     return error("The signup details could not be read.");
   }
 
-  const name = input.name?.trim() ?? "";
+  const identityResult = resolveSiteIdentity(input);
+  if (!identityResult.identity) return error(identityResult.error);
+  const identity = identityResult.identity;
   const email = input.email?.trim().toLowerCase() ?? "";
   const phone = input.phone?.trim() ?? "";
-  const slug = normalizeSiteSlug(input.slug ?? name);
+  const slug = normalizeSiteSlug(identity.displayName);
   const referralUrl = input.referralUrl?.trim() ?? "";
   const sourceSlug = normalizeSiteSlug(input.source ?? "");
   const plan: BillingPlan = input.plan === "annual" ? "annual" : "monthly";
 
-  if (name.length < 2 || name.length > 80) return error("Enter your full name.");
   if (!EMAIL_PATTERN.test(email)) return error("Enter a valid email address.");
   if (phone.replace(/\D/g, "").length < 10) return error("Enter a valid phone number.");
   const slugError = validateSiteSlug(slug);
@@ -178,13 +174,15 @@ export async function POST(request: Request) {
   const siteValues = {
     userId,
     slug,
-    displayName: name,
-    initials: initialsFor(name),
+    displayName: identity.displayName,
+    companyName: identity.companyName,
+    displayNameType: identity.displayNameType,
+    initials: identity.initials,
     publicEmail: email,
     publicPhone: phone,
     showEmail: true,
     showPhone: true,
-    bio: `Questions before joining? ${name} is here to help you understand the information and take your next step with confidence.`,
+    bio: `Questions before joining? ${identity.displayName} is here to help you understand the information and take your next step with confidence.`,
     referralUrl,
     status: "pending" as const,
     publicationOverride: null,
@@ -213,13 +211,21 @@ export async function POST(request: Request) {
   if (existingUser) {
     await db
       .update(users)
-      .set({ name, phone, updatedAt: now })
+      .set({
+        name: identity.fullName,
+        firstName: identity.firstName,
+        lastName: identity.lastName,
+        phone,
+        updatedAt: now,
+      })
       .where(eq(users.id, userId));
   } else {
     await db.insert(users).values({
       id: userId,
       email,
-      name,
+      name: identity.fullName,
+      firstName: identity.firstName,
+      lastName: identity.lastName,
       phone,
       createdAt: now,
       updatedAt: now,
