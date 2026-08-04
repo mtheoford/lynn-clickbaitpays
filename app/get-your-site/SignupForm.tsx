@@ -14,6 +14,10 @@ function slugify(value: string) {
     .slice(0, 48);
 }
 
+function referralUrlFor(username: string) {
+  return `https://clickbaitpays.me/?ref=${encodeURIComponent(username.trim())}`;
+}
+
 export default function SignupForm({
   source = "",
   addressPrefix = "https://",
@@ -25,6 +29,7 @@ export default function SignupForm({
 }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [referralUsername, setReferralUsername] = useState("");
   const [plan, setPlan] = useState<"monthly" | "annual">("monthly");
   const [status, setStatus] = useState<"idle" | "submitting" | "error">("idle");
   const [message, setMessage] = useState("");
@@ -35,6 +40,7 @@ export default function SignupForm({
   }>({ state: "idle", message: "" });
   const effectiveSlug = useMemo(() => slugify(name), [name]);
   const replicatedSiteUrl = `${addressPrefix}${effectiveSlug || "your-name"}${addressSuffix}`;
+  const referralUrl = referralUsername.trim() ? referralUrlFor(referralUsername) : "";
 
   useEffect(() => {
     if (effectiveSlug.length < 2) return;
@@ -77,8 +83,8 @@ export default function SignupForm({
     const form = new FormData(event.currentTarget);
     const submittedName = String(form.get("name") ?? "");
     const submittedSlug = slugify(submittedName);
-    const referralUsername = String(form.get("referralUsername") ?? "").trim();
-    const referralUrl = `https://clickbaitpays.me/?ref=${encodeURIComponent(referralUsername)}`;
+    const submittedReferralUsername = String(form.get("referralUsername") ?? "");
+    const submittedReferralUrl = referralUrlFor(submittedReferralUsername);
 
     try {
       const response = await fetch("/api/checkout", {
@@ -89,7 +95,7 @@ export default function SignupForm({
           email: form.get("email"),
           phone: form.get("phone"),
           slug: submittedSlug,
-          referralUrl,
+          referralUrl: submittedReferralUrl,
           source,
           plan,
           acceptedTerms: form.get("acceptedTerms") === "on",
@@ -130,7 +136,6 @@ export default function SignupForm({
     <form className="site-signup-form" onSubmit={submit}>
       <div className="signup-form-heading">
         <span>Personalize your site</span>
-        <strong>Your name also creates your replicated site address.</strong>
       </div>
 
       <label>
@@ -190,12 +195,23 @@ export default function SignupForm({
           autoCapitalize="none"
           autoCorrect="off"
           spellCheck={false}
+          value={referralUsername}
+          onChange={(event) => setReferralUsername(event.currentTarget.value)}
+          onInput={(event) => setReferralUsername(event.currentTarget.value)}
           placeholder="Your ClickBaitPays user name"
           pattern="[A-Za-z0-9._-]+"
           title="Use letters, numbers, periods, underscores, or hyphens."
           required
         />
         <small>We’ll create your ClickBaitPays referral link automatically.</small>
+        {referralUrl ? (
+          <span className="signup-referral-preview" aria-live="polite">
+            <small>Your ClickBaitPays company page</small>
+            <a href={referralUrl} target="_blank" rel="noopener noreferrer">
+              {referralUrl}
+            </a>
+          </span>
+        ) : null}
       </label>
 
       <div className="signup-url-preview" aria-live="polite">
