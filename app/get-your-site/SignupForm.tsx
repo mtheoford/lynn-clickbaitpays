@@ -28,11 +28,13 @@ export default function SignupForm({
   const [plan, setPlan] = useState<"monthly" | "annual">("monthly");
   const [status, setStatus] = useState<"idle" | "submitting" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">("idle");
   const [availability, setAvailability] = useState<{
     state: "idle" | "checking" | "available" | "unavailable" | "error";
     message: string;
   }>({ state: "idle", message: "" });
   const effectiveSlug = useMemo(() => slugify(name), [name]);
+  const replicatedSiteUrl = `${addressPrefix}${effectiveSlug || "your-name"}${addressSuffix}`;
 
   useEffect(() => {
     if (effectiveSlug.length < 2) return;
@@ -75,6 +77,8 @@ export default function SignupForm({
     const form = new FormData(event.currentTarget);
     const submittedName = String(form.get("name") ?? "");
     const submittedSlug = slugify(submittedName);
+    const referralUsername = String(form.get("referralUsername") ?? "").trim();
+    const referralUrl = `https://clickbaitpays.me/?ref=${encodeURIComponent(referralUsername)}`;
 
     try {
       const response = await fetch("/api/checkout", {
@@ -85,7 +89,7 @@ export default function SignupForm({
           email: form.get("email"),
           phone: form.get("phone"),
           slug: submittedSlug,
-          referralUrl: form.get("referralUrl"),
+          referralUrl,
           source,
           plan,
           acceptedTerms: form.get("acceptedTerms") === "on",
@@ -113,15 +117,24 @@ export default function SignupForm({
     }
   }
 
+  async function copyReplicatedSiteUrl() {
+    try {
+      await navigator.clipboard.writeText(replicatedSiteUrl);
+      setCopyStatus("copied");
+    } catch {
+      setCopyStatus("error");
+    }
+  }
+
   return (
     <form className="site-signup-form" onSubmit={submit}>
       <div className="signup-form-heading">
         <span>Personalize your site</span>
-        <strong>Preview your replicated site address before checkout.</strong>
+        <strong>Your name also creates your replicated site address.</strong>
       </div>
 
       <label>
-        Name
+        Name / Business Name
         <input
           name="name"
           autoComplete="name"
@@ -129,15 +142,18 @@ export default function SignupForm({
           onChange={(event) => {
             setName(event.currentTarget.value);
             setAvailability({ state: "idle", message: "" });
+            setCopyStatus("idle");
           }}
           onInput={(event) => {
             setName(event.currentTarget.value);
             setAvailability({ state: "idle", message: "" });
+            setCopyStatus("idle");
           }}
           placeholder="Name/Business Name"
           required
           maxLength={80}
         />
+        <small>This is the name visitors will see on your replicated site.</small>
       </label>
 
       <div className="signup-field-row">
@@ -167,34 +183,47 @@ export default function SignupForm({
       </div>
 
       <label>
-        Your replicated site address
-        <span className="slug-input" aria-live="polite">
-          <span className="slug-value">{effectiveSlug || "your-name"}</span>
-          <b>{addressSuffix || " on this site"}</b>
-        </span>
+        ClickBaitPays User Name
+        <input
+          name="referralUsername"
+          type="text"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+          placeholder="Your ClickBaitPays user name"
+          pattern="[A-Za-z0-9._-]+"
+          title="Use letters, numbers, periods, underscores, or hyphens."
+          required
+        />
+        <small>We’ll create your ClickBaitPays referral link automatically.</small>
       </label>
 
       <div className="signup-url-preview" aria-live="polite">
-        <small>Your new replicated site</small>
-        <strong>{addressPrefix}{effectiveSlug || "your-name"}{addressSuffix}</strong>
+        <div className="signup-url-preview-row">
+          <div>
+            <small>Your new replicated site</small>
+            <strong>{replicatedSiteUrl}</strong>
+          </div>
+          <button
+            className="signup-copy-url"
+            type="button"
+            onClick={copyReplicatedSiteUrl}
+            aria-label="Copy your new replicated site address"
+            title="Copy site address"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 8V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-3M5 8h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2Z" />
+            </svg>
+          </button>
+        </div>
+        {copyStatus === "copied" ? <span className="signup-copy-status">Copied!</span> : null}
+        {copyStatus === "error" ? <span className="signup-copy-status is-error">Couldn’t copy. Select the address above to copy it.</span> : null}
         {availability.message ? (
           <span className={`signup-availability is-${availability.state}`}>
             {availability.message}
           </span>
         ) : null}
       </div>
-
-      <label>
-        ClickBaitPays referral link
-        <input
-          name="referralUrl"
-          type="url"
-          inputMode="url"
-          placeholder="https://clickbaitpays.me/?ref=yourcode"
-          required
-        />
-        <small>Only official clickbaitpays.me referral links are accepted.</small>
-      </label>
 
       <fieldset className="signup-plan-picker">
         <legend>Choose billing</legend>

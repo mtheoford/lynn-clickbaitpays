@@ -4102,14 +4102,19 @@ footer > p { margin: 0; color: #7e87a5; font-size: 11px; line-height: 1.55; }
 .site-signup-form input:focus { border-color: rgba(46,231,242,.52); box-shadow: 0 0 0 3px rgba(46,231,242,.08); }
 .site-signup-form label > small { color: #747c99; font-size: 9px; font-weight: 500; }
 .signup-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.slug-input { height: 49px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; overflow: hidden; border: 1px solid rgba(255,255,255,.12); border-radius: 11px; background: rgba(255,255,255,.035); }
-.slug-value { padding: 0 14px; overflow: hidden; color: var(--white); font-size: 12px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
-.slug-input b { padding: 0 12px; color: #9097b0; font-size: 10px; white-space: nowrap; }
 .signup-url-preview { padding: 13px 15px; overflow: hidden; border: 1px solid rgba(46,231,242,.17); border-radius: 11px; background: rgba(46,231,242,.045); }
+.signup-url-preview-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; }
+.signup-url-preview-row > div { min-width: 0; }
 .signup-url-preview small,
 .signup-url-preview strong { display: block; }
 .signup-url-preview small { color: #7f88a5; font-size: 8px; letter-spacing: .1em; text-transform: uppercase; }
 .signup-url-preview strong { margin-top: 5px; overflow: hidden; color: var(--cyan); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.signup-copy-url { width: 36px; height: 36px; display: grid; flex: 0 0 auto; place-items: center; border: 1px solid rgba(46,231,242,.3); border-radius: 9px; color: var(--cyan); background: rgba(46,231,242,.08); cursor: pointer; transition: border-color 160ms ease, background 160ms ease, transform 160ms ease; }
+.signup-copy-url:hover { border-color: rgba(46,231,242,.6); background: rgba(46,231,242,.14); transform: translateY(-1px); }
+.signup-copy-url:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.signup-copy-url svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.signup-copy-status { display: block; margin-top: 7px; color: var(--green); font-size: 9px; line-height: 1.35; }
+.signup-copy-status.is-error { color: #ffabd8; }
 .signup-availability { display: block; margin-top: 7px; font-size: 9px; line-height: 1.35; }
 .signup-availability.is-checking,
 .signup-availability.is-error { color: #a0a7c0; }
@@ -4271,8 +4276,6 @@ footer > p { margin: 0; color: #7e87a5; font-size: 11px; line-height: 1.55; }
   .site-signup-form { padding: 23px 18px; border-radius: 18px; }
   .signup-form-heading { align-items: flex-start; flex-direction: column; gap: 5px; }
   .signup-field-row { grid-template-columns: 1fr; }
-  .slug-input { grid-template-columns: auto 1fr; }
-  .slug-input b:last-child { display: none; }
   .signup-plan-picker { grid-template-columns: 1fr; }
   .marketing-faq { padding: 75px 0; }
   .marketing-footer { grid-template-columns: 1fr; gap: 15px; }
