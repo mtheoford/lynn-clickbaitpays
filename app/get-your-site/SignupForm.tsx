@@ -338,14 +338,16 @@ export default function SignupForm({
           className={plan === "monthly" ? "is-selected" : ""}
           onClick={() => setPlan("monthly")}
         >
-          <span>Monthly</span><strong>$9</strong><small>per month</small>
+          <span className="signup-plan-name">Monthly</span>
+          <span className="signup-plan-price"><strong>$9</strong><small>Per Month</small></span>
         </button>
         <button
           type="button"
           className={plan === "annual" ? "is-selected" : ""}
           onClick={() => setPlan("annual")}
         >
-          <span>Annual</span><strong>$79</strong><small>Save $29 · 27% off</small>
+          <span className="signup-plan-name">Annual</span>
+          <span className="signup-plan-price"><strong>$79</strong><small className="signup-plan-savings">Save 27%</small></span>
         </button>
       </fieldset>
 
