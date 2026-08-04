@@ -14,28 +14,28 @@ const manrope = Manrope({
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ??
-  "https://lynn-clickbaitpays.theoford.chatgpt.site";
+  "https://mtheoford.github.io/lynn-clickbaitpays/";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Personal CBP Sites | ProNeurs",
+    default: "ClickBaitPays Replicated Sites | ProNeurs",
     template: "%s | ProNeurs",
   },
   description:
-    "Professional, personalized ClickBaitPays sponsor pages from ProNeurs.",
+    "Personalized ClickBaitPays replicated sites with your referral link and ready-to-share marketing materials.",
   openGraph: {
-    title: "Personal CBP Sites by ProNeurs",
+    title: "ClickBaitPays Replicated Sites by ProNeurs",
     description:
-      "A professional ClickBaitPays sponsor page with your referral link and contact information.",
+      "Your custom CBP growth hub with a referral link, videos, resources, and marketing materials.",
     type: "website",
     images: [{ url: "/og.png", width: 1536, height: 1024 }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Personal CBP Sites by ProNeurs",
+    title: "ClickBaitPays Replicated Sites by ProNeurs",
     description:
-      "Your professional, personalized ClickBaitPays sharing page.",
+      "Your personalized ClickBaitPays replicated site—ready to share.",
     images: ["/og.png"],
   },
 };

@@ -38,10 +38,14 @@ export const sites = sqliteTable(
     })
       .notNull()
       .default("pending"),
+    publicationOverride: text("publication_override", {
+      enum: ["suspended", "canceled"],
+    }),
     sourceSiteId: text("source_site_id"),
     stripeCheckoutSessionId: text("stripe_checkout_session_id"),
     publishedAt: integer("published_at", { mode: "timestamp_ms" }),
     reservationExpiresAt: integer("reservation_expires_at", { mode: "timestamp_ms" }),
+    deletionScheduledAt: integer("deletion_scheduled_at", { mode: "timestamp_ms" }),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
   },
@@ -50,6 +54,7 @@ export const sites = sqliteTable(
     uniqueIndex("idx_sites_checkout_session_unique").on(table.stripeCheckoutSessionId),
     index("idx_sites_user_id").on(table.userId),
     index("idx_sites_status").on(table.status),
+    index("idx_sites_deletion_scheduled_at").on(table.deletionScheduledAt),
     index("idx_sites_source_site_id").on(table.sourceSiteId),
   ],
 );
@@ -68,6 +73,9 @@ export const subscriptions = sqliteTable(
     stripeSubscriptionId: text("stripe_subscription_id").notNull(),
     plan: text("plan", { enum: ["monthly", "annual", "complimentary"] }).notNull(),
     status: text("status").notNull(),
+    cancelAtPeriodEnd: integer("cancel_at_period_end", { mode: "boolean" })
+      .notNull()
+      .default(false),
     currentPeriodEnd: integer("current_period_end", { mode: "timestamp_ms" }),
     graceEndsAt: integer("grace_ends_at", { mode: "timestamp_ms" }),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
@@ -143,7 +151,14 @@ export const analyticsEvents = sqliteTable(
 export const stripeEvents = sqliteTable("stripe_events", {
   id: text("id").primaryKey(),
   eventType: text("event_type").notNull(),
-  processedAt: integer("processed_at", { mode: "timestamp_ms" }).notNull(),
+  status: text("status", { enum: ["pending", "processing", "completed", "failed"] })
+    .notNull()
+    .default("pending"),
+  payloadJson: text("payload_json").notNull(),
+  attempts: integer("attempts").notNull().default(0),
+  lastError: text("last_error"),
+  receivedAt: integer("received_at", { mode: "timestamp_ms" }).notNull(),
+  processedAt: integer("processed_at", { mode: "timestamp_ms" }),
 });
 
 export const auditLogs = sqliteTable(

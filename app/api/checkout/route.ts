@@ -13,6 +13,12 @@ import {
   priceForPlan,
   type BillingPlan,
 } from "@/lib/stripe";
+import { isSameOriginMutation } from "@/lib/request-security";
+import {
+  checkoutReservationDecision,
+  ownedReservationDecision,
+} from "@/lib/checkout-reservation";
+import { purgeExpiredCheckoutReservations } from "@/lib/checkout-cleanup";
 
 type CheckoutInput = {
   name?: string;
@@ -36,12 +42,15 @@ function initialsFor(name: string): string {
     .join("") || "CB";
 }
 
-function error(message: string, status = 400) {
-  return NextResponse.json({ error: message }, { status });
+type CheckoutErrorCode = "email_has_site" | "site_unavailable" | "checkout_processing";
+
+function error(message: string, status = 400, code?: CheckoutErrorCode) {
+  return NextResponse.json({ error: message, ...(code ? { code } : {}) }, { status });
 }
 
 export async function POST(request: Request) {
-  if (!isBillingConfigured()) {
+  if (!isSameOriginMutation(request)) return error("Request origin could not be verified.", 403);
+  if (!(await isBillingConfigured())) {
     return error(
       "Checkout is being connected now. Your information has not been submitted or saved.",
       503,
@@ -74,35 +83,90 @@ export async function POST(request: Request) {
 
   const db = await getDb();
   const now = new Date();
-  const reservationExpiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+  await purgeExpiredCheckoutReservations(now);
   const [existingSite] = await db
     .select({
       id: sites.id,
       userId: sites.userId,
       status: sites.status,
       reservationExpiresAt: sites.reservationExpiresAt,
+      stripeCheckoutSessionId: sites.stripeCheckoutSessionId,
+      updatedAt: sites.updatedAt,
     })
     .from(sites)
     .where(eq(sites.slug, slug))
     .limit(1);
 
   const [existingUser] = await db
-    .select({ id: users.id, email: users.email })
+    .select({
+      id: users.id,
+      email: users.email,
+      stripeCustomerId: users.stripeCustomerId,
+    })
     .from(users)
     .where(eq(users.email, email))
     .limit(1);
 
-  const reservationIsReusable =
-    existingSite?.status === "pending" &&
-    existingSite.reservationExpiresAt !== null &&
-    existingSite.reservationExpiresAt.getTime() < now.getTime();
+  const [existingOwnedSite] = existingUser
+    ? await db
+        .select({
+          id: sites.id,
+          userId: sites.userId,
+          slug: sites.slug,
+          status: sites.status,
+          reservationExpiresAt: sites.reservationExpiresAt,
+          stripeCheckoutSessionId: sites.stripeCheckoutSessionId,
+          updatedAt: sites.updatedAt,
+        })
+        .from(sites)
+        .where(eq(sites.userId, existingUser.id))
+        .limit(1)
+    : [];
 
-  if (existingSite && !reservationIsReusable && existingSite.userId !== existingUser?.id) {
-    return error("That site address is already reserved. Please choose another.", 409);
+  const ownedDecision = ownedReservationDecision(existingOwnedSite, existingSite?.id);
+  if (existingOwnedSite && ownedDecision === "retained") {
+    return error(
+      `That email already manages ${existingOwnedSite.slug}. Sign in to update or reactivate the existing site.`,
+      409,
+      "email_has_site",
+    );
   }
 
+  const requestedAddressDecision = checkoutReservationDecision(
+    existingSite,
+    existingUser?.id,
+    now,
+  );
+  if (requestedAddressDecision === "retained") {
+    return error(
+      "That site address already belongs to an active or retained account.",
+      409,
+      "site_unavailable",
+    );
+  }
+  if (requestedAddressDecision === "reserved") {
+    return error(
+      "That site address is already reserved. Please choose another.",
+      409,
+      "site_unavailable",
+    );
+  }
+
+  const reservationSite = ownedDecision === "rename" ? existingOwnedSite : existingSite;
+  const renamingOwnedReservation = ownedDecision === "rename";
+  const reservationDecision = checkoutReservationDecision(
+    reservationSite,
+    existingUser?.id,
+    now,
+  );
+
+  const reservationExpiresAt =
+    reservationSite && reservationDecision === "reuse" && !renamingOwnedReservation
+      ? reservationSite.reservationExpiresAt!
+      : new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
   const userId = existingUser?.id ?? crypto.randomUUID();
-  const siteId = existingSite?.id ?? crypto.randomUUID();
+  const siteId = reservationSite?.id ?? crypto.randomUUID();
   const [sourceSite] = sourceSlug
     ? await db
         .select({ id: sites.id })
@@ -110,6 +174,41 @@ export async function POST(request: Request) {
         .where(and(eq(sites.slug, sourceSlug), eq(sites.status, "active")))
         .limit(1)
     : [];
+
+  const siteValues = {
+    userId,
+    slug,
+    displayName: name,
+    initials: initialsFor(name),
+    publicEmail: email,
+    publicPhone: phone,
+    showEmail: true,
+    showPhone: true,
+    bio: `Questions before joining? ${name} is here to help you understand the information and take your next step with confidence.`,
+    referralUrl,
+    status: "pending" as const,
+    publicationOverride: null,
+    sourceSiteId: sourceSite?.id ?? null,
+    reservationExpiresAt,
+    updatedAt: now,
+  };
+
+  const stripe = await getStripe();
+  if (renamingOwnedReservation && reservationSite?.stripeCheckoutSessionId) {
+    const previousSession = await stripe.checkout.sessions.retrieve(
+      reservationSite.stripeCheckoutSessionId,
+    );
+    if (previousSession.status === "complete") {
+      return error(
+        "Your previous checkout has completed and the site is still being activated. Please wait a moment, then sign in.",
+        409,
+        "checkout_processing",
+      );
+    }
+    if (previousSession.status === "open") {
+      await stripe.checkout.sessions.expire(previousSession.id);
+    }
+  }
 
   if (existingUser) {
     await db
@@ -127,48 +226,62 @@ export async function POST(request: Request) {
     });
   }
 
-  const siteValues = {
-    userId,
-    slug,
-    displayName: name,
-    initials: initialsFor(name),
-    publicEmail: email,
-    publicPhone: phone,
-    showEmail: true,
-    showPhone: true,
-    bio: `Questions before joining? ${name} is here to help you understand the information and take your next step with confidence.`,
-    referralUrl,
-    status: "pending" as const,
-    sourceSiteId: sourceSite?.id ?? null,
-    reservationExpiresAt,
-    updatedAt: now,
-  };
-
-  if (existingSite) {
-    await db.update(sites).set(siteValues).where(eq(sites.id, siteId));
+  if (reservationSite) {
+    const updated = await db
+      .update(sites)
+      .set(siteValues)
+      .where(and(eq(sites.id, siteId), eq(sites.updatedAt, reservationSite.updatedAt)))
+      .returning({ id: sites.id });
+    if (updated.length === 0) {
+      return error(
+        "That site address was just claimed. Please enter another name.",
+        409,
+        "site_unavailable",
+      );
+    }
   } else {
-    await db.insert(sites).values({
-      id: siteId,
-      ...siteValues,
-      createdAt: now,
-    });
+    try {
+      await db.insert(sites).values({
+        id: siteId,
+        ...siteValues,
+        createdAt: now,
+      });
+    } catch (cause) {
+      const [conflictingSite] = await db
+        .select({ id: sites.id })
+        .from(sites)
+        .where(eq(sites.slug, slug))
+        .limit(1);
+      if (conflictingSite) {
+        return error(
+          "That site address was just claimed. Please enter another name.",
+          409,
+          "site_unavailable",
+        );
+      }
+      throw cause;
+    }
   }
 
-  const stripe = getStripe();
   const origin = new URL(request.url).origin;
   const session = await stripe.checkout.sessions.create(
     {
       mode: "subscription",
-      customer_email: email,
+      ...(existingUser?.stripeCustomerId
+        ? { customer: existingUser.stripeCustomerId }
+        : { customer_email: email }),
       client_reference_id: siteId,
-      line_items: [{ price: priceForPlan(plan), quantity: 1 }],
+      line_items: [{ price: await priceForPlan(plan), quantity: 1 }],
       allow_promotion_codes: true,
+      expires_at: Math.floor(reservationExpiresAt.getTime() / 1000),
       success_url: `${origin}/get-your-site/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/get-your-site?checkout=canceled&site=${encodeURIComponent(slug)}`,
       metadata: { siteId, userId, plan, sourceSlug },
       subscription_data: { metadata: { siteId, userId, plan, sourceSlug } },
     },
-    { idempotencyKey: `site-checkout-${siteId}-${plan}` },
+    {
+      idempotencyKey: `site-checkout-${siteId}-${plan}-${reservationExpiresAt.getTime()}`,
+    },
   );
 
   if (!session.url) return error("Stripe did not return a checkout address.", 502);

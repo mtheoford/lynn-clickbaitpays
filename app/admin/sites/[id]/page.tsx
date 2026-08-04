@@ -4,9 +4,14 @@ import { notFound } from "next/navigation";
 import { getDb } from "@/db";
 import { analyticsEvents, sites, subscriptions, users } from "@/db/schema";
 import { requireAdmin } from "@/lib/admin-auth";
+import { subscriptionAllowsDataDeletion } from "@/lib/billing-lifecycle";
+import { runtimeValue } from "@/lib/runtime";
 import { siteUrl } from "@/lib/site-config";
+import { stripeDashboardUrl } from "@/lib/stripe";
 import SiteStatusActions from "../../SiteStatusActions";
+import AccountDeletionAction from "./AccountDeletionAction";
 import AdminSiteEditor from "./AdminSiteEditor";
+import WelcomeEmailAction from "./WelcomeEmailAction";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +38,9 @@ export default async function AdminSiteDetailPage({ params }: { params: Promise<
       plan: subscriptions.plan,
       subscriptionStatus: subscriptions.status,
       stripeSubscriptionId: subscriptions.stripeSubscriptionId,
+      cancelAtPeriodEnd: subscriptions.cancelAtPeriodEnd,
+      currentPeriodEnd: subscriptions.currentPeriodEnd,
+      deletionScheduledAt: sites.deletionScheduledAt,
       createdAt: sites.createdAt,
       updatedAt: sites.updatedAt,
     })
@@ -42,6 +50,13 @@ export default async function AdminSiteDetailPage({ params }: { params: Promise<
     .where(eq(sites.id, id))
     .limit(1);
   if (!account) notFound();
+
+  const appEnv = await runtimeValue("APP_ENV");
+  const deletionAllowed = subscriptionAllowsDataDeletion(
+    account.subscriptionStatus,
+    account.plan,
+    account.currentPeriodEnd,
+  );
 
   const metrics = await db
     .select({ eventType: analyticsEvents.eventType, total: count() })
@@ -58,7 +73,7 @@ export default async function AdminSiteDetailPage({ params }: { params: Promise<
       </header>
 
       <section className="admin-detail-title">
-        <div><p className="eyebrow">Customer account</p><h1>{account.displayName}</h1><p>cbp-{account.slug}.proneurs.org · Created {account.createdAt.toLocaleDateString()}</p></div>
+        <div><p className="eyebrow">Customer account</p><h1>{account.displayName}</h1><p>{siteUrl(account.slug).replace(/^https?:\/\//, "")} · Created {account.createdAt.toLocaleDateString()}</p></div>
         <div><a href={siteUrl(account.slug)} target="_blank" rel="noreferrer">View public page ↗</a><SiteStatusActions siteId={account.siteId} status={account.siteStatus} /></div>
       </section>
 
@@ -80,16 +95,41 @@ export default async function AdminSiteDetailPage({ params }: { params: Promise<
           showPhone: account.showPhone,
         }} />
         <aside className="manage-account-panel">
-          <div><span>Billing record</span><strong>{account.plan ?? "Not active"}</strong><small>{account.subscriptionStatus ?? "No subscription connected"}</small></div>
+          <div>
+            <span>Billing record</span>
+            <strong>{account.plan ?? "Not active"}</strong>
+            <small>
+              {account.subscriptionStatus ?? "No subscription connected"}
+              {account.cancelAtPeriodEnd && account.currentPeriodEnd
+                ? ` · Cancels ${account.currentPeriodEnd.toLocaleDateString()}`
+                : ""}
+            </small>
+          </div>
           <dl className="admin-account-facts">
             <div><dt>Login email</dt><dd>{account.loginEmail}</dd></div>
             <div><dt>Stripe customer</dt><dd>{account.stripeCustomerId ?? "—"}</dd></div>
             <div><dt>Stripe subscription</dt><dd>{account.stripeSubscriptionId ?? "—"}</dd></div>
+            <div><dt>Paid through</dt><dd>{account.currentPeriodEnd?.toLocaleString() ?? "—"}</dd></div>
             <div><dt>Last updated</dt><dd>{account.updatedAt.toLocaleString()}</dd></div>
           </dl>
+          {account.stripeCustomerId || account.stripeSubscriptionId ? (
+            <div className="admin-stripe-links">
+              {account.stripeCustomerId ? (
+                <a href={stripeDashboardUrl("customers", account.stripeCustomerId, appEnv)} target="_blank" rel="noreferrer">Manage customer in Stripe ↗</a>
+              ) : null}
+              {account.stripeSubscriptionId ? (
+                <a href={stripeDashboardUrl("subscriptions", account.stripeSubscriptionId, appEnv)} target="_blank" rel="noreferrer">Manage subscription in Stripe ↗</a>
+              ) : null}
+            </div>
+          ) : null}
+          <WelcomeEmailAction siteId={account.siteId} />
+          <AccountDeletionAction
+            siteId={account.siteId}
+            initialScheduledAt={account.deletionScheduledAt?.toISOString() ?? null}
+            deletionAllowed={deletionAllowed}
+          />
         </aside>
       </section>
     </main>
   );
 }
-

@@ -1,9 +1,9 @@
 import { desc, eq, like, or } from "drizzle-orm";
 import Link from "next/link";
+import { chatGPTSignInPath, chatGPTSignOutPath } from "@/app/chatgpt-auth";
 import { getDb } from "@/db";
 import { sites, subscriptions, users } from "@/db/schema";
-import { chatGPTSignOutPath } from "@/app/chatgpt-auth";
-import { requireAdmin } from "@/lib/admin-auth";
+import { adminSignOutPath, requireAdmin } from "@/lib/admin-auth";
 import { siteUrl } from "@/lib/site-config";
 import SiteStatusActions from "./SiteStatusActions";
 
@@ -26,18 +26,38 @@ export default async function AdminPage({
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
-  const admin = await requireAdmin("/admin");
+  let admin = null;
+  try {
+    admin = await requireAdmin("/admin");
+  } catch (error) {
+    console.error(
+      JSON.stringify({
+        message: "administrator authentication context failed",
+        error: error instanceof Error ? error.message : "Unknown authentication failure",
+      }),
+    );
+  }
   if (!admin) {
+    const signInPath = chatGPTSignInPath("/admin");
+    const signOutPath = chatGPTSignOutPath("/admin");
     return (
       <main className="admin-access-page">
         <div>
           <p className="eyebrow">ProNeurs administration</p>
           <h1>This account is not authorized.</h1>
           <p>Add the signed-in email to the protected administrator allowlist before using this page.</p>
-          <Link href={chatGPTSignOutPath("/admin")}>Sign out and use another account</Link>
+          <Link href={signInPath}>Sign in with an administrator account</Link>
+          {signInPath !== signOutPath ? <Link href={signOutPath}>Sign out and use another account</Link> : null}
         </div>
       </main>
     );
+  }
+
+  let signOutPath = chatGPTSignOutPath("/admin");
+  try {
+    signOutPath = await adminSignOutPath("/admin");
+  } catch {
+    // The direct ChatGPT sign-out path remains available on the hosted pilot.
   }
 
   const query = (await searchParams).q?.trim().slice(0, 100) ?? "";
@@ -89,7 +109,7 @@ export default async function AdminPage({
     <main className="admin-page">
       <header className="admin-header">
         <div><span>PN</span><div><strong>Personal CBP Sites</strong><small>Administration</small></div></div>
-        <div><span>Signed in as {admin.email}</span><Link href={chatGPTSignOutPath("/")}>Sign out</Link></div>
+        <div><span>Signed in as {admin.email}</span><Link href={signOutPath}>Sign out</Link></div>
       </header>
 
       <section className="admin-title-row">
@@ -125,7 +145,7 @@ export default async function AdminPage({
                 {rows.map((row) => (
                   <tr key={row.siteId}>
                     <td><Link className="admin-customer-link" href={`/admin/sites/${row.siteId}`}>{row.displayName} →</Link><span>{row.email}</span><span>{row.phone}</span></td>
-                    <td><a href={siteUrl(row.slug)} target="_blank" rel="noreferrer">cbp-{row.slug}.proneurs.org ↗</a></td>
+                    <td><a href={siteUrl(row.slug)} target="_blank" rel="noreferrer">{siteUrl(row.slug).replace(/^https?:\/\//, "")} ↗</a></td>
                     <td><strong>{row.plan ?? "—"}</strong><span>{row.subscriptionStatus ?? "No subscription"}</span></td>
                     <td>{row.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</td>
                     <td><SiteStatusActions siteId={row.siteId} status={row.status} /></td>

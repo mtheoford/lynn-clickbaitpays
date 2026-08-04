@@ -4,10 +4,12 @@ import { getDb } from "@/db";
 import { auditLogs, sites, users } from "@/db/schema";
 import { getSignedInCustomer } from "@/lib/customer-auth";
 import { validateReferralUrl } from "@/lib/site-config";
+import { isSameOriginMutation } from "@/lib/request-security";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function PATCH(request: Request) {
+  if (!isSameOriginMutation(request)) return NextResponse.json({ error: "Request origin could not be verified." }, { status: 403 });
   const signedIn = await getSignedInCustomer();
   if (!signedIn) return NextResponse.json({ error: "Not authorized." }, { status: 403 });
 
@@ -64,4 +66,3 @@ export async function PATCH(request: Request) {
 
   return NextResponse.json({ saved: true });
 }
-

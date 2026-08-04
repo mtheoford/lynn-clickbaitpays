@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { getSignedInCustomer } from "@/lib/customer-auth";
 import { getStripe } from "@/lib/stripe";
+import { isSameOriginMutation } from "@/lib/request-security";
 
 export async function POST(request: Request) {
+  if (!isSameOriginMutation(request)) return NextResponse.json({ error: "Request origin could not be verified." }, { status: 403 });
   const signedIn = await getSignedInCustomer();
   if (!signedIn) return NextResponse.json({ error: "Not authorized." }, { status: 403 });
   if (!signedIn.customer.stripeCustomerId) {
@@ -10,7 +12,8 @@ export async function POST(request: Request) {
   }
 
   try {
-    const session = await getStripe().billingPortal.sessions.create({
+    const stripe = await getStripe();
+    const session = await stripe.billingPortal.sessions.create({
       customer: signedIn.customer.stripeCustomerId,
       return_url: `${new URL(request.url).origin}/manage`,
     });
@@ -19,4 +22,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Billing access is not configured yet." }, { status: 503 });
   }
 }
-

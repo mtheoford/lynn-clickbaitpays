@@ -1,32 +1,45 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
-import SignupForm from "./SignupForm";
+import { siteUrl } from "@/lib/site-config";
+import SignupDialog from "./SignupDialog";
 
 export const metadata: Metadata = {
-  title: "Get Your Personal CBP Site | ProNeurs",
-  description: "Launch a professional, personalized ClickBaitPays sponsor page with your referral link and contact information.",
+  title: "Get Your ClickBaitPays Replicated Site",
+  description:
+    "Grow your ClickBaitPays opportunity with a personalized replicated site featuring your referral link, videos, resources, and marketing materials.",
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Your Personal CBP Site",
-    description: "Professional. Personalized. Ready to share.",
+    title: "Your ClickBaitPays replicated site—ready to grow with you.",
+    description:
+      "A custom, ready-to-share site with your referral link and high-impact ClickBaitPays marketing materials.",
     type: "website",
-    images: [{ url: "/og-personal-cbp-sites.png", width: 1536, height: 1024 }],
+    images: [{ url: "/og-personal-cbp-sites-v4.png", width: 1659, height: 948 }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Your Personal CBP Site",
-    description: "Professional. Personalized. Ready to share.",
-    images: ["/og-personal-cbp-sites.png"],
+    title: "Get your ClickBaitPays replicated site.",
+    description: "Your custom CBP growth hub—personalized and ready to share.",
+    images: ["/og-personal-cbp-sites-v4.png"],
   },
 };
 
-const features = [
-  "Your own cbp-name.proneurs.org address",
-  "Your referral link on every ClickBaitPays button",
-  "Personal contact section and sponsor introduction",
-  "Mobile-ready design, videos, FAQs, and resources",
-  "Centrally maintained content and disclosures",
-  "Sharing tools and basic page analytics",
+const benefits = [
+  {
+    number: "01",
+    title: "Customized to you",
+    copy: "Your name, contact details, and official referral link—presented professionally.",
+  },
+  {
+    number: "02",
+    title: "Marketing, ready to share",
+    copy: "Give prospects one polished place for high-impact videos, resources, and opportunity information.",
+  },
+  {
+    number: "03",
+    title: "Built to help you grow",
+    copy: "Share one memorable link in every text, email, post, or real-life CBP conversation.",
+  },
 ];
 
 export default async function GetYourSitePage({
@@ -35,97 +48,150 @@ export default async function GetYourSitePage({
   searchParams: Promise<{ source?: string; checkout?: string }>;
 }) {
   const params = await searchParams;
+  const exampleSiteUrl = siteUrl("your-name");
+  const [addressPrefix, addressSuffix = ""] = exampleSiteUrl.split("your-name");
+  const signupProps = {
+    source: params.source,
+    addressPrefix,
+    addressSuffix,
+    checkoutCanceled: params.checkout === "canceled",
+  };
 
   return (
-    <main className="marketing-page">
-      <header className="marketing-header">
-        <Link href="/" className="marketing-brand">
-          <span>PN</span>
-          <div><strong>ProNeurs</strong><small>Personal CBP Sites</small></div>
+    <main className="cbp-offer" id="top">
+      <div className="cbp-offer-glow cbp-offer-glow-one" />
+      <div className="cbp-offer-glow cbp-offer-glow-two" />
+
+      <header className="cbp-offer-header">
+        <Link href="#top" className="cbp-offer-brand" aria-label="ProNeurs Personal CBP Sites home">
+          <span aria-hidden="true">PN</span>
+          <div>
+            <strong>ProNeurs</strong>
+            <small>ClickBaitPays Replicated Sites</small>
+          </div>
         </Link>
-        <nav className="marketing-account-links" aria-label="Personal site account">
-          <Link href="/manage">Manage my page</Link>
-          <a href="#build">Build my page</a>
+        <nav aria-label="Page navigation">
+          <Link href="/s/lynn-theobald">See a live site <span aria-hidden="true">↗</span></Link>
+          <Link href="/manage">Customer login</Link>
         </nav>
       </header>
 
-      <section className="marketing-hero">
-        <div className="marketing-hero-copy">
-          <p className="eyebrow">Your professional sharing page</p>
-          <h1>Share ClickBaitPays with a page that feels like <em>yours.</em></h1>
-          <p>
-            Add your referral link and contact details once. We create and maintain a polished,
-            mobile-ready sponsor page you can confidently share anywhere.
+      <section className="cbp-offer-hero" aria-labelledby="cbp-offer-title">
+        <div className="cbp-offer-copy">
+          <h1 id="cbp-offer-title">
+            Supercharge your CBP growth with a <em>replicated site.</em>
+          </h1>
+          <p className="cbp-offer-lead">
+            Your own custom growth hub—personalized with your referral link and packed with high-impact videos, resources, and marketing materials that are ready to share.
           </p>
-          <div className="marketing-price">
-            <strong>$9</strong><span>/month</span><small>or $79 annually · cancel anytime</small>
+
+          <div className="cbp-offer-actions">
+            <SignupDialog
+              {...signupProps}
+              dialogId="hero-signup"
+              triggerLabel="Get My Replicated CBP Site"
+            />
+            <Link
+              className="cbp-offer-demo-link"
+              href="/s/lynn-theobald"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              See a replicated site <span aria-hidden="true">↗</span>
+            </Link>
           </div>
-          <a className="join-button" href="#build">Create my page <i aria-hidden="true">↓</i></a>
-        </div>
-        <div className="marketing-site-preview" aria-label="Example personal site address">
-          <div className="preview-browser-bar"><i /><i /><i /><span>cbp-your-name.proneurs.org</span></div>
-          <div className="preview-content">
-            <small>Your independent sponsor guide</small>
-            <h2>Start with<br /><em>Your Name.</em></h2>
-            <p>A focused page with the key videos, resources, answers, and your contact details.</p>
-            <span className="preview-cta">Join ClickBaitPays ↗</span>
+
+          <div className="cbp-offer-pricing" aria-label="Subscription pricing">
+            <div className="cbp-price-option">
+              <span>Monthly</span>
+              <strong>$9<small>/month</small></strong>
+              <p>Billed monthly</p>
+            </div>
+            <div className="cbp-price-option cbp-price-option-annual">
+              <b>Best value · 27% off</b>
+              <span>Annual</span>
+              <strong>$79<small>/year</small></strong>
+              <p>Save $29 every year</p>
+            </div>
           </div>
+          <p className="cbp-secure-checkout">Secure checkout through Stripe</p>
+        </div>
+
+        <div className="cbp-offer-product" aria-label="Preview of a personalized ClickBaitPays replicated site">
+          <figure className="cbp-product-browser">
+            <div className="cbp-product-browser-bar">
+              <span className="cbp-product-dots" aria-hidden="true"><i /><i /><i /></span>
+              <span className="cbp-product-address">lynn-theobald.cbp.proneurs.org</span>
+              <span className="cbp-product-live"><i /> Live example</span>
+            </div>
+            <div className="cbp-product-screen">
+              <Image
+                src="/clickbaitpays-replicated-site-preview.jpg"
+                alt="Personalized ClickBaitPays sponsor site with the ClickBaitPays welcome video and referral call to action"
+                fill
+                priority
+                sizes="(max-width: 760px) calc(100vw - 30px), (max-width: 1020px) 62vw, 60vw"
+              />
+            </div>
+            <figcaption>
+              <div><span>Personalized replicated site</span><strong>Professional from the very first click.</strong></div>
+              <Link href="/s/lynn-theobald" aria-label="Open Lynn Theobald's live example site">Open live site <span aria-hidden="true">↗</span></Link>
+            </figcaption>
+          </figure>
+          <p className="cbp-product-member-note"><span /> Made for ClickBaitPays members</p>
         </div>
       </section>
 
-      <section className="marketing-proof-strip">
-        <span>One link to share</span><i>•</i><span>Personalized in minutes</span><i>•</i><span>Updated for you</span><i>•</i><span>Cancel anytime</span>
+      <section className="cbp-offer-benefits" aria-labelledby="cbp-benefits-title">
+        <div className="cbp-benefits-heading">
+          <p>Your custom CBP growth hub.</p>
+          <h2 id="cbp-benefits-title">Power every conversation with one replicated site.</h2>
+        </div>
+        <div className="cbp-benefit-grid">
+          {benefits.map((benefit) => (
+            <article key={benefit.number}>
+              <span>{benefit.number}</span>
+              <h3>{benefit.title}</h3>
+              <p>{benefit.copy}</p>
+            </article>
+          ))}
+        </div>
       </section>
 
-      <section className="marketing-features" id="included">
+      <section className="cbp-offer-close" aria-labelledby="cbp-close-title">
         <div>
-          <p className="eyebrow">Everything you need to start sharing</p>
-          <h2>Professional without becoming a web designer.</h2>
-          <p>Your page uses the proven sponsor-site structure while keeping your identity, contact details, and referral destination front and center.</p>
+          <p>Your CBP opportunity deserves a stronger follow-up.</p>
+          <h2 id="cbp-close-title">Put your replicated site to work.</h2>
         </div>
-        <ul>
-          {features.map((feature) => <li key={feature}><span>✓</span>{feature}</li>)}
-        </ul>
-      </section>
-
-      <section className="marketing-steps">
-        <p className="eyebrow">Three straightforward steps</p>
-        <div>
-          <article><b>01</b><h3>Personalize</h3><p>Enter your contact information, page name, and official referral link.</p></article>
-          <article><b>02</b><h3>Subscribe</h3><p>Choose monthly or annual billing and complete secure Stripe Checkout.</p></article>
-          <article><b>03</b><h3>Share</h3><p>Receive your personal URL and start sending prospects to one clear destination.</p></article>
-        </div>
-      </section>
-
-      <section className="marketing-builder" id="build">
-        <div className="builder-copy">
-          <p className="eyebrow">See your address take shape</p>
-          <h2>Build your personal CBP site.</h2>
-          <p>Checkout activates after Stripe completes its account review. Until then, the form safely previews the finished onboarding experience without saving information.</p>
-          {params.checkout === "canceled" ? <p className="checkout-note">Checkout was canceled. Your page has not been activated.</p> : null}
-          <div className="builder-assurances">
-            <span><b>✓</b> Your referral link stays yours</span>
-            <span><b>✓</b> No setup fee</span>
-            <span><b>✓</b> No wallet credentials collected</span>
+        <div className="cbp-close-action">
+          <div className="cbp-close-pricing" aria-label="Subscription pricing">
+            <div className="cbp-close-price-option">
+              <span>Monthly</span>
+              <strong>$9<small>/month</small></strong>
+              <p>Billed monthly</p>
+            </div>
+            <div className="cbp-close-price-option cbp-close-price-annual">
+              <b>Best value · 27% off</b>
+              <span>Annual</span>
+              <strong>$79<small>/year</small></strong>
+              <p>Save $29 every year</p>
+            </div>
           </div>
-        </div>
-        <SignupForm source={params.source} />
-      </section>
-
-      <section className="marketing-faq">
-        <div><p className="eyebrow">Before you subscribe</p><h2>Clear expectations.</h2></div>
-        <div>
-          <details><summary>Is this operated by ClickBaitPays?<i>+</i></summary><p>No. ProNeurs provides an independent website and sharing service. A subscription does not create or fund a ClickBaitPays account.</p></details>
-          <details><summary>Can I update my information later?<i>+</i></summary><p>Yes. You will receive secure passwordless access to update your contact details and official referral link.</p></details>
-          <details><summary>What happens if I cancel?<i>+</i></summary><p>Your site remains active through the paid billing period and is then unpublished under the service retention policy.</p></details>
-          <details><summary>Does the site guarantee referrals or earnings?<i>+</i></summary><p>No. The service provides a professional information page. Traffic, referrals, acceptance, participation, and earnings are never guaranteed.</p></details>
+          <SignupDialog
+            {...signupProps}
+            dialogId="closing-signup"
+            triggerLabel="Get My Replicated CBP Site"
+          />
         </div>
       </section>
 
-      <footer className="marketing-footer">
-        <span>ProNeurs Personal CBP Sites</span>
-        <p>Independent website service—not operated by ClickBaitPays. Participation involves financial and cryptocurrency risk. Earnings are not guaranteed.</p>
-        <Link href="/manage">Manage my page</Link>
+      <footer className="cbp-offer-footer">
+        <p>Independent website service for ClickBaitPays members. Not affiliated with or endorsed by ClickBaitPays.</p>
+        <nav aria-label="Legal links">
+          <Link href="/terms">Terms</Link>
+          <Link href="/privacy">Privacy</Link>
+          <Link href="/refund-policy">Refund policy</Link>
+        </nav>
       </footer>
     </main>
   );

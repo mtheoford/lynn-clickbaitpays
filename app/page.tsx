@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import ReferralSimulator from "./ReferralSimulator";
 import { SiteViewTracker, TrackedLink } from "./SiteAnalytics";
 import cbpMark from "../public/cbp-mark.png";
@@ -7,6 +8,7 @@ import {
   formatPhoneForDisplay,
   growthSignupUrl,
   phoneHref,
+  requestSurface,
   resolveSponsorSite,
 } from "@/lib/site-config";
 
@@ -19,16 +21,6 @@ const resources = [
     href: "https://media.base44.com/files/public/6a59be82aeb9c1fbceeb9656/618d0fa01_CBPGettingStartedGuide.pdf",
   },
   {
-    title: "Growth Roadmap",
-    eyebrow: "Illustrative strategy",
-    href: "https://media.base44.com/files/public/6a59be82aeb9c1fbceeb9656/970c892b8_CBPGrowthRoadmap.pdf",
-  },
-  {
-    title: "Sustainability Story",
-    eyebrow: "The team’s explanation",
-    href: "https://media.base44.com/files/public/6a59be82aeb9c1fbceeb9656/4a93543a4_CBPSustainabilityStory.pdf",
-  },
-  {
     title: "Official FAQ",
     eyebrow: "Current rules & fees",
     href: "https://clickbaitpays.me/questions.php",
@@ -39,17 +31,17 @@ const faqs = [
   {
     question: "Is joining free?",
     answer:
-      "Account registration is free. Earning from eligible ad activity requires purchasing an Ad Campaign and paying that campaign level’s activation fee.",
+      "The program’s public materials distinguish account registration from paid campaign activity. Review the official FAQ and dashboard for current costs before making any payment.",
   },
   {
     question: "Do I need referrals?",
     answer:
-      "No. ClickBaitPays says referrals are optional. Direct referrals can add commission income, but members can participate through their own campaign activity.",
+      "ClickBaitPays currently describes referrals as optional. Confirm the current program rules in official materials before participating.",
   },
   {
     question: "When can earnings be withdrawn?",
     answer:
-      "Current public materials describe 12 days of campaign activity plus a 7-day hold. The official FAQ lists a 10 USDT withdrawal minimum, a 10% fee, and manual weekly processing. Confirm current terms in the official dashboard.",
+      "Withdrawal timing, minimums, fees, eligibility, and processing rules can change. Use the official FAQ and member dashboard as the current source of truth.",
   },
 ];
 
@@ -100,8 +92,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function Home() {
-  const site = await resolveSponsorSite();
+export async function SponsorSitePage({ slug }: { slug?: string }) {
+  const site = await resolveSponsorSite(slug);
 
   if (site.status !== "active" && site.status !== "past_due") {
     return (
@@ -132,7 +124,7 @@ export default async function Home() {
         </a>
         <nav aria-label="Main navigation">
           <a href="#how">Income strategy</a>
-          <a href="#calculator">Calculator</a>
+          <a href="#learn">Member tour</a>
           <JoinButton href={site.referralUrl} siteSlug={site.slug} />
         </nav>
       </header>
@@ -143,29 +135,21 @@ export default async function Home() {
 
         <div className="hero-copy">
           <h1>
-            Advertise.
+            See how it works.
             <br />
-            Participate.
+            Understand the risks.
             <br />
-            <em>Get rewarded.</em>
+            <em>Decide with confidence.</em>
           </h1>
-          <p className="hero-lead">
-            Discover how ClickBaitPays connects advertisers who want attention
-            with participating members who can earn USDT for eligible ad views.
-          </p>
-          <div className="everybody-wins" aria-label="How ClickBaitPays describes its model">
-            <span><b>Advertisers</b> get traffic!</span>
-            <i aria-hidden="true">+</i>
-            <span><b>Viewers</b> get paid!</span>
-            <i aria-hidden="true">=</i>
-            <span><b>Everybody wins!</b></span>
-          </div>
           <div className="hero-actions">
             <JoinButton href={site.referralUrl} siteSlug={site.slug} />
             <a className="text-link" href="#how">
               See how it works <span aria-hidden="true">↓</span>
             </a>
           </div>
+          <p className="hero-disclosure">
+            Independent affiliate site. If you join through a sponsor link, the sponsor may receive compensation. Participation involves financial and cryptocurrency risk, and earnings are not guaranteed. <a href="/affiliate-disclosure">Read the affiliate disclosure.</a>
+          </p>
         </div>
 
         <div className="welcome-feature">
@@ -193,93 +177,95 @@ export default async function Home() {
 
       <section className="momentum-strip" aria-label="What you will find">
         <div className="momentum-track">
-          <span><b>✓</b> Real advertising traffic</span>
-          <span><b>✓</b> Crypto-powered participation</span>
-          <span><b>✓</b> No referrals required</span>
-          <span><b>✓</b> Sponsor &amp; up-line support</span>
-          <span aria-hidden="true"><b>✓</b> Real advertising traffic</span>
-          <span aria-hidden="true"><b>✓</b> Crypto-powered participation</span>
-          <span aria-hidden="true"><b>✓</b> No referrals required</span>
-          <span aria-hidden="true"><b>✓</b> Sponsor &amp; up-line support</span>
+          <span><b>✓</b> See how the platform works</span>
+          <span><b>✓</b> Explore campaign strategies</span>
+          <span><b>✓</b> Calculate your own scenarios</span>
+          <span aria-hidden="true"><b>✓</b> See how the platform works</span>
+          <span aria-hidden="true"><b>✓</b> Explore campaign strategies</span>
+          <span aria-hidden="true"><b>✓</b> Calculate your own scenarios</span>
         </div>
       </section>
 
-      <section className="section how-section" id="how">
-        <div className="strategy-feature">
-          <div className="strategy-heading-wide">
-            <p className="eyebrow">The strategy that changes the picture</p>
-            <h2>See how campaigns and referrals can work together.</h2>
+      <div className="journey-flow">
+        <section className="section how-section" id="how">
+          <div className="strategy-feature">
+            <div className="strategy-heading-wide">
+              <p className="eyebrow">01 · Explore the strategy</p>
+              <h2>See how campaigns and referrals can work together.</h2>
+            </div>
+
+            <div className="strategy-stage">
+              <div className="strategy-video-wrap">
+                <div className="strategy-video-label">
+                  <span className="pulse-dot" />
+                  Featured · Income strategies
+                </div>
+                <div className="strategy-video">
+                  <iframe
+                    src="https://player.vimeo.com/video/1210888623?h=310a937e30&title=0&byline=0&portrait=0"
+                    title="ClickBaitPays income strategies"
+                    allow="autoplay; fullscreen; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+                <div className="strategy-video-footer">
+                  <span>Campaigns</span>
+                  <i aria-hidden="true">•</i>
+                  <span>Staggering</span>
+                  <i aria-hidden="true">•</i>
+                  <span>Direct referrals</span>
+                  <strong>Watch now <b aria-hidden="true">▶</b></strong>
+                </div>
+              </div>
+              <div className="strategy-support">
+                <p>
+                  This focused walkthrough explains the three-campaign approach,
+                  staggered timing, direct-referral commissions, and the choices
+                  members make when campaign value becomes available.
+                </p>
+                <div className="strategy-support-actions">
+                  <JoinButton href={site.referralUrl} siteSlug={site.slug} />
+                  <ReferralSimulator />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <a className="section-transition" href="#learn">
+          <span>Next</span>
+          <strong>See the member dashboard</strong>
+          <i aria-hidden="true">↓</i>
+        </a>
+
+        <section className="section learn-section" id="learn">
+          <div className="section-heading compact-heading">
+            <div>
+              <p className="eyebrow">02 · Tour the dashboard</p>
+              <h2>Know the dashboard.</h2>
+            </div>
           </div>
 
-          <div className="strategy-stage">
-            <div className="strategy-video-wrap">
-              <div className="strategy-video-label">
-                <span className="pulse-dot" />
-                Featured · Income strategies
-              </div>
-              <div className="strategy-video">
+          <div className="secondary-videos single-video">
+            <article>
+              <div className="small-video">
                 <iframe
-                  src="https://player.vimeo.com/video/1210888623?h=310a937e30&title=0&byline=0&portrait=0"
-                  title="ClickBaitPays income strategies"
+                  src="https://player.vimeo.com/video/1210888621?h=adb75853a1&title=0&byline=0&portrait=0"
+                  title="ClickBaitPays back-office walkthrough"
                   allow="autoplay; fullscreen; picture-in-picture"
                   allowFullScreen
+                  loading="lazy"
                 />
               </div>
-              <div className="strategy-video-footer">
-                <span>Campaigns</span>
-                <i aria-hidden="true">•</i>
-                <span>Staggering</span>
-                <i aria-hidden="true">•</i>
-                <span>Direct referrals</span>
-                <strong>Watch now <b aria-hidden="true">▶</b></strong>
+              <div className="small-video-copy">
+                <span>Member tour</span>
+                <h3>Back-office walkthrough</h3>
+                <p>See campaigns, clicks, balances, referrals, deposits, and withdrawals.</p>
               </div>
-            </div>
-            <div className="strategy-support">
-              <p>
-                This focused walkthrough explains the three-campaign approach,
-                staggered timing, direct-referral commissions, and the choices
-                members make when campaign value becomes available.
-              </p>
-              <div className="strategy-support-actions">
-                <JoinButton href={site.referralUrl} siteSlug={site.slug} />
-                <ReferralSimulator />
-              </div>
-            </div>
+            </article>
           </div>
-        </div>
-      </section>
-
-      <section className="section learn-section" id="learn">
-        <div className="section-heading compact-heading">
-          <div>
-            <p className="eyebrow">See what happens after you join</p>
-            <h2>Know the dashboard.</h2>
-          </div>
-          <p>
-            Take a practical tour of the member experience, from campaign
-            tracking to referrals, balances, deposits, and withdrawals.
-          </p>
-        </div>
-
-        <div className="secondary-videos single-video">
-          <article>
-            <div className="small-video">
-              <iframe
-                src="https://player.vimeo.com/video/1210888621?h=adb75853a1&title=0&byline=0&portrait=0"
-                title="ClickBaitPays back-office walkthrough"
-                allow="autoplay; fullscreen; picture-in-picture"
-                allowFullScreen
-                loading="lazy"
-              />
-            </div>
-            <div className="small-video-copy">
-              <span>Member tour</span>
-              <h3>Back-office walkthrough</h3>
-              <p>See campaigns, clicks, balances, referrals, deposits, and withdrawals.</p>
-            </div>
-          </article>
-        </div>
-      </section>
+        </section>
+      </div>
 
       <section className="section decision-section">
         <div className="decision-grid">
@@ -364,8 +350,10 @@ export default async function Home() {
           Review official terms before participating.
         </p>
         <div className="footer-links">
-          <a href="https://clickbaitpays.me/terms.php" target="_blank" rel="noopener noreferrer">Terms</a>
-          <a href="https://clickbaitpays.me/privacy.php" target="_blank" rel="noopener noreferrer">Privacy</a>
+          <a href="/terms">ProNeurs terms</a>
+          <a href="/privacy">ProNeurs privacy</a>
+          <a href="https://clickbaitpays.me/terms.php" target="_blank" rel="noopener noreferrer">ClickBaitPays terms</a>
+          <a href="/affiliate-disclosure">Affiliate disclosure</a>
           {site.showEmail ? <a href={`mailto:${site.publicEmail}`}>Contact {site.displayName}</a> : null}
           <TrackedLink href={growthSignupUrl(site.slug)} siteSlug={site.slug} eventType="growth_click">Get Your Personal CBP Site</TrackedLink>
         </div>
@@ -383,4 +371,11 @@ export default async function Home() {
       </TrackedLink>
     </main>
   );
+}
+
+export default async function Home() {
+  const surface = await requestSurface();
+  if (surface === "marketing") redirect("/get-your-site");
+  if (surface === "admin") redirect("/admin");
+  return <SponsorSitePage />;
 }

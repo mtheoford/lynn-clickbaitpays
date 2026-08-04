@@ -1,16 +1,15 @@
 import type { NextConfig } from "next";
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
-const isGitHubPages = process.env.GITHUB_PAGES === "true";
+initOpenNextCloudflareForDev();
 
 const nextConfig: NextConfig = {
-  ...(isGitHubPages
-    ? {
-        output: "export",
-        basePath: "/lynn-clickbaitpays",
-        assetPrefix: "/lynn-clickbaitpays",
-        trailingSlash: true,
-      }
-    : {}),
+  serverExternalPackages: ["jose"],
+  turbopack: {
+    resolveAlias: {
+      "@runtime-platform": "./lib/runtime-platform.ts",
+    },
+  },
   images: {
     unoptimized: true,
   },
