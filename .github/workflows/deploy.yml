@@ -60,22 +60,17 @@ jobs:
           fi
       - name: Build Worker
         run: npm run build:worker
-      - name: Configure Worker secrets
+      - name: Verify Worker secrets
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
-          STRIPE_PRICE_MONTHLY: ${{ secrets.STRIPE_PRICE_MONTHLY }}
-          STRIPE_PRICE_ANNUAL: ${{ secrets.STRIPE_PRICE_ANNUAL }}
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-          ADMIN_EMAILS: ${{ secrets.ADMIN_EMAILS }}
-          CF_ACCESS_AUD: ${{ secrets.CF_ACCESS_AUD }}
-          CF_ACCESS_TEAM_DOMAIN: ${{ secrets.CF_ACCESS_TEAM_DOMAIN }}
         run: |
+          configured_secrets="$(npx wrangler secret list --env "$DEPLOY_ENV" | jq -r '.[].name')"
           for secret_name in STRIPE_SECRET_KEY STRIPE_WEBHOOK_SECRET STRIPE_PRICE_MONTHLY STRIPE_PRICE_ANNUAL RESEND_API_KEY ADMIN_EMAILS CF_ACCESS_AUD CF_ACCESS_TEAM_DOMAIN; do
-            test -n "${!secret_name}"
-            printf '%s' "${!secret_name}" | npx wrangler secret put "$secret_name" --env "$DEPLOY_ENV"
+            if ! grep -Fxq "$secret_name" <<< "$configured_secrets"; then
+              echo "Missing required Worker secret: $secret_name" >&2
+              exit 1
+            fi
           done
       - name: Apply D1 migrations
         env:
