@@ -14,8 +14,14 @@ export async function POST(request: Request) {
 
   try {
     await requestCustomerMagicLink(email, new URL(request.url).origin);
-  } catch {
+  } catch (error) {
     // Never disclose account existence or email-provider state.
+    console.error(
+      JSON.stringify({
+        message: "customer magic-link request failed",
+        error: error instanceof Error ? error.message : "Unknown magic-link failure",
+      }),
+    );
   }
   return NextResponse.json({ accepted: true });
 }

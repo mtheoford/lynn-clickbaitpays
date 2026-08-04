@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { submitMagicLinkRequest } from "./magic-link-submission";
 
 export default function SignInForm() {
   const [message, setMessage] = useState("");
@@ -8,18 +9,12 @@ export default function SignInForm() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const formElement = event.currentTarget;
     setBusy(true);
     setMessage("");
-    const form = new FormData(event.currentTarget);
+    const form = new FormData(formElement);
     try {
-      const response = await fetch("/api/auth/magic-link", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email: form.get("email") }),
-      });
-      if (!response.ok) throw new Error("Sign-in email could not be sent.");
-      setMessage("If that email is connected to a site, a secure sign-in link is on its way.");
-      event.currentTarget.reset();
+      setMessage(await submitMagicLinkRequest(form.get("email"), formElement));
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Sign-in email could not be sent.");
     } finally {
