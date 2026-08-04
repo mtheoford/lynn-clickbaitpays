@@ -97,9 +97,10 @@ export async function requestCustomerMagicLink(
   if ((recent?.total ?? 0) >= MAX_MAGIC_LINKS_PER_HOUR) return { accepted: true };
 
   const token = randomToken();
+  const tokenId = crypto.randomUUID();
   const now = new Date();
   await db.insert(magicLinkTokens).values({
-    id: crypto.randomUUID(),
+    id: tokenId,
     userId: customer.id,
     tokenHash: await hashToken(token),
     expiresAt: new Date(now.getTime() + MAGIC_LINK_TTL_MS),
@@ -108,13 +109,31 @@ export async function requestCustomerMagicLink(
 
   const verifyUrl = new URL("/auth/verify", origin);
   verifyUrl.searchParams.set("token", token);
-  await sendTransactionalEmail({
-    to: customer.email,
-    subject: "Sign in to manage your ProNeurs site",
-    idempotencyKey: `magic-link-${customer.id}-${Math.floor(now.getTime() / 60_000)}`,
-    text: `Hi ${customer.name},\n\nUse this secure link to manage your ProNeurs Personal CBP Site:\n${verifyUrl}\n\nThis link expires in 15 minutes and can be used only once.`,
-    html: `<p>Hi ${escapeHtml(customer.name)},</p><p><a href="${escapeHtml(verifyUrl.toString())}">Sign in to manage your site</a></p><p>This link expires in 15 minutes and can be used only once.</p>`,
-  });
+  try {
+    await sendTransactionalEmail({
+      to: customer.email,
+      subject: "Sign in to manage your ProNeurs site",
+      idempotencyKey: `magic-link-${tokenId}`,
+      text: `Hi ${customer.name},\n\nUse this secure link to manage your ProNeurs Personal CBP Site:\n${verifyUrl}\n\nThis link expires in 15 minutes and can be used only once.`,
+      html: `<p>Hi ${escapeHtml(customer.name)},</p><p><a href="${escapeHtml(verifyUrl.toString())}">Sign in to manage your site</a></p><p>This link expires in 15 minutes and can be used only once.</p>`,
+    });
+  } catch (error) {
+    try {
+      await db.delete(magicLinkTokens).where(eq(magicLinkTokens.id, tokenId));
+    } catch (cleanupError) {
+      console.error(
+        JSON.stringify({
+          message: "failed magic-link token could not be removed",
+          tokenId,
+          error:
+            cleanupError instanceof Error
+              ? cleanupError.message
+              : "Unknown token cleanup failure",
+        }),
+      );
+    }
+    throw error;
+  }
 
   return process.env.NODE_ENV === "production"
     ? { accepted: true }
