@@ -94,8 +94,6 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export async function SponsorSitePage({ slug }: { slug?: string }) {
   const site = await resolveSponsorSite(slug);
-  const incomeStrategyApproved =
-    process.env.ENABLE_APPROVED_INCOME_STRATEGY_CONTENT === "true";
 
   if (site.status !== "active" && site.status !== "past_due") {
     return (
@@ -125,7 +123,7 @@ export async function SponsorSitePage({ slug }: { slug?: string }) {
           </span>
         </a>
         <nav aria-label="Main navigation">
-          {incomeStrategyApproved ? <a href="#how">Income strategy</a> : null}
+          <a href="#how">Income strategy</a>
           <a href="#learn">Member tour</a>
           <JoinButton href={site.referralUrl} siteSlug={site.slug} />
         </nav>
@@ -137,26 +135,15 @@ export async function SponsorSitePage({ slug }: { slug?: string }) {
 
         <div className="hero-copy">
           <h1>
-            Learn the model.
+            See how it works.
             <br />
-            Review the risks.
+            Understand the risks.
             <br />
-            <em>Decide carefully.</em>
+            <em>Decide with confidence.</em>
           </h1>
-          <p className="hero-lead">
-            Review how ClickBaitPays publicly describes its advertiser and member
-            model, then compare the current rules, costs, and risks for yourself.
-          </p>
-          <div className="everybody-wins" aria-label="How ClickBaitPays describes its model">
-            <span><b>Official</b> resources</span>
-            <i aria-hidden="true">+</i>
-            <span><b>Independent</b> sponsor support</span>
-            <i aria-hidden="true">=</i>
-            <span><b>Your</b> informed decision</span>
-          </div>
           <div className="hero-actions">
             <JoinButton href={site.referralUrl} siteSlug={site.slug} />
-            <a className="text-link" href={incomeStrategyApproved ? "#how" : "#learn"}>
+            <a className="text-link" href="#how">
               See how it works <span aria-hidden="true">↓</span>
             </a>
           </div>
@@ -190,93 +177,95 @@ export async function SponsorSitePage({ slug }: { slug?: string }) {
 
       <section className="momentum-strip" aria-label="What you will find">
         <div className="momentum-track">
-          <span><b>✓</b> Official program resources</span>
-          <span><b>✓</b> Current requirements to review</span>
-          <span><b>✓</b> Referrals described as optional</span>
-          <span><b>✓</b> Independent sponsor support</span>
-          <span aria-hidden="true"><b>✓</b> Official program resources</span>
-          <span aria-hidden="true"><b>✓</b> Current requirements to review</span>
-          <span aria-hidden="true"><b>✓</b> Referrals described as optional</span>
-          <span aria-hidden="true"><b>✓</b> Independent sponsor support</span>
+          <span><b>✓</b> See how the platform works</span>
+          <span><b>✓</b> Explore campaign strategies</span>
+          <span><b>✓</b> Calculate your own scenarios</span>
+          <span aria-hidden="true"><b>✓</b> See how the platform works</span>
+          <span aria-hidden="true"><b>✓</b> Explore campaign strategies</span>
+          <span aria-hidden="true"><b>✓</b> Calculate your own scenarios</span>
         </div>
       </section>
 
-      {incomeStrategyApproved ? <section className="section how-section" id="how">
-        <div className="strategy-feature">
-          <div className="strategy-heading-wide">
-            <p className="eyebrow">The strategy that changes the picture</p>
-            <h2>See how campaigns and referrals can work together.</h2>
+      <div className="journey-flow">
+        <section className="section how-section" id="how">
+          <div className="strategy-feature">
+            <div className="strategy-heading-wide">
+              <p className="eyebrow">01 · Explore the strategy</p>
+              <h2>See how campaigns and referrals can work together.</h2>
+            </div>
+
+            <div className="strategy-stage">
+              <div className="strategy-video-wrap">
+                <div className="strategy-video-label">
+                  <span className="pulse-dot" />
+                  Featured · Income strategies
+                </div>
+                <div className="strategy-video">
+                  <iframe
+                    src="https://player.vimeo.com/video/1210888623?h=310a937e30&title=0&byline=0&portrait=0"
+                    title="ClickBaitPays income strategies"
+                    allow="autoplay; fullscreen; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+                <div className="strategy-video-footer">
+                  <span>Campaigns</span>
+                  <i aria-hidden="true">•</i>
+                  <span>Staggering</span>
+                  <i aria-hidden="true">•</i>
+                  <span>Direct referrals</span>
+                  <strong>Watch now <b aria-hidden="true">▶</b></strong>
+                </div>
+              </div>
+              <div className="strategy-support">
+                <p>
+                  This focused walkthrough explains the three-campaign approach,
+                  staggered timing, direct-referral commissions, and the choices
+                  members make when campaign value becomes available.
+                </p>
+                <div className="strategy-support-actions">
+                  <JoinButton href={site.referralUrl} siteSlug={site.slug} />
+                  <ReferralSimulator />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <a className="section-transition" href="#learn">
+          <span>Next</span>
+          <strong>See the member dashboard</strong>
+          <i aria-hidden="true">↓</i>
+        </a>
+
+        <section className="section learn-section" id="learn">
+          <div className="section-heading compact-heading">
+            <div>
+              <p className="eyebrow">02 · Tour the dashboard</p>
+              <h2>Know the dashboard.</h2>
+            </div>
           </div>
 
-          <div className="strategy-stage">
-            <div className="strategy-video-wrap">
-              <div className="strategy-video-label">
-                <span className="pulse-dot" />
-                Featured · Income strategies
-              </div>
-              <div className="strategy-video">
+          <div className="secondary-videos single-video">
+            <article>
+              <div className="small-video">
                 <iframe
-                  src="https://player.vimeo.com/video/1210888623?h=310a937e30&title=0&byline=0&portrait=0"
-                  title="ClickBaitPays income strategies"
+                  src="https://player.vimeo.com/video/1210888621?h=adb75853a1&title=0&byline=0&portrait=0"
+                  title="ClickBaitPays back-office walkthrough"
                   allow="autoplay; fullscreen; picture-in-picture"
                   allowFullScreen
+                  loading="lazy"
                 />
               </div>
-              <div className="strategy-video-footer">
-                <span>Campaigns</span>
-                <i aria-hidden="true">•</i>
-                <span>Staggering</span>
-                <i aria-hidden="true">•</i>
-                <span>Direct referrals</span>
-                <strong>Watch now <b aria-hidden="true">▶</b></strong>
+              <div className="small-video-copy">
+                <span>Member tour</span>
+                <h3>Back-office walkthrough</h3>
+                <p>See campaigns, clicks, balances, referrals, deposits, and withdrawals.</p>
               </div>
-            </div>
-            <div className="strategy-support">
-              <p>
-                This focused walkthrough explains the three-campaign approach,
-                staggered timing, direct-referral commissions, and the choices
-                members make when campaign value becomes available.
-              </p>
-              <div className="strategy-support-actions">
-                <JoinButton href={site.referralUrl} siteSlug={site.slug} />
-                <ReferralSimulator />
-              </div>
-            </div>
+            </article>
           </div>
-        </div>
-      </section> : null}
-
-      <section className="section learn-section" id="learn">
-        <div className="section-heading compact-heading">
-          <div>
-            <p className="eyebrow">See what happens after you join</p>
-            <h2>Know the dashboard.</h2>
-          </div>
-          <p>
-            Take a practical tour of the member experience, from campaign
-            tracking to referrals, balances, deposits, and withdrawals.
-          </p>
-        </div>
-
-        <div className="secondary-videos single-video">
-          <article>
-            <div className="small-video">
-              <iframe
-                src="https://player.vimeo.com/video/1210888621?h=adb75853a1&title=0&byline=0&portrait=0"
-                title="ClickBaitPays back-office walkthrough"
-                allow="autoplay; fullscreen; picture-in-picture"
-                allowFullScreen
-                loading="lazy"
-              />
-            </div>
-            <div className="small-video-copy">
-              <span>Member tour</span>
-              <h3>Back-office walkthrough</h3>
-              <p>See campaigns, clicks, balances, referrals, deposits, and withdrawals.</p>
-            </div>
-          </article>
-        </div>
-      </section>
+        </section>
+      </div>
 
       <section className="section decision-section">
         <div className="decision-grid">

@@ -16,7 +16,6 @@ jobs:
       NEXT_PUBLIC_SITE_URL: https://cbp-staging.proneurs.org
       NEXT_PUBLIC_MARKETING_URL: https://cbp-staging.proneurs.org
       NEXT_PUBLIC_TENANT_BASE_DOMAIN: cbp-staging.proneurs.org
-      ENABLE_APPROVED_INCOME_STRATEGY_CONTENT: "false"
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

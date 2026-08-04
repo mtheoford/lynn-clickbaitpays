@@ -48,8 +48,8 @@ export default function SignupDialog({
         <div className="signup-dialog-shell">
           <header>
             <div>
-              <p className="eyebrow">Your page starts here</p>
-              <h2 id={`${dialogId}-title`}>Build your personal CBP page.</h2>
+              <p className="eyebrow">Your replicated site starts here</p>
+              <h2 id={`${dialogId}-title`}>Get your personalized replicated site.</h2>
             </div>
             <button type="button" onClick={closeDialog} aria-label="Close signup form">×</button>
           </header>

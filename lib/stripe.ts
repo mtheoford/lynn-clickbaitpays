@@ -31,3 +31,12 @@ export async function isBillingConfigured(): Promise<boolean> {
   const config = await stripeConfig();
   return Boolean(config.secretKey && config.monthlyPrice && config.annualPrice);
 }
+
+export function stripeDashboardUrl(
+  resource: "customers" | "subscriptions",
+  id: string,
+  appEnv: string,
+): string {
+  const modePath = appEnv === "production" ? "" : "test/";
+  return `https://dashboard.stripe.com/${modePath}${resource}/${encodeURIComponent(id)}`;
+}

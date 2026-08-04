@@ -3,7 +3,7 @@
 A multi-tenant subscription application for centrally managed, personalized
 ClickBaitPays education and referral sites.
 
-## Production architecture
+## Planned production architecture
 
 - Next.js 16 and React 19
 - Cloudflare Workers via OpenNext
@@ -18,25 +18,27 @@ ClickBaitPays education and referral sites.
 
 One application serves all surfaces:
 
-| Surface | Production address |
+| Surface | Planned address |
 | --- | --- |
 | Marketing and signup | `https://cbp.proneurs.org` |
-| Customer site | `https://{slug}.cbp.proneurs.org` |
+| Customer site | `https://cbp.proneurs.org/s/{slug}` |
 | Customer management | `https://cbp.proneurs.org/manage` |
 | Administration | `https://admin.cbp.proneurs.org/admin` |
 
-The existing OpenAI Sites configuration remains in the repository as a rollback
-path until Cloudflare production cutover is complete.
+Lynn's current public site is the GitHub Pages deployment at
+`https://mtheoford.github.io/lynn-clickbaitpays/`. The retired OpenAI Sites
+deployment must not be used as a public or rollback address.
 
-The hosted pilot uses `/s/{slug}` tenant addresses on its Sites hostname. When
-`NEXT_PUBLIC_TENANT_BASE_DOMAIN` is configured in Cloudflare, the same records
-automatically use `{slug}.cbp.proneurs.org` without changing customer data.
+Set `NEXT_PUBLIC_PRIMARY_DOMAIN=cbp.proneurs.org` in production so customer links
+use `/s/{slug}` without requiring wildcard DNS or a deep-subdomain TLS certificate.
+`NEXT_PUBLIC_TENANT_BASE_DOMAIN` remains available for resolving legacy tenant hosts.
 
 ## Local development
 
 Use Node.js 22.13 or newer.
 
 ```bash
+nvm use
 cp .env.example .env.local
 npm install
 npm run dev
@@ -45,6 +47,7 @@ npm run dev
 For a local Worker/D1 integration preview:
 
 ```bash
+nvm use
 npx wrangler d1 migrations apply proneurs-cbp-local --local
 npm run preview
 ```
@@ -70,9 +73,8 @@ files.
 ## Cloudflare bootstrap
 
 Add `proneurs.org` to the Cloudflare account and reproduce its existing DNS
-records before changing the domain's authoritative nameservers. Keep the current
-Sites records in place during this step so the live preview is not interrupted.
-Workers routes require the domain to be an active Cloudflare zone.
+records before changing the domain's authoritative nameservers. Workers routes
+require the domain to be an active Cloudflare zone.
 
 Create separate staging and production resources before the first deployment:
 
@@ -121,7 +123,6 @@ Environment secrets:
 - `STRIPE_PRICE_MONTHLY`
 - `STRIPE_PRICE_ANNUAL`
 - `RESEND_API_KEY`
-- `EMAIL_FROM`
 - `ADMIN_EMAILS`
 - `CF_ACCESS_AUD`
 - `CF_ACCESS_TEAM_DOMAIN`
@@ -148,7 +149,9 @@ Subscribe to:
 The HTTP handler verifies Stripe's signature, persists the event, and enqueues
 its ID. The queue consumer reconciles current Stripe state, making replay and
 out-of-order delivery safe. A cron job enforces grace-period and paid-through
-expiration every 15 minutes.
+expiration every 15 minutes. The same cron permanently purges sites whose
+administrator-scheduled 30-day deletion window has elapsed. Subscription
+cancellation is managed in Stripe; deletion is a separate administrator action.
 
 Verify the Resend sending domain before testing welcome and magic-link email.
 Until Resend is configured, the hosted pilot exposes Sign in with ChatGPT as a
@@ -170,16 +173,16 @@ or administrator allowlist email.
   dead-letter queue for manual inspection and replay.
 - Worker observability is enabled. Add alerting for webhook 5xx responses, queue
   failures, and elevated application errors before the pilot.
-- Keep the previous Sites deployment and DNS values documented until production
-  smoke tests and the pilot acceptance window have passed.
+- Use the GitHub Pages deployment as the public reference until the Cloudflare
+  production cutover passes smoke tests and the pilot acceptance window.
 
 ## Launch gates
 
 Do not enable live billing until branding permission, legal/claims review,
 privacy and subscription policies, wildcard TLS, Stripe business approval,
 transactional email, and end-to-end failure/replay testing are complete. Keep
-`ENABLE_APPROVED_INCOME_STRATEGY_CONTENT=false` unless the hidden simulator and
-related claims receive explicit approval.
+the centrally managed income-strategy disclosures and supporting source material
+current before selling or publishing replicated sites.
 
 The fuller product and cutover checklist is in
 [`docs/REPLICATED_SITE_PRODUCT_PLAN.md`](docs/REPLICATED_SITE_PRODUCT_PLAN.md).

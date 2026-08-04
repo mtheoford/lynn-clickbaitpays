@@ -9,6 +9,8 @@ export type PublishableSiteStatus =
 
 export type PublicationOverride = "suspended" | "canceled" | null;
 
+export const ACCOUNT_DATA_RETENTION_DAYS = 30;
+
 export function siteStatusWithPublicationOverride(
   billingStatus: PublishableSiteStatus,
   publicationOverride: PublicationOverride,
@@ -46,6 +48,28 @@ export function siteStatusForSubscription(
 
 export function gracePeriodEnd(now = new Date(), days = 7): Date {
   return new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+}
+
+export function accountDeletionDate(
+  requestedAt = new Date(),
+  days = ACCOUNT_DATA_RETENTION_DAYS,
+): Date {
+  return new Date(requestedAt.getTime() + days * 24 * 60 * 60 * 1000);
+}
+
+export function subscriptionAllowsDataDeletion(
+  status: string | null,
+  plan: string | null,
+  currentPeriodEnd: Date | null = null,
+  now = new Date(),
+): boolean {
+  return (
+    status === null ||
+    plan === "complimentary" ||
+    (status === "canceled" &&
+      (!currentPeriodEnd || currentPeriodEnd <= now)) ||
+    status === "incomplete_expired"
+  );
 }
 
 export function graceHasExpired(

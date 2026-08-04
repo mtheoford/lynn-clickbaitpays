@@ -21,7 +21,7 @@
     ],
     "paths": {
       "@/*": ["./*"],
-      "@runtime-platform": ["./lib/runtime-platform.sites.ts"]
+      "@runtime-platform": ["./lib/runtime-platform.ts"]
     }
   },
   "include": [
@@ -34,7 +34,6 @@
   ],
   "exclude": [
     "node_modules",
-    "build",
     "drizzle",
     "examples",
     "worker"

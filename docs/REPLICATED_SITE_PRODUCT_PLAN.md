@@ -98,11 +98,12 @@ Creating a customer must not require an individual DNS change.
 | `active` | Published | Normal service |
 | `past_due` | Published during grace period | Payment recovery messaging and Stripe portal link |
 | `suspended` | Neutral unavailable page | Admin or automated billing suspension |
-| `canceled` | Published until paid-through date, then unavailable | Data retained for reactivation window |
-| `deleted` | Unavailable | Personal data removed under retention policy |
+| `canceled` | Published until paid-through date, then unavailable | Eligible for a reversible 30-day deletion schedule |
+| `deleted` | Unavailable | Site and eligible customer data purged; limited Stripe financial and non-personal audit records retained |
 
-Initial grace period: seven days after a failed renewal. Exact cancellation and
-retention language must match the final customer Terms of Service.
+Initial grace period: seven days after a failed renewal. The data-deletion
+recovery window is 30 days after an administrator schedules an eligible deletion.
+Cancellation and deletion remain separate actions.
 
 ## Stripe integration
 
@@ -190,8 +191,9 @@ and ownership metadata belongs in D1.
 - Keep centrally managed disclosures and official-resource links versioned.
 - Do not allow subscribers to publish arbitrary earnings claims.
 - Do not collect ClickBaitPays passwords, wallet keys, balances, or account access.
-- Keep the existing earnings/referral simulator out of the replicated product
-  until its assumptions, substantiation, and presentation receive legal review.
+- Include the centrally managed income-strategy video and referral simulator in
+  replicated sites, with its assumptions, disclosures, and supporting source
+  material kept current and subject to legal review.
 - Validate referral destinations against an explicit host allowlist and block
   unsafe URL schemes and open redirects.
 - Publish privacy, subscription, cancellation, refund, and acceptable-use terms
@@ -202,20 +204,18 @@ and ownership metadata belongs in D1.
 Observed on 2026-08-03:
 
 - `proneurs.org` is managed in GoDaddy DNS.
-- Existing Sites custom-domain records use
-  `custom-domains.chatgpt.site` plus a `_cf-custom-hostname` verification record.
+- The obsolete OpenAI Sites deployment was made owner-only and its
+  `cbp.proneurs.org` custom domain was detached.
+- Lynn's current public site is
+  `https://mtheoford.github.io/lynn-clickbaitpays/`.
 - Stripe account activation is complete.
 - A test-mode Stripe product named `ProNeurs Personal CBP Site` is configured
   with `$9/month` and `$79/year` recurring prices.
 - The Stripe-hosted customer portal is configured for subscription management,
   payment-method updates, invoices, and cancellation.
-- A test-mode signed webhook named `ProNeurs Personal CBP Sites (Test)` sends
-  the six required lifecycle events to
-  `https://lynn-clickbaitpays.theoford.chatgpt.site/api/stripe/webhook`.
-- The Stripe test secret, webhook signing secret, and both test price IDs are
-  stored as protected Sites runtime values and are not committed to source.
-- Sites runtime changes require deployment of the saved application version
-  before hosted Checkout and webhook handling use the new configuration.
+- The former OpenAI Sites webhook destination is retired and must not be used.
+  Configure a new signed webhook only when a supported server deployment is
+  ready; GitHub Pages cannot receive server-side Stripe webhooks.
 
 Do not add wildcard DNS until the production hosting destination and required
 verification value are known. Repeat the product, prices, webhook, and runtime

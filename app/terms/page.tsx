@@ -12,7 +12,7 @@ export default function TermsPage() {
       <h2>3. Subscription and renewal</h2>
       <p>The service is billed monthly or annually through Stripe and renews automatically until canceled. Current prices are shown before Checkout. Taxes may apply. Stripe stores and processes payment-card information; ProNeurs does not store full card details.</p>
       <h2>4. Cancellation</h2>
-      <p>You may cancel through the Stripe customer portal. Unless law requires otherwise, the site remains available through the paid subscription period and is unpublished afterward. Failed payments may receive a seven-day recovery period before suspension.</p>
+      <p>You may cancel through the Stripe customer portal. Unless law requires otherwise, the site remains available through the paid subscription period and is unpublished afterward. Cancellation does not itself delete account data. Eligible deletion requests normally receive a 30-day recovery window before permanent removal. Failed payments may receive a seven-day recovery period before suspension.</p>
       <h2>5. No performance promise</h2>
       <p>The service does not guarantee traffic, leads, referrals, acceptance into any third-party program, financial performance, or earnings. Cryptocurrency and third-party program participation involve substantial risk.</p>
       <h2>6. Content and acceptable use</h2>

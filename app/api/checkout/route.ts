@@ -14,7 +14,11 @@ import {
   type BillingPlan,
 } from "@/lib/stripe";
 import { isSameOriginMutation } from "@/lib/request-security";
-import { checkoutReservationDecision } from "@/lib/checkout-reservation";
+import {
+  checkoutReservationDecision,
+  ownedReservationDecision,
+} from "@/lib/checkout-reservation";
+import { purgeExpiredCheckoutReservations } from "@/lib/checkout-cleanup";
 
 type CheckoutInput = {
   name?: string;
@@ -38,8 +42,10 @@ function initialsFor(name: string): string {
     .join("") || "CB";
 }
 
-function error(message: string, status = 400) {
-  return NextResponse.json({ error: message }, { status });
+type CheckoutErrorCode = "email_has_site" | "site_unavailable" | "checkout_processing";
+
+function error(message: string, status = 400, code?: CheckoutErrorCode) {
+  return NextResponse.json({ error: message, ...(code ? { code } : {}) }, { status });
 }
 
 export async function POST(request: Request) {
@@ -77,12 +83,15 @@ export async function POST(request: Request) {
 
   const db = await getDb();
   const now = new Date();
+  await purgeExpiredCheckoutReservations(now);
   const [existingSite] = await db
     .select({
       id: sites.id,
       userId: sites.userId,
       status: sites.status,
       reservationExpiresAt: sites.reservationExpiresAt,
+      stripeCheckoutSessionId: sites.stripeCheckoutSessionId,
+      updatedAt: sites.updatedAt,
     })
     .from(sites)
     .where(eq(sites.slug, slug))
@@ -100,38 +109,64 @@ export async function POST(request: Request) {
 
   const [existingOwnedSite] = existingUser
     ? await db
-        .select({ id: sites.id, slug: sites.slug })
+        .select({
+          id: sites.id,
+          userId: sites.userId,
+          slug: sites.slug,
+          status: sites.status,
+          reservationExpiresAt: sites.reservationExpiresAt,
+          stripeCheckoutSessionId: sites.stripeCheckoutSessionId,
+          updatedAt: sites.updatedAt,
+        })
         .from(sites)
         .where(eq(sites.userId, existingUser.id))
         .limit(1)
     : [];
 
-  if (existingOwnedSite && existingOwnedSite.id !== existingSite?.id) {
+  const ownedDecision = ownedReservationDecision(existingOwnedSite, existingSite?.id);
+  if (existingOwnedSite && ownedDecision === "retained") {
     return error(
       `That email already manages ${existingOwnedSite.slug}. Sign in to update or reactivate the existing site.`,
       409,
+      "email_has_site",
     );
   }
 
-  const reservationDecision = checkoutReservationDecision(
+  const requestedAddressDecision = checkoutReservationDecision(
     existingSite,
     existingUser?.id,
     now,
   );
-  if (reservationDecision === "retained") {
-    return error("That site address already belongs to an active or retained account.", 409);
+  if (requestedAddressDecision === "retained") {
+    return error(
+      "That site address already belongs to an active or retained account.",
+      409,
+      "site_unavailable",
+    );
   }
-  if (reservationDecision === "reserved") {
-    return error("That site address is already reserved. Please choose another.", 409);
+  if (requestedAddressDecision === "reserved") {
+    return error(
+      "That site address is already reserved. Please choose another.",
+      409,
+      "site_unavailable",
+    );
   }
 
+  const reservationSite = ownedDecision === "rename" ? existingOwnedSite : existingSite;
+  const renamingOwnedReservation = ownedDecision === "rename";
+  const reservationDecision = checkoutReservationDecision(
+    reservationSite,
+    existingUser?.id,
+    now,
+  );
+
   const reservationExpiresAt =
-    existingSite && reservationDecision === "reuse"
-      ? existingSite.reservationExpiresAt!
+    reservationSite && reservationDecision === "reuse" && !renamingOwnedReservation
+      ? reservationSite.reservationExpiresAt!
       : new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
   const userId = existingUser?.id ?? crypto.randomUUID();
-  const siteId = existingSite?.id ?? crypto.randomUUID();
+  const siteId = reservationSite?.id ?? crypto.randomUUID();
   const [sourceSite] = sourceSlug
     ? await db
         .select({ id: sites.id })
@@ -139,22 +174,6 @@ export async function POST(request: Request) {
         .where(and(eq(sites.slug, sourceSlug), eq(sites.status, "active")))
         .limit(1)
     : [];
-
-  if (existingUser) {
-    await db
-      .update(users)
-      .set({ name, phone, updatedAt: now })
-      .where(eq(users.id, userId));
-  } else {
-    await db.insert(users).values({
-      id: userId,
-      email,
-      name,
-      phone,
-      createdAt: now,
-      updatedAt: now,
-    });
-  }
 
   const siteValues = {
     userId,
@@ -174,17 +193,76 @@ export async function POST(request: Request) {
     updatedAt: now,
   };
 
-  if (existingSite) {
-    await db.update(sites).set(siteValues).where(eq(sites.id, siteId));
+  const stripe = await getStripe();
+  if (renamingOwnedReservation && reservationSite?.stripeCheckoutSessionId) {
+    const previousSession = await stripe.checkout.sessions.retrieve(
+      reservationSite.stripeCheckoutSessionId,
+    );
+    if (previousSession.status === "complete") {
+      return error(
+        "Your previous checkout has completed and the site is still being activated. Please wait a moment, then sign in.",
+        409,
+        "checkout_processing",
+      );
+    }
+    if (previousSession.status === "open") {
+      await stripe.checkout.sessions.expire(previousSession.id);
+    }
+  }
+
+  if (existingUser) {
+    await db
+      .update(users)
+      .set({ name, phone, updatedAt: now })
+      .where(eq(users.id, userId));
   } else {
-    await db.insert(sites).values({
-      id: siteId,
-      ...siteValues,
+    await db.insert(users).values({
+      id: userId,
+      email,
+      name,
+      phone,
       createdAt: now,
+      updatedAt: now,
     });
   }
 
-  const stripe = await getStripe();
+  if (reservationSite) {
+    const updated = await db
+      .update(sites)
+      .set(siteValues)
+      .where(and(eq(sites.id, siteId), eq(sites.updatedAt, reservationSite.updatedAt)))
+      .returning({ id: sites.id });
+    if (updated.length === 0) {
+      return error(
+        "That site address was just claimed. Please enter another name.",
+        409,
+        "site_unavailable",
+      );
+    }
+  } else {
+    try {
+      await db.insert(sites).values({
+        id: siteId,
+        ...siteValues,
+        createdAt: now,
+      });
+    } catch (cause) {
+      const [conflictingSite] = await db
+        .select({ id: sites.id })
+        .from(sites)
+        .where(eq(sites.slug, slug))
+        .limit(1);
+      if (conflictingSite) {
+        return error(
+          "That site address was just claimed. Please enter another name.",
+          409,
+          "site_unavailable",
+        );
+      }
+      throw cause;
+    }
+  }
+
   const origin = new URL(request.url).origin;
   const session = await stripe.checkout.sessions.create(
     {
@@ -195,6 +273,7 @@ export async function POST(request: Request) {
       client_reference_id: siteId,
       line_items: [{ price: await priceForPlan(plan), quantity: 1 }],
       allow_promotion_codes: true,
+      expires_at: Math.floor(reservationExpiresAt.getTime() / 1000),
       success_url: `${origin}/get-your-site/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/get-your-site?checkout=canceled&site=${encodeURIComponent(slug)}`,
       metadata: { siteId, userId, plan, sourceSlug },

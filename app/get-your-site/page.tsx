@@ -5,21 +5,21 @@ import { siteUrl } from "@/lib/site-config";
 import SignupDialog from "./SignupDialog";
 
 export const metadata: Metadata = {
-  title: "Your Personal CBP Site",
+  title: "Get Your ClickBaitPays Replicated Site",
   description:
-    "Give every CBP prospect one polished, personalized place to learn, watch, and take the next step with you.",
+    "Grow your ClickBaitPays opportunity with a personalized replicated site featuring your referral link, videos, resources, and marketing materials.",
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Your CBP story, beautifully presented.",
+    title: "Your ClickBaitPays replicated site—ready to grow with you.",
     description:
-      "Your own polished CBP site—personalized, maintained, and ready to share.",
+      "A custom, ready-to-share site with your referral link and high-impact ClickBaitPays marketing materials.",
     type: "website",
     images: [{ url: "/og-personal-cbp-sites-v4.png", width: 1659, height: 948 }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Your CBP story, beautifully presented.",
-    description: "One polished link for every CBP conversation.",
+    title: "Get your ClickBaitPays replicated site.",
+    description: "Your custom CBP growth hub—personalized and ready to share.",
     images: ["/og-personal-cbp-sites-v4.png"],
   },
 };
@@ -27,18 +27,18 @@ export const metadata: Metadata = {
 const benefits = [
   {
     number: "01",
-    title: "Built around you",
+    title: "Customized to you",
     copy: "Your name, contact details, and official referral link—presented professionally.",
   },
   {
     number: "02",
-    title: "Does the explaining",
-    copy: "Videos, member tour, FAQs, and resources give prospects one clear place to learn.",
+    title: "Marketing, ready to share",
+    copy: "Give prospects one polished place for high-impact videos, resources, and opportunity information.",
   },
   {
     number: "03",
-    title: "Ready for every share",
-    copy: "Send one memorable link in a text, email, post, or real-life conversation.",
+    title: "Built to help you grow",
+    copy: "Share one memorable link in every text, email, post, or real-life CBP conversation.",
   },
 ];
 
@@ -67,7 +67,7 @@ export default async function GetYourSitePage({
           <span aria-hidden="true">PN</span>
           <div>
             <strong>ProNeurs</strong>
-            <small>Personal CBP Sites</small>
+            <small>ClickBaitPays Replicated Sites</small>
           </div>
         </Link>
         <nav aria-label="Page navigation">
@@ -78,44 +78,46 @@ export default async function GetYourSitePage({
 
       <section className="cbp-offer-hero" aria-labelledby="cbp-offer-title">
         <div className="cbp-offer-copy">
-          <p className="cbp-offer-kicker"><span /> Made for ClickBaitPays members</p>
           <h1 id="cbp-offer-title">
-            Give your prospects one great place to <em>start.</em>
+            Supercharge your CBP growth with a <em>replicated site.</em>
           </h1>
           <p className="cbp-offer-lead">
-            Your own polished CBP site—personalized to you, packed with the right information, and ready to share.
+            Your own custom growth hub—personalized with your referral link and packed with high-impact videos, resources, and marketing materials that are ready to share.
           </p>
 
           <div className="cbp-offer-actions">
             <SignupDialog
               {...signupProps}
               dialogId="hero-signup"
-              triggerLabel="Build my CBP site"
+              triggerLabel="Get My Replicated CBP Site"
             />
-            <Link className="cbp-offer-demo-link" href="/s/lynn-theobald">
-              Explore the live example <span aria-hidden="true">↗</span>
+            <Link
+              className="cbp-offer-demo-link"
+              href="/s/lynn-theobald"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              See a replicated site <span aria-hidden="true">↗</span>
             </Link>
           </div>
 
-          <div className="cbp-offer-price-line" aria-label="Pricing">
-            <strong>$9<span>/month</span></strong>
-            <i />
-            <span>or $79/year</span>
-            <i />
-            <span>Secure Stripe checkout</span>
+          <div className="cbp-offer-pricing" aria-label="Subscription pricing">
+            <div className="cbp-price-option">
+              <span>Monthly</span>
+              <strong>$9<small>/month</small></strong>
+              <p>Billed monthly</p>
+            </div>
+            <div className="cbp-price-option cbp-price-option-annual">
+              <b>Best value · 27% off</b>
+              <span>Annual</span>
+              <strong>$79<small>/year</small></strong>
+              <p>Save $29 every year</p>
+            </div>
           </div>
+          <p className="cbp-secure-checkout">Secure checkout through Stripe</p>
         </div>
 
-        <div className="cbp-offer-product" aria-label="Preview of a personalized CBP site">
-          <div className="cbp-product-note cbp-product-note-brand">
-            <span>01</span>
-            <strong>Your brand</strong>
-          </div>
-          <div className="cbp-product-note cbp-product-note-link">
-            <span>02</span>
-            <strong>Your referral link</strong>
-          </div>
-
+        <div className="cbp-offer-product" aria-label="Preview of a personalized ClickBaitPays replicated site">
           <figure className="cbp-product-browser">
             <div className="cbp-product-browser-bar">
               <span className="cbp-product-dots" aria-hidden="true"><i /><i /><i /></span>
@@ -124,25 +126,26 @@ export default async function GetYourSitePage({
             </div>
             <div className="cbp-product-screen">
               <Image
-                src="/replicated-site-hero.jpg"
-                alt="Personalized CBP website showing the sponsor name, educational messaging, and referral call to action"
+                src="/clickbaitpays-replicated-site-preview.jpg"
+                alt="Personalized ClickBaitPays sponsor site with the ClickBaitPays welcome video and referral call to action"
                 fill
                 priority
-                sizes="(max-width: 760px) 92vw, 57vw"
+                sizes="(max-width: 760px) calc(100vw - 30px), (max-width: 1020px) 62vw, 60vw"
               />
             </div>
             <figcaption>
-              <div><span>Personalized sponsor site</span><strong>Professional from the very first click.</strong></div>
+              <div><span>Personalized replicated site</span><strong>Professional from the very first click.</strong></div>
               <Link href="/s/lynn-theobald" aria-label="Open Lynn Theobald's live example site">Open live site <span aria-hidden="true">↗</span></Link>
             </figcaption>
           </figure>
+          <p className="cbp-product-member-note"><span /> Made for ClickBaitPays members</p>
         </div>
       </section>
 
       <section className="cbp-offer-benefits" aria-labelledby="cbp-benefits-title">
         <div className="cbp-benefits-heading">
-          <p>One link. The complete introduction.</p>
-          <h2 id="cbp-benefits-title">Let the site do the explaining.</h2>
+          <p>Your custom CBP growth hub.</p>
+          <h2 id="cbp-benefits-title">Power every conversation with one replicated site.</h2>
         </div>
         <div className="cbp-benefit-grid">
           {benefits.map((benefit) => (
@@ -157,17 +160,28 @@ export default async function GetYourSitePage({
 
       <section className="cbp-offer-close" aria-labelledby="cbp-close-title">
         <div>
-          <p>Your next CBP conversation deserves a better follow-up.</p>
-          <h2 id="cbp-close-title">Make your introduction memorable.</h2>
+          <p>Your CBP opportunity deserves a stronger follow-up.</p>
+          <h2 id="cbp-close-title">Put your replicated site to work.</h2>
         </div>
         <div className="cbp-close-action">
-          <span><strong>$9</strong>/month</span>
+          <div className="cbp-close-pricing" aria-label="Subscription pricing">
+            <div className="cbp-close-price-option">
+              <span>Monthly</span>
+              <strong>$9<small>/month</small></strong>
+              <p>Billed monthly</p>
+            </div>
+            <div className="cbp-close-price-option cbp-close-price-annual">
+              <b>Best value · 27% off</b>
+              <span>Annual</span>
+              <strong>$79<small>/year</small></strong>
+              <p>Save $29 every year</p>
+            </div>
+          </div>
           <SignupDialog
             {...signupProps}
             dialogId="closing-signup"
-            triggerLabel="Get my personal site"
+            triggerLabel="Get My Replicated CBP Site"
           />
-          <small>Annual plan available for $79/year.</small>
         </div>
       </section>
 

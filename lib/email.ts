@@ -1,4 +1,9 @@
-import { runtimeValue } from "@/lib/runtime";
+import { and, eq, ne } from "drizzle-orm";
+import { getDb } from "@/db";
+import { sites, users } from "@/db/schema";
+import { getRuntimeEnv, runtimeValue } from "@/lib/runtime";
+import { siteUrl } from "@/lib/site-config";
+import { buildWelcomeEmail } from "@/lib/welcome-email";
 
 type EmailInput = {
   to: string;
@@ -51,25 +56,59 @@ export async function sendWelcomeEmail(input: {
   publicUrl: string;
   manageUrl: string;
   siteId: string;
+  deliveryId?: string;
 }) {
+  const supportEmail =
+    (await runtimeValue("NEXT_PUBLIC_SUPPORT_EMAIL")) || "support@proneurs.org";
+  const content = buildWelcomeEmail({
+    name: input.name,
+    publicUrl: input.publicUrl,
+    manageUrl: input.manageUrl,
+    supportEmail,
+  });
   await sendTransactionalEmail({
     to: input.email,
-    subject: "Your ProNeurs Personal CBP Site is ready",
-    idempotencyKey: `welcome-${input.siteId}`,
-    text: `Hi ${input.name},\n\nYour personal sharing site is ready: ${input.publicUrl}\n\nManage your page: ${input.manageUrl}\n\nProNeurs provides an independent website service and does not guarantee traffic, referrals, participation, or earnings.`,
-    html: `<p>Hi ${escapeHtml(input.name)},</p><p>Your personal sharing site is ready:</p><p><a href="${escapeHtml(input.publicUrl)}">${escapeHtml(input.publicUrl)}</a></p><p><a href="${escapeHtml(input.manageUrl)}">Manage your page</a></p><p><small>ProNeurs provides an independent website service and does not guarantee traffic, referrals, participation, or earnings.</small></p>`,
+    subject: content.subject,
+    idempotencyKey: input.deliveryId ?? `welcome-${input.siteId}`,
+    text: content.text,
+    html: content.html,
   });
 }
 
-function escapeHtml(value: string): string {
-  return value.replace(/[&<>'"]/g, (character) => {
-    const entities: Record<string, string> = {
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      "'": "&#39;",
-      '"': "&quot;",
-    };
-    return entities[character] ?? character;
+export async function deliverWelcomeEmailForSite(
+  siteId: string,
+  deliveryId = `welcome-${siteId}`,
+): Promise<void> {
+  const db = await getDb();
+  const [account] = await db
+    .select({ email: users.email, name: users.name, slug: sites.slug })
+    .from(users)
+    .innerJoin(sites, eq(sites.userId, users.id))
+    .where(and(eq(sites.id, siteId), ne(sites.status, "deleted")))
+    .limit(1);
+  if (!account) throw new Error("Welcome email account was not found.");
+
+  const marketingUrl =
+    (await runtimeValue("NEXT_PUBLIC_MARKETING_URL")) || "https://cbp.proneurs.org";
+  await sendWelcomeEmail({
+    email: account.email,
+    name: account.name,
+    publicUrl: siteUrl(account.slug),
+    manageUrl: new URL("/manage", marketingUrl).toString(),
+    siteId,
+    deliveryId,
   });
+}
+
+export async function enqueueWelcomeEmail(
+  siteId: string,
+  deliveryId = `welcome-${siteId}-${crypto.randomUUID()}`,
+): Promise<"queued" | "sent"> {
+  const env = await getRuntimeEnv();
+  if (env.BILLING_QUEUE) {
+    await env.BILLING_QUEUE.send({ type: "welcome_email", siteId, deliveryId });
+    return "queued";
+  }
+  await deliverWelcomeEmailForSite(siteId, deliveryId);
+  return "sent";
 }

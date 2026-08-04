@@ -2,6 +2,7 @@ import { and, eq, lte, or, sql } from "drizzle-orm";
 import type Stripe from "stripe";
 import { getDb } from "@/db";
 import {
+  auditLogs,
   customerSessions,
   magicLinkTokens,
   sites,
@@ -15,10 +16,10 @@ import {
   siteStatusWithPublicationOverride,
   subscriptionPeriodEnd,
 } from "@/lib/billing-lifecycle";
-import { sendWelcomeEmail } from "@/lib/email";
+import { deliverWelcomeEmailForSite, enqueueWelcomeEmail } from "@/lib/email";
 import { getRuntimeEnv, type BillingQueueMessage } from "@/lib/runtime";
-import { siteUrl } from "@/lib/site-config";
 import { getStripe, type BillingPlan } from "@/lib/stripe";
+import { purgeExpiredCheckoutReservations } from "@/lib/checkout-cleanup";
 
 function stripeId(value: string | { id: string } | null | undefined): string | null {
   if (!value) return null;
@@ -77,13 +78,21 @@ export async function processBillingMessages(
 ): Promise<void> {
   for (const message of messages) {
     try {
-      await processStripeEvent(message.body.stripeEventId);
+      if (message.body.type === "welcome_email") {
+        await deliverWelcomeEmailForSite(message.body.siteId, message.body.deliveryId);
+      } else {
+        await processStripeEvent(message.body.stripeEventId);
+      }
       message.ack();
     } catch (error) {
       console.error(
         JSON.stringify({
           message: "billing queue message failed",
-          stripeEventId: message.body.stripeEventId,
+          jobType: message.body.type ?? "stripe_event",
+          jobId:
+            message.body.type === "welcome_email"
+              ? message.body.siteId
+              : message.body.stripeEventId,
           error: error instanceof Error ? error.message : "Unknown queue failure",
         }),
       );
@@ -158,7 +167,13 @@ async function applyStripeEvent(event: Stripe.Event): Promise<void> {
     await db
       .update(sites)
       .set({ reservationExpiresAt: new Date(), updatedAt: new Date() })
-      .where(and(eq(sites.id, siteId), eq(sites.status, "pending")));
+      .where(
+        and(
+          eq(sites.id, siteId),
+          eq(sites.status, "pending"),
+          eq(sites.stripeCheckoutSessionId, event.data.object.id),
+        ),
+      );
   }
 }
 
@@ -242,33 +257,7 @@ async function applyCompletedCheckout(session: Stripe.Checkout.Session): Promise
   }
 
   if (siteStatus === "active") {
-    const [account] = await db
-      .select({ email: users.email, name: users.name, slug: sites.slug })
-      .from(users)
-      .innerJoin(sites, eq(sites.userId, users.id))
-      .where(and(eq(users.id, userId), eq(sites.id, siteId)))
-      .limit(1);
-    if (account) {
-      const marketingUrl =
-        process.env.NEXT_PUBLIC_MARKETING_URL ?? "https://cbp.proneurs.org";
-      try {
-        await sendWelcomeEmail({
-          email: account.email,
-          name: account.name,
-          publicUrl: siteUrl(account.slug),
-          manageUrl: new URL("/manage", marketingUrl).toString(),
-          siteId,
-        });
-      } catch (error) {
-        console.error(
-          JSON.stringify({
-            message: "welcome email delivery failed after site activation",
-            siteId,
-            error: error instanceof Error ? error.message : "Unknown email failure",
-          }),
-        );
-      }
-    }
+    await enqueueWelcomeEmail(siteId, `welcome-${siteId}`);
   }
 }
 
@@ -336,6 +325,7 @@ async function applySubscription(
 
 export async function enforceScheduledBillingState(now = new Date()): Promise<void> {
   const db = await getDb();
+  await purgeExpiredCheckoutReservations(now);
   await db.delete(customerSessions).where(lte(customerSessions.expiresAt, now));
   await db.delete(magicLinkTokens).where(lte(magicLinkTokens.expiresAt, now));
 
@@ -389,5 +379,62 @@ export async function enforceScheduledBillingState(now = new Date()): Promise<vo
         updatedAt: now,
       })
       .where(eq(sites.id, item.siteId));
+  }
+
+  await purgeScheduledAccountData(now);
+}
+
+export async function purgeScheduledAccountData(now = new Date()): Promise<void> {
+  const db = await getDb();
+  const due = await db
+    .select({ siteId: sites.id, userId: sites.userId })
+    .from(sites)
+    .where(lte(sites.deletionScheduledAt, now));
+
+  for (const item of due) {
+    const billingRecords = await db
+      .select({
+        stripeCustomerId: subscriptions.stripeCustomerId,
+        stripeSubscriptionId: subscriptions.stripeSubscriptionId,
+      })
+      .from(subscriptions)
+      .where(eq(subscriptions.siteId, item.siteId));
+
+    const stripeIdentifiers = new Set(
+      billingRecords.flatMap((record) => [
+        record.stripeCustomerId,
+        record.stripeSubscriptionId,
+      ]),
+    );
+    for (const identifier of stripeIdentifiers) {
+      await db
+        .delete(stripeEvents)
+        .where(sql`instr(${stripeEvents.payloadJson}, ${identifier}) > 0`);
+    }
+
+    await db.insert(auditLogs).values({
+      id: crypto.randomUUID(),
+      actorEmail: "system",
+      action: "site.data_deletion.completed",
+      targetType: "site",
+      targetId: item.siteId,
+      beforeJson: JSON.stringify({ deletionScheduled: true }),
+      afterJson: JSON.stringify({
+        siteRemoved: true,
+        customerRemovedWhenNoSitesRemain: true,
+        retainedRecords: ["stripe_financial_records", "non_personal_audit_log"],
+      }),
+      createdAt: now,
+    });
+
+    await db.delete(sites).where(eq(sites.id, item.siteId));
+    const [remainingSite] = await db
+      .select({ id: sites.id })
+      .from(sites)
+      .where(eq(sites.userId, item.userId))
+      .limit(1);
+    if (!remainingSite) {
+      await db.delete(users).where(eq(users.id, item.userId));
+    }
   }
 }

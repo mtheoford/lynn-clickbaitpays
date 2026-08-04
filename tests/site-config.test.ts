@@ -56,7 +56,10 @@ test("resolves nested production and legacy tenant hosts", () => {
 
 test("builds the configured tenant URL", () => {
   withEnvironment(
-    { NEXT_PUBLIC_TENANT_BASE_DOMAIN: "cbp.proneurs.org" },
+    {
+      NEXT_PUBLIC_PRIMARY_DOMAIN: undefined,
+      NEXT_PUBLIC_TENANT_BASE_DOMAIN: "cbp.proneurs.org",
+    },
     () => {
       assert.equal(
         siteUrl("Lynn Theobald"),
@@ -69,7 +72,7 @@ test("builds the configured tenant URL", () => {
 test("builds a path-based tenant URL when the pilot host has no wildcard domain", () => {
   withEnvironment(
     {
-      NEXT_PUBLIC_TENANT_BASE_DOMAIN: undefined,
+      NEXT_PUBLIC_TENANT_BASE_DOMAIN: "cbp.proneurs.org",
       NEXT_PUBLIC_PRIMARY_DOMAIN: "personal-sites.example.com",
     },
     () => {

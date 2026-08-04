@@ -1,8 +1,9 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import { platformRuntimeEnv } from "@runtime-platform";
 
-export type BillingQueueMessage = {
-  stripeEventId: string;
-};
+export type BillingQueueMessage =
+  | { type?: "stripe_event"; stripeEventId: string }
+  | { type: "welcome_email"; siteId: string; deliveryId: string };
 
 export type RuntimeEnv = {
   DB?: D1Database;
@@ -22,7 +23,19 @@ export type RuntimeEnv = {
   [key: string]: unknown;
 };
 
+const runtimeEnvStorage = new AsyncLocalStorage<RuntimeEnv>();
+
+export function runWithRuntimeEnv<T>(
+  env: RuntimeEnv,
+  callback: () => T,
+): T {
+  return runtimeEnvStorage.run(env, callback);
+}
+
 export async function getRuntimeEnv(): Promise<RuntimeEnv> {
+  const scopedEnv = runtimeEnvStorage.getStore();
+  if (scopedEnv) return scopedEnv;
+
   const runtime = await platformRuntimeEnv();
   return runtime && typeof runtime === "object"
     ? (runtime as RuntimeEnv)

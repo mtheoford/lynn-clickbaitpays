@@ -16,9 +16,9 @@ export default function PrivacyPage() {
       <h2>Service providers</h2>
       <p>Cloudflare provides hosting, security, and data infrastructure. Stripe processes billing. The configured transactional-email provider delivers account messages. These providers process information under their own contracts and privacy terms.</p>
       <h2>Retention and security</h2>
-      <p>We retain account and billing records while the service is active and for a reasonable period afterward for recovery, disputes, fraud prevention, and legal requirements. Access is restricted, secrets are kept outside source code, and sensitive links are short-lived and single-use.</p>
+      <p>We retain account information while the service is active. After an eligible deletion request is scheduled, the site remains unavailable during a 30-day recovery window and is then permanently removed by an automated process. Stripe may retain financial records, and ProNeurs may retain limited non-personal audit information, when needed for accounting, disputes, fraud prevention, or legal requirements. Access is restricted, secrets are kept outside source code, and sensitive links are short-lived and single-use.</p>
       <h2>Your choices</h2>
-      <p>You may update public information and visibility choices, cancel service, or request access, correction, or deletion of eligible personal information by contacting <SupportContact />.</p>
+      <p>You may update public information and visibility choices, manage or cancel billing through Stripe, or request access, correction, or deletion of eligible personal information by contacting <SupportContact />. Subscription cancellation and data deletion are separate actions.</p>
       <p><strong>Review notice:</strong> This policy should receive qualified legal review and be updated with the final business entity, address, retention schedule, and jurisdictional notices before live launch.</p>
     </LegalPage>
   );

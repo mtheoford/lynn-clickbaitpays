@@ -81,13 +81,15 @@
         "APP_ENV": "staging",
         "NEXT_PUBLIC_SITE_URL": "https://proneurs-personal-cbp-sites-staging.mtheoford.workers.dev",
         "NEXT_PUBLIC_MARKETING_URL": "https://proneurs-personal-cbp-sites-staging.mtheoford.workers.dev",
-        "NEXT_PUBLIC_TENANT_BASE_DOMAIN": "",
+        "NEXT_PUBLIC_TENANT_BASE_DOMAIN": "cbp.proneurs.org",
         "NEXT_PUBLIC_PRIMARY_DOMAIN": "proneurs-personal-cbp-sites-staging.mtheoford.workers.dev"
       }
     },
     "production": {
       "name": "proneurs-personal-cbp-sites",
       "routes": [
+        { "pattern": "lynn-theobald.cbp.proneurs.org", "custom_domain": true },
+        { "pattern": "admin.cbp.proneurs.org", "custom_domain": true },
         { "pattern": "cbp.proneurs.org/*", "zone_name": "proneurs.org" },
         { "pattern": "*.cbp.proneurs.org/*", "zone_name": "proneurs.org" }
       ],
@@ -95,7 +97,7 @@
         {
           "binding": "DB",
           "database_name": "proneurs-cbp-production",
-          "database_id": "00000000-0000-4000-8000-000000000002",
+          "database_id": "b189b9e0-62ad-4b8c-a745-e4962599e691",
           "migrations_dir": "drizzle"
         }
       ],
@@ -119,9 +121,11 @@
       },
       "vars": {
         "APP_ENV": "production",
+        "EMAIL_FROM": "ProNeurs <sites@mail.proneurs.org>",
         "NEXT_PUBLIC_SITE_URL": "https://cbp.proneurs.org",
         "NEXT_PUBLIC_MARKETING_URL": "https://cbp.proneurs.org",
-        "NEXT_PUBLIC_TENANT_BASE_DOMAIN": "cbp.proneurs.org"
+        "NEXT_PUBLIC_TENANT_BASE_DOMAIN": "cbp.proneurs.org",
+        "NEXT_PUBLIC_PRIMARY_DOMAIN": "cbp.proneurs.org"
       }
     }
   }

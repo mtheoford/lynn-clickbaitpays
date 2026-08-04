@@ -29,6 +29,7 @@ export async function POST(
       status: sites.status,
       publicationOverride: sites.publicationOverride,
       publishedAt: sites.publishedAt,
+      deletionScheduledAt: sites.deletionScheduledAt,
     })
     .from(sites)
     .where(eq(sites.id, id))
@@ -36,6 +37,12 @@ export async function POST(
   if (!site) return NextResponse.json({ error: "Site not found." }, { status: 404 });
 
   const now = new Date();
+  if (input.status === "active" && site.deletionScheduledAt) {
+    return NextResponse.json(
+      { error: "Cancel the scheduled data deletion before activating this site." },
+      { status: 409 },
+    );
+  }
   let nextStatus: "active" | "pending" | "past_due" | "suspended" | "canceled";
   let publicationOverride: "suspended" | "canceled" | null;
   if (input.status === "active") {

@@ -47,11 +47,11 @@ export default async function CustomerSignInPage() {
             <Link className="signup-submit" href={chatGPTSignInPath("/manage")}>
               Sign in with ChatGPT <span aria-hidden="true">→</span>
             </Link>
-          ) : (
+          ) : !emailSignInConfigured ? (
             <p className="signup-error" role="status">
               Email sign-in is temporarily unavailable. Contact ProNeurs support for account access.
             </p>
-          )}
+          ) : null}
           {showChatGPTPilotSignIn ? <p className="signup-safe-note">Use the same email address used during purchase.</p> : null}
         </div>
       </section>

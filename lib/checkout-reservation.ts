@@ -1,5 +1,16 @@
 export type ReservationDecision = "new" | "reuse" | "replace" | "reserved" | "retained";
 
+export type OwnedReservationDecision = "none" | "same" | "rename" | "retained";
+
+export function ownedReservationDecision(
+  existingOwnedSite: { id: string; status: string } | null | undefined,
+  requestedSiteId: string | null | undefined,
+): OwnedReservationDecision {
+  if (!existingOwnedSite) return "none";
+  if (existingOwnedSite.id === requestedSiteId) return "same";
+  return existingOwnedSite.status === "pending" ? "rename" : "retained";
+}
+
 export function checkoutReservationDecision(
   existing: {
     userId: string;

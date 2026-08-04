@@ -45,6 +45,7 @@ export const sites = sqliteTable(
     stripeCheckoutSessionId: text("stripe_checkout_session_id"),
     publishedAt: integer("published_at", { mode: "timestamp_ms" }),
     reservationExpiresAt: integer("reservation_expires_at", { mode: "timestamp_ms" }),
+    deletionScheduledAt: integer("deletion_scheduled_at", { mode: "timestamp_ms" }),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
   },
@@ -53,6 +54,7 @@ export const sites = sqliteTable(
     uniqueIndex("idx_sites_checkout_session_unique").on(table.stripeCheckoutSessionId),
     index("idx_sites_user_id").on(table.userId),
     index("idx_sites_status").on(table.status),
+    index("idx_sites_deletion_scheduled_at").on(table.deletionScheduledAt),
     index("idx_sites_source_site_id").on(table.sourceSiteId),
   ],
 );

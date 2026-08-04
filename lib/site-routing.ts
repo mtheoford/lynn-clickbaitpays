@@ -51,11 +51,11 @@ export function validateReferralUrl(value: string): string | null {
 
 export function siteUrl(slug: string): string {
   const normalizedSlug = normalizeSiteSlug(slug);
-  const tenantDomain = process.env.NEXT_PUBLIC_TENANT_BASE_DOMAIN;
-  if (tenantDomain) return `https://${normalizedSlug}.${tenantDomain}`;
-
   const primaryDomain = process.env.NEXT_PUBLIC_PRIMARY_DOMAIN;
   if (primaryDomain) return `https://${primaryDomain}/s/${normalizedSlug}`;
+
+  const tenantDomain = process.env.NEXT_PUBLIC_TENANT_BASE_DOMAIN;
+  if (tenantDomain) return `https://${normalizedSlug}.${tenantDomain}`;
 
   const marketingUrl = process.env.NEXT_PUBLIC_MARKETING_URL;
   if (marketingUrl) return new URL(`/s/${normalizedSlug}`, marketingUrl).toString();
