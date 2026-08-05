@@ -137,7 +137,7 @@ export async function SponsorSitePage({ slug }: { slug?: string }) {
           <h1>
             See how it works.
             <br />
-            Understand the risks.
+            Understand the opportunity.
             <br />
             <em>Decide with confidence.</em>
           </h1>

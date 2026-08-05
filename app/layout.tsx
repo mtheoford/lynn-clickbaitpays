@@ -25,6 +25,11 @@ export const metadata: Metadata = {
   },
   description:
     "Personalized ClickBaitPays replicated sites with your referral link and ready-to-share marketing materials.",
+  icons: {
+    icon: [{ url: "/cbp-mark.png", type: "image/png", sizes: "256x256" }],
+    shortcut: "/cbp-mark.png",
+    apple: [{ url: "/cbp-mark.png", type: "image/png", sizes: "256x256" }],
+  },
   openGraph: {
     title: "ClickBaitPays Replicated Sites by ProNeurs™",
     description:
