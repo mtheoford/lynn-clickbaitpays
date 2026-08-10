@@ -31,16 +31,16 @@
     "stripe": "^22.4.0"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "4.2.1",
+    "@tailwindcss/postcss": "4.3.3",
     "@types/node": "22.19.19",
-    "@types/react": "19.2.14",
-    "@types/react-dom": "19.2.3",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
     "drizzle-kit": "0.31.10",
     "eslint": "9.39.4",
-    "eslint-config-next": "16.2.12",
-    "tailwindcss": "4.2.1",
+    "eslint-config-next": "16.3.0",
+    "tailwindcss": "4.3.3",
     "typescript": "5.9.3",
-    "wrangler": "4.118.0"
+    "wrangler": "4.120.0"
   },
   "overrides": {
     "@aws-sdk/credential-provider-sso": "3.973.9",
