@@ -6,7 +6,7 @@ export default function PrivacyPage() {
   return (
     <LegalPage eyebrow="Data practices" title="Privacy Policy" summary="This policy explains the information ProNeurs™ uses to provide and protect Personal CBP Sites.">
       <h2>Information collected</h2>
-      <p>We collect the name, email, phone number, requested site address, sponsor introduction, contact-visibility choices, and referral URL submitted during signup or account editing. We also store Stripe customer and subscription identifiers, subscription status, security and audit records, and privacy-limited page and outbound-click events.</p>
+      <p>We collect the name, email, phone number, requested site address, sponsor introduction, contact-visibility choices, and referral URL submitted during signup or account editing. We also store Stripe customer and subscription identifiers, subscription status, security and audit records, and privacy-limited page and outbound-click events. A random first-party browser identifier is hashed before storage and used only to estimate unique visitors; analytics records do not store IP addresses.</p>
       <h2>Information not collected</h2>
       <p>We do not request or store ClickBaitPays passwords, cryptocurrency wallet keys, wallet balances, full payment-card numbers, or credit applications.</p>
       <h2>How information is used</h2>

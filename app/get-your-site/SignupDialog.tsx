@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import SignupForm from "./SignupForm";
+import { recordSignupPageEvent } from "./SignupPageAnalytics";
 
 export default function SignupDialog({
   source,
@@ -10,6 +11,7 @@ export default function SignupDialog({
   checkoutCanceled,
   dialogId,
   triggerLabel,
+  analyticsPlacement,
 }: {
   source?: string;
   addressPrefix: string;
@@ -17,6 +19,7 @@ export default function SignupDialog({
   checkoutCanceled: boolean;
   dialogId: string;
   triggerLabel: string;
+  analyticsPlacement: "hero" | "closing";
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -24,6 +27,7 @@ export default function SignupDialog({
     const dialog = dialogRef.current;
     if (!dialog || dialog.open) return;
     dialog.showModal();
+    recordSignupPageEvent("signup_click", analyticsPlacement, source);
   }
 
   function closeDialog() {

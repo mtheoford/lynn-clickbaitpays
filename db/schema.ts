@@ -156,6 +156,34 @@ export const analyticsEvents = sqliteTable(
   ],
 );
 
+export const signupPageEvents = sqliteTable(
+  "signup_page_events",
+  {
+    id: text("id").primaryKey(),
+    eventType: text("event_type", {
+      enum: ["page_view", "signup_click", "demo_click"],
+    }).notNull(),
+    placement: text("placement", {
+      enum: ["page", "header", "hero", "product_preview", "closing"],
+    }).notNull(),
+    visitorHash: text("visitor_hash").notNull(),
+    source: text("source"),
+    referrerHost: text("referrer_host"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => [
+    index("idx_signup_page_events_created").on(table.createdAt),
+    index("idx_signup_page_events_type_created").on(
+      table.eventType,
+      table.createdAt,
+    ),
+    index("idx_signup_page_events_visitor_created").on(
+      table.visitorHash,
+      table.createdAt,
+    ),
+  ],
+);
+
 export const stripeEvents = sqliteTable("stripe_events", {
   id: text("id").primaryKey(),
   eventType: text("event_type").notNull(),

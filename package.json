@@ -13,7 +13,7 @@
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy:staging": "opennextjs-cloudflare build && opennextjs-cloudflare deploy -- --env staging --keep-vars",
     "deploy:production": "opennextjs-cloudflare build && opennextjs-cloudflare deploy -- --env production --keep-vars",
-    "test": "node --test tests/calculator-math.test.ts tests/site-config.test.ts tests/site-identity.test.ts tests/billing-lifecycle.test.ts tests/customer-auth.test.ts tests/checkout-reservation.test.ts tests/checkout-session-cleanup.test.ts tests/magic-link-submission.test.ts tests/welcome-email.test.ts",
+    "test": "node --test tests/calculator-math.test.ts tests/site-config.test.ts tests/site-identity.test.ts tests/billing-lifecycle.test.ts tests/customer-auth.test.ts tests/checkout-reservation.test.ts tests/checkout-session-cleanup.test.ts tests/magic-link-submission.test.ts tests/welcome-email.test.ts tests/signup-page-analytics.test.ts",
     "test:calculator": "node --test tests/calculator-math.test.ts",
     "audit:security": "node scripts/security-audit.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next --ignore-pattern .open-next --ignore-pattern cloudflare-env.d.ts",
