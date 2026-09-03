@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { chatGPTSignInPath } from "@/app/chatgpt-auth";
+import { customerSignInErrorMessage } from "@/lib/magic-link-flow";
 import { runtimeValue } from "@/lib/runtime";
 import SignInForm from "./SignInForm";
 
@@ -8,7 +9,13 @@ export const metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function CustomerSignInPage() {
+export default async function CustomerSignInPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string | string[] }>;
+}) {
+  const params = await searchParams;
+  const errorMessage = customerSignInErrorMessage(params.error);
   let showChatGPTPilotSignIn = false;
   let emailSignInConfigured = false;
   try {
@@ -42,6 +49,9 @@ export default async function CustomerSignInPage() {
           </p>
         </div>
         <div>
+          {errorMessage ? (
+            <p className="signup-error" role="alert">{errorMessage}</p>
+          ) : null}
           {emailSignInConfigured ? <SignInForm /> : null}
           {showChatGPTPilotSignIn ? (
             <Link className="signup-submit" href={chatGPTSignInPath("/manage")}>

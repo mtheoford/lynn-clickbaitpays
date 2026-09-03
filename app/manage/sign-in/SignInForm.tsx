@@ -27,6 +27,7 @@ export default function SignInForm() {
       <label>
         Email used during purchase
         <input name="email" type="email" autoComplete="email" required />
+        <small>Use the exact address shown on your purchase receipt, including spelling.</small>
       </label>
       <button className="signup-submit" type="submit" disabled={busy}>
         {busy ? "Sending secure link…" : "Email me a sign-in link"}
