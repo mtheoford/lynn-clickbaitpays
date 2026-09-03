@@ -159,7 +159,7 @@ export async function SponsorSitePage({ slug }: { slug?: string }) {
           </div>
           <div className="hero-video">
             <iframe
-              src="https://player.vimeo.com/video/1210888620?h=46a4e2c6c8&title=0&byline=0&portrait=0"
+              src="https://www.youtube.com/embed/PhTIPCzqMjw"
               title="Welcome to ClickBaitPays"
               allow="autoplay; fullscreen; picture-in-picture"
               allowFullScreen
@@ -202,7 +202,7 @@ export async function SponsorSitePage({ slug }: { slug?: string }) {
                 </div>
                 <div className="strategy-video">
                   <iframe
-                    src="https://player.vimeo.com/video/1210888623?h=310a937e30&title=0&byline=0&portrait=0"
+                    src="https://www.youtube.com/embed/YFbW5RSLOQM"
                     title="ClickBaitPays income strategies"
                     allow="autoplay; fullscreen; picture-in-picture"
                     allowFullScreen
@@ -250,7 +250,7 @@ export async function SponsorSitePage({ slug }: { slug?: string }) {
             <article>
               <div className="small-video">
                 <iframe
-                  src="https://player.vimeo.com/video/1210888621?h=adb75853a1&title=0&byline=0&portrait=0"
+                  src="https://www.youtube.com/embed/JQEnm6I37dI"
                   title="ClickBaitPays back-office walkthrough"
                   allow="autoplay; fullscreen; picture-in-picture"
                   allowFullScreen
