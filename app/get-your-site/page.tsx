@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { siteUrl } from "@/lib/site-config";
 import SignupDialog from "./SignupDialog";
+import { SignupPageViewTracker, TrackedDemoLink } from "./SignupPageAnalytics";
 
 export const metadata: Metadata = {
   title: "Get Your ClickBaitPays Replicated Site",
@@ -59,6 +60,7 @@ export default async function GetYourSitePage({
 
   return (
     <main className="cbp-offer" id="top">
+      <SignupPageViewTracker source={params.source} />
       <div className="cbp-offer-glow cbp-offer-glow-one" />
       <div className="cbp-offer-glow cbp-offer-glow-two" />
 
@@ -71,7 +73,7 @@ export default async function GetYourSitePage({
           </div>
         </Link>
         <nav aria-label="Page navigation">
-          <Link href="/s/lynn-theobald">See a live site <span aria-hidden="true">↗</span></Link>
+          <TrackedDemoLink href="/s/lynn-theobald" placement="header" source={params.source}>See a live site <span aria-hidden="true">↗</span></TrackedDemoLink>
           <Link href="/manage">Customer login</Link>
         </nav>
       </header>
@@ -90,15 +92,18 @@ export default async function GetYourSitePage({
               {...signupProps}
               dialogId="hero-signup"
               triggerLabel="Get My Replicated CBP Site"
+              analyticsPlacement="hero"
             />
-            <Link
+            <TrackedDemoLink
               className="cbp-offer-demo-link"
               href="/s/lynn-theobald"
+              placement="hero"
+              source={params.source}
               target="_blank"
               rel="noopener noreferrer"
             >
               See a replicated site <span aria-hidden="true">↗</span>
-            </Link>
+            </TrackedDemoLink>
           </div>
 
           <div className="cbp-offer-pricing" aria-label="Subscription pricing">
@@ -135,7 +140,7 @@ export default async function GetYourSitePage({
             </div>
             <figcaption>
               <div><span>Personalized replicated site</span><strong>Professional from the very first click.</strong></div>
-              <Link href="/s/lynn-theobald" aria-label="Open Lynn Theobald's live example site">Open live site <span aria-hidden="true">↗</span></Link>
+              <TrackedDemoLink href="/s/lynn-theobald" placement="product_preview" source={params.source} ariaLabel="Open Lynn Theobald's live example site">Open live site <span aria-hidden="true">↗</span></TrackedDemoLink>
             </figcaption>
           </figure>
           <p className="cbp-product-member-note"><span /> Made for ClickBaitPays members</p>
@@ -181,6 +186,7 @@ export default async function GetYourSitePage({
             {...signupProps}
             dialogId="closing-signup"
             triggerLabel="Get My Replicated CBP Site"
+            analyticsPlacement="closing"
           />
         </div>
       </section>

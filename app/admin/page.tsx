@@ -1,10 +1,17 @@
-import { desc, eq, like, or } from "drizzle-orm";
+import { and, count, countDistinct, desc, eq, gte, like, lt, or } from "drizzle-orm";
 import Link from "next/link";
 import { chatGPTSignInPath, chatGPTSignOutPath } from "@/app/chatgpt-auth";
 import { getDb } from "@/db";
-import { sites, subscriptions, users } from "@/db/schema";
+import { signupPageEvents, sites, subscriptions, users } from "@/db/schema";
 import { adminSignOutPath, requireAdmin } from "@/lib/admin-auth";
 import { siteUrl } from "@/lib/site-config";
+import {
+  SIGNUP_ANALYTICS_RANGE_OPTIONS,
+  SIGNUP_ANALYTICS_TIME_ZONE,
+  parseSignupAnalyticsRange,
+  signupAnalyticsWindow,
+  type SignupAnalyticsRange,
+} from "@/lib/signup-page-analytics";
 import SiteStatusActions from "./SiteStatusActions";
 
 export const dynamic = "force-dynamic";
@@ -21,10 +28,16 @@ type AdminRow = {
   createdAt: Date;
 };
 
+function adminPageHref(range: SignupAnalyticsRange, query: string): string {
+  const params = new URLSearchParams({ range });
+  if (query) params.set("q", query);
+  return `/admin?${params.toString()}`;
+}
+
 export default async function AdminPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; range?: string }>;
 }) {
   let admin = null;
   try {
@@ -60,7 +73,13 @@ export default async function AdminPage({
     // The direct ChatGPT sign-out path remains available on the hosted pilot.
   }
 
-  const query = (await searchParams).q?.trim().slice(0, 100) ?? "";
+  const params = await searchParams;
+  const query = params.q?.trim().slice(0, 100) ?? "";
+  const analyticsRange = parseSignupAnalyticsRange(params.range);
+  const analyticsWindow = signupAnalyticsWindow(analyticsRange);
+  const analyticsRangeLabel =
+    SIGNUP_ANALYTICS_RANGE_OPTIONS.find((option) => option.value === analyticsRange)
+      ?.label ?? "Last 7 Days";
   let rows: AdminRow[] = [];
   let databaseMessage = "";
   try {
@@ -96,6 +115,38 @@ export default async function AdminPage({
     databaseMessage = "The account database will appear here after the first hosted migration is applied.";
   }
 
+  let signupMetrics = { visitors: 0, signupClicks: 0, demoClicks: 0 };
+  let signupAnalyticsMessage = "";
+  try {
+    const db = await getDb();
+    const dateFilter =
+      analyticsWindow.start && analyticsWindow.end
+        ? and(
+            gte(signupPageEvents.createdAt, analyticsWindow.start),
+            lt(signupPageEvents.createdAt, analyticsWindow.end),
+          )
+        : undefined;
+    const metricRows = await db
+      .select({
+        eventType: signupPageEvents.eventType,
+        total: count(),
+        uniqueVisitors: countDistinct(signupPageEvents.visitorHash),
+      })
+      .from(signupPageEvents)
+      .where(dateFilter)
+      .groupBy(signupPageEvents.eventType);
+    const metric = (eventType: "page_view" | "signup_click" | "demo_click") =>
+      metricRows.find((row) => row.eventType === eventType);
+    signupMetrics = {
+      visitors: metric("page_view")?.uniqueVisitors ?? 0,
+      signupClicks: metric("signup_click")?.total ?? 0,
+      demoClicks: metric("demo_click")?.total ?? 0,
+    };
+  } catch {
+    signupAnalyticsMessage =
+      "Signup-page activity will appear after the analytics migration is applied.";
+  }
+
   const counts = rows.reduce(
     (totals, row) => {
       totals.total += 1;
@@ -117,6 +168,46 @@ export default async function AdminPage({
         <Link href="/get-your-site">Open signup page ↗</Link>
       </section>
 
+      <section className="admin-funnel-panel" aria-labelledby="admin-funnel-title">
+        <div className="admin-funnel-heading">
+          <div>
+            <p className="eyebrow">Signup funnel</p>
+            <h2 id="admin-funnel-title">Get Your Site page activity</h2>
+            <p>{analyticsRangeLabel} · Calendar ranges use {SIGNUP_ANALYTICS_TIME_ZONE.replace("America/", "")} time.</p>
+          </div>
+          <nav className="admin-range-filters" aria-label="Signup analytics date range">
+            {SIGNUP_ANALYTICS_RANGE_OPTIONS.map((option) => (
+              <Link
+                key={option.value}
+                href={adminPageHref(option.value, query)}
+                className={option.value === analyticsRange ? "active" : undefined}
+                aria-current={option.value === analyticsRange ? "page" : undefined}
+              >
+                {option.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+        <div className="admin-funnel-stat-grid">
+          <article>
+            <span>Site visitors</span>
+            <strong>{signupMetrics.visitors}</strong>
+            <small>Unique browsers</small>
+          </article>
+          <article>
+            <span>Get my replicated site</span>
+            <strong>{signupMetrics.signupClicks}</strong>
+            <small>Signup-form opens</small>
+          </article>
+          <article>
+            <span>See a replicated site</span>
+            <strong>{signupMetrics.demoClicks}</strong>
+            <small>Live-demo clicks</small>
+          </article>
+        </div>
+        {signupAnalyticsMessage ? <p className="admin-funnel-message">{signupAnalyticsMessage}</p> : null}
+      </section>
+
       <section className="admin-stat-grid" aria-label="Site account totals">
         <article><span>All sites</span><strong>{counts.total}</strong></article>
         <article><span>Active</span><strong>{counts.active}</strong></article>
@@ -129,9 +220,10 @@ export default async function AdminPage({
         <div className="admin-panel-heading">
           <div><h2>Customer accounts</h2><p>Search by customer, email, phone, site address, or Stripe customer ID.</p></div>
           <form className="admin-search-form" action="/admin" method="get">
+            <input type="hidden" name="range" value={analyticsRange} />
             <label><span className="sr-only">Search customer accounts</span><input name="q" defaultValue={query} placeholder="Search accounts" /></label>
             <button type="submit">Search</button>
-            {query ? <Link href="/admin">Clear</Link> : null}
+            {query ? <Link href={adminPageHref(analyticsRange, "")}>Clear</Link> : null}
           </form>
           <span>{rows.length} records</span>
         </div>

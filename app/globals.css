@@ -4187,6 +4187,7 @@ footer.site-copyright {
 .admin-page { min-height: 100vh; padding-bottom: 80px; background: #090b19; }
 .admin-header,
 .admin-title-row,
+.admin-funnel-panel,
 .admin-stat-grid,
 .admin-table-panel { width: min(1240px, calc(100% - 40px)); margin-inline: auto; }
 .admin-header { min-height: 72px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
@@ -4201,6 +4202,20 @@ footer.site-copyright {
 .admin-title-row h1 { margin: 0; font-family: var(--font-manrope), sans-serif; font-size: 48px; letter-spacing: -.055em; }
 .admin-title-row > div > p:last-child { margin: 12px 0 0; color: var(--muted); font-size: 12px; }
 .admin-title-row > a { padding: 12px 15px; border: 1px solid rgba(46,231,242,.23); border-radius: 10px; color: var(--cyan); font-size: 10px; font-weight: 850; }
+.admin-funnel-panel { margin-bottom: 22px; overflow: hidden; border: 1px solid rgba(46,231,242,.17); border-radius: 17px; background: linear-gradient(110deg, rgba(46,231,242,.045), rgba(91,133,255,.04), rgba(155,92,255,.045)); }
+.admin-funnel-heading { min-height: 96px; padding: 20px; display: flex; align-items: center; justify-content: space-between; gap: 26px; border-bottom: 1px solid var(--line); }
+.admin-funnel-heading h2 { margin: 5px 0 0; font-family: var(--font-manrope), sans-serif; font-size: 22px; letter-spacing: -.035em; }
+.admin-funnel-heading > div > p:last-child { margin: 7px 0 0; color: #78819d; font-size: 9px; }
+.admin-range-filters { display: flex; align-items: center; justify-content: flex-end; gap: 6px; flex-wrap: wrap; }
+.admin-range-filters a { min-height: 32px; padding: 0 10px; display: inline-flex; align-items: center; border: 1px solid rgba(255,255,255,.09); border-radius: 8px; color: #8d95ae; background: rgba(255,255,255,.018); font-size: 8px; font-weight: 850; white-space: nowrap; }
+.admin-range-filters a:hover { border-color: rgba(46,231,242,.28); color: #d5d9e8; }
+.admin-range-filters a.active { border-color: rgba(46,231,242,.42); color: var(--cyan); background: rgba(46,231,242,.075); box-shadow: 0 0 18px rgba(46,231,242,.06); }
+.admin-funnel-stat-grid { padding: 14px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.admin-funnel-stat-grid article { min-height: 108px; padding: 18px; display: grid; grid-template-columns: 1fr auto; align-content: space-between; gap: 14px; border: 1px solid rgba(255,255,255,.08); border-radius: 13px; background: rgba(7,9,24,.56); }
+.admin-funnel-stat-grid span { color: #858da8; font-size: 9px; font-weight: 850; letter-spacing: .065em; text-transform: uppercase; }
+.admin-funnel-stat-grid strong { grid-row: 1 / 3; grid-column: 2; align-self: center; color: #f0f2f8; font-family: var(--font-manrope), sans-serif; font-size: 38px; letter-spacing: -.045em; }
+.admin-funnel-stat-grid small { color: #69728e; font-size: 8px; }
+.admin-funnel-message { margin: 0 14px 14px; padding: 10px 12px; border: 1px solid rgba(255,202,98,.2); border-radius: 9px; color: #d9bd7c; background: rgba(255,202,98,.045); font-size: 9px; }
 .admin-stat-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
 .admin-stat-grid article { min-height: 96px; padding: 17px; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.018); }
 .admin-stat-grid span { color: #8189a3; font-size: 9px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
@@ -4274,6 +4289,8 @@ footer.site-copyright {
   .marketing-faq { gap: 45px; }
   .builder-copy { padding-top: 0; position: static; }
   .admin-stat-grid { grid-template-columns: repeat(3, 1fr); }
+  .admin-funnel-heading { align-items: flex-start; flex-direction: column; }
+  .admin-range-filters { justify-content: flex-start; }
   .admin-panel-heading { align-items: flex-start; flex-wrap: wrap; }
   .admin-search-form { width: 100%; margin-left: 0; }
   .admin-search-form label { flex: 1; }
@@ -4292,6 +4309,7 @@ footer.site-copyright {
   .marketing-footer,
   .admin-header,
   .admin-title-row,
+  .admin-funnel-panel,
   .admin-stat-grid,
   .admin-table-panel { width: calc(100% - 28px); }
   .marketing-header { height: 66px; }
@@ -4321,6 +4339,7 @@ footer.site-copyright {
   .marketing-footer { grid-template-columns: 1fr; gap: 15px; }
   .admin-header { padding: 12px 0; align-items: flex-start; flex-direction: column; }
   .admin-title-row { padding-top: 42px; align-items: flex-start; flex-direction: column; }
+  .admin-funnel-stat-grid { grid-template-columns: 1fr; }
   .admin-stat-grid { grid-template-columns: repeat(2, 1fr); }
   .admin-detail-title,
   .admin-detail-metrics,
