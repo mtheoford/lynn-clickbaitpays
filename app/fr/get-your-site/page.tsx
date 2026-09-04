@@ -163,7 +163,7 @@ export default async function FrenchGetYourSitePage({
             </div>
             <div className="cbp-product-screen">
               <Image
-                src="/clickbaitpays-replicated-site-preview.jpg"
+                src="/clickbaitpays-replicated-site-preview-fr.jpg"
                 alt="Aperçu visuel de la mise en page du site de parrainage ClickBaitPays"
                 fill
                 priority

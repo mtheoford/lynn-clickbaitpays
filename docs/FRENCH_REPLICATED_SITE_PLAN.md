@@ -51,6 +51,7 @@ A visible EN / FR language switcher will preserve the current sponsor. French in
 - Use the existing YouTube videos with French captions requested in the embed when available.
 - Add a French transcript/summary fallback and clearly identify videos whose spoken audio remains English.
 - Create a French social-sharing image or a language-neutral replacement.
+- Use a separately localized French product-preview image on the sales page while preserving the original English asset.
 
 ### 5. French documents and policy routes
 
