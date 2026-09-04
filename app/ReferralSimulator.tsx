@@ -1,41 +1,375 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { SiteLocale } from "../lib/i18n";
 import {
-  clickDays,
+  calculateLevelSevenCapacity,
   cycleDays,
-  getLevel,
   levels,
-  maximumProjectionDays,
-  milestoneLabel,
-  monthlyReferralPotential,
-  simulateCashPath,
-  simulateCompoundPath,
+  simulateStartingCampaignOptions,
   timeLabel,
   withdrawalRate,
+  type ContinuationMode,
+  type StrategyPathResult,
 } from "./calculatorMath";
 
-type ReferralMode = "none" | "refer3" | "custom";
-type JourneyMode = "start" | "compound" | "continuity";
+type JourneyIconName = "start" | "growth" | "continuity";
 
-type HorizonResult = {
-  months: number;
-  cashAvailable: number;
-  activeCampaignValue: number;
-  recoveredPercent: number;
-  differencePercent: number;
+type StrategyMeta = {
+  kicker: string;
+  description: string;
+  icon: JourneyIconName;
 };
-const horizonDays = [
-  { months: 3, days: 90 },
-  { months: 6, days: 180 },
-  { months: 12, days: 365 },
-];
 
-const money = new Intl.NumberFormat("en-US", {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
+const startingCampaignOptions = [1, 2, 3] as const;
 
+const calculatorCopy = {
+  en: {
+    startingCampaignMeta: {
+      1: {
+        kicker: "Lowest starting amount",
+        description:
+          "Begin with one campaign and compound its released value toward full campaign capacity.",
+        icon: "start",
+      },
+      2: {
+        kicker: "Faster modeled growth",
+        description:
+          "Put two campaigns to work immediately so more value reaches its first release together.",
+        icon: "continuity",
+      },
+      3: {
+        kicker: "Fastest modeled growth",
+        description:
+          "Use all three campaign spots today for the quickest modeled start at this level.",
+        icon: "growth",
+      },
+    } satisfies Record<(typeof startingCampaignOptions)[number], StrategyMeta>,
+    continuationLabels: {
+      "wait-for-release": "Wait for released funds",
+      "keep-spots-moving": "Keep your selected campaign spots moving",
+    } satisfies Record<ContinuationMode, string>,
+    launch: "Calculate Your Campaign Potential",
+    closeAria: "Close campaign path calculator",
+    eyebrow: "Campaign path calculator",
+    title: "Compare starting with one, two, or three campaigns.",
+    introduction:
+      "Choose a campaign level, compare what each starting amount could produce, then decide whether to wait for released funds or keep your selected campaign spots moving.",
+    availabilityTitle: "When campaign earnings become available",
+    availabilityIntro: "Daily earnings are shown before they can be used.",
+    campaignDays: "Campaign days 1–12",
+    earningsAppear: "Earnings appear daily",
+    earningsAppearDetail:
+      "They build in the Earned Wallet while campaign days are completed, but they cannot be reused yet.",
+    nextSevenDays: "Next 7 days",
+    earningsHeld: "Earnings are held",
+    earningsHeldDetail:
+      "The seven-day hold begins only after all 12 campaign days are complete.",
+    afterHold: "After the hold",
+    fundsAvailable: "Funds become available",
+    fundsAvailableDetail:
+      "They move to Available Balance and can then be reused or withdrawn.",
+    availabilityNote:
+      "“About day 19” assumes one campaign day is completed each day. Missing campaign days would move the dates later.",
+    fastest: "Fastest result for these choices",
+    moneyNeededToday: "Money needed today",
+    firstEstimatedWithdrawal: "First estimated net withdrawal",
+    firstBatchRoi: "First-batch ROI",
+    estimatedTime: "Estimated time to 3 Level 7 campaigns",
+    averageNetAfterGoal: "Average net gain per month after the goal",
+    yourCampaigns: "Your campaigns",
+    referralCommissions: "Referral commissions",
+    combined: "Combined",
+    longTermExcess: "Long-term net excess:",
+    averageAfterGoal:
+      "average per month during the first 12 months after reaching three Level 7 campaigns.",
+    goalTimingFollows: "Goal timing follows",
+    estimatedTimeToReach: "Estimated time to reach 3 Level 7 campaigns",
+    goalActiveToday: "Goal active today",
+    realNumbers: "Your plan in real numbers",
+    campaignsOnly: "campaigns only",
+    takeFirstRelease: "If you take the first release",
+    requestFirstWithdrawal: "Request the first withdrawal",
+    estimatedAround: "estimated campaign withdrawal around day",
+    netGain: "Net gain",
+    roiInAbout: "ROI in about",
+    days: "days",
+    referralNetAddon: "Referral net add-on",
+    combinedFirstWithdrawal: "Combined first withdrawal",
+    campaignRoiExcludes: "Campaign ROI excludes",
+    separateDay12Reserve: "the separate Day-12 reserve",
+    and: "and",
+    referralIncome: "referral income",
+    keepCompounding: "If you keep compounding",
+    buildCapacity: "Build to full campaign capacity",
+    outsideMoneyToGoal: "Outside money used to reach the goal",
+    reachGoal: "Reach 3 Level 7 campaigns",
+    netSurplus: "Net surplus per completed set",
+    campaignRoi: "campaign ROI",
+    perCompletedSet: "per completed set",
+    cadenceWithBridge:
+      "new sets can start every 12 days; each releases after about 19 days",
+    cadenceWithoutBridge: "each set releases after about 19 days",
+    ongoingPlan: "Your ongoing plan at full campaign capacity",
+    keep: "Keep",
+    workingWithdraw: "working. Withdraw the net gains.",
+    averageCampaignNetGain: "Average campaign net gain per month",
+    averageCombinedNetGain: "Average combined net gain per month",
+    campaigns: "Campaigns",
+    referrals: "Referrals",
+    monthlyAverageNote: "12-month total divided by 12",
+    twelveMonthCampaignNetGain: "12-month campaign net gain",
+    twelveMonthCombinedNetGain: "12-month combined net gain",
+    afterWithdrawalFee: "After the modeled withdrawal fee",
+    twelveMonthCampaignRoi: "12-month campaign cash ROI",
+    gainDividedByCapital: "Campaign gain ÷ total capital working",
+    totalsAssumption:
+      "12-month totals count modeled releases during the 365 days after the goal; the monthly figure is the total divided by 12.",
+    referralAssumptionStart:
+      "Referral estimates assume the selected referrals repeat every",
+    referralAssumptionEnd: "days and fund their own campaigns.",
+    chooseModel: "Choose what to model",
+    chooseModelDetail: "Pick your level, then add a referral example if wanted.",
+    yourLevel: "Your campaign level",
+    level: "Level",
+    directReferrals: "Direct referrals (0 for none)",
+    theirLevel: "Their campaign level",
+    campaignsPerPerson: "Campaigns per person",
+    referralExample: "Referral example",
+    person: "person",
+    people: "people",
+    each: "each",
+    referralsPay:
+      "They pay for their own campaigns. The calculator counts only your referral commissions, modeled as available after about 19 days.",
+    incomeShownSeparately:
+      "Your campaign income, referral commissions, and combined total are shown separately below.",
+    chooseCampaignCount: "Choose how many campaigns to start today",
+    campaignCountDetailStart:
+      "If the money is available today, putting it to work today produces the fastest modeled start. Compare the cost and result at Level",
+    chooseAfterTwelve: "Choose what happens after 12 completed days",
+    chooseAfterTwelveDetail:
+      "This optional choice changes the reserve and timing, not the number of campaigns you start today.",
+    afterDayTwelveChoice: "After Day 12 choice",
+    noAdditionalReserve: "No additional reserve",
+    waitForFunds: "Wait for released funds",
+    waitForFundsDetail:
+      "Add no outside money on Day 12. Start the next campaigns after value becomes available around Day 19.",
+    dayTwelveReserve: "Day-12 reserve",
+    optionalOutsideMoney: "Optional outside money",
+    keepSpotsMoving: "Keep your selected campaign spots moving",
+    keepSpotsMovingDetail:
+      "Set aside one bridge reserve to replace your selected campaigns after 12 completed days. Released value then follows the modeled reinvestment schedule.",
+    initialDayTwelveReserve: "Initial Day-12 reserve",
+    selected: "You selected",
+    selectedNoteEnd:
+      "The goal timing and long-term estimates in all three cards follow this choice.",
+    assumptionsSummary: "See the assumptions",
+    assumptionAvailability:
+      "Campaign earnings appear daily in the Earned Wallet but remain unavailable until all 12 campaign days and the following seven-day hold are complete.",
+    assumptionCards:
+      "The three starting cards compare one, two, or three campaigns purchased together at the selected level. One activation fee is included in each card’s money-needed-today figure.",
+    assumptionContinuation:
+      "“Wait for released funds” adds no replacement money on Day 12. “Keep your selected campaign spots moving” adds separate money equal to the selected campaign count times the campaign price after 12 completed days. This is a one-time bridge in the growth model; later purchases use released value.",
+    assumptionGoal:
+      "The displayed goal is the fastest path found by the calculator’s automatic purchase rule, not a promise of the shortest possible schedule under every purchase choice.",
+    assumptionReferrals:
+      "The referral estimate models the number of direct referrals entered above at the selected level and campaign count, with those campaigns starting together. Referral campaign costs are paid by the referred people and are not included in your starting amount or Day-12 reserve.",
+    assumptionReferralTiming:
+      "Referral timing assumption: the model treats the full direct referral commission as available after the referred campaign completes 12 days and the seven-day hold—about day 19. A separate referral-wallet release rule has not been independently verified.",
+    assumptionWithdrawal:
+      "Internal reinvestment does not apply the withdrawal fee. Net cash and 12-month estimates apply the modeled 10% withdrawal fee.",
+    disclaimerStart:
+      "Illustrative strategy only—not guaranteed earnings, financial advice, or an investment projection. Campaign availability, member activity, program rules, fees, and timing can change. Funding source and financing costs are not modeled. Review the",
+    officialRules: "current official rules",
+    close: "Close calculator",
+  },
+  fr: {
+    startingCampaignMeta: {
+      1: {
+        kicker: "Mise de départ la plus basse",
+        description:
+          "Commencez avec une campagne et réinvestissez les fonds débloqués pour atteindre la capacité maximale.",
+        icon: "start",
+      },
+      2: {
+        kicker: "Croissance simulée plus rapide",
+        description:
+          "Lancez immédiatement deux campagnes afin que davantage de fonds soient débloqués en même temps.",
+        icon: "continuity",
+      },
+      3: {
+        kicker: "Croissance simulée la plus rapide",
+        description:
+          "Utilisez dès aujourd’hui les trois emplacements pour obtenir le démarrage simulé le plus rapide à ce niveau.",
+        icon: "growth",
+      },
+    } satisfies Record<(typeof startingCampaignOptions)[number], StrategyMeta>,
+    continuationLabels: {
+      "wait-for-release": "Attendre le déblocage des fonds",
+      "keep-spots-moving": "Maintenir actifs les emplacements sélectionnés",
+    } satisfies Record<ContinuationMode, string>,
+    launch: "Calculez le potentiel de vos campagnes",
+    closeAria: "Fermer le calculateur de parcours des campagnes",
+    eyebrow: "Calculateur de parcours des campagnes",
+    title: "Comparez un départ avec une, deux ou trois campagnes.",
+    introduction:
+      "Choisissez un niveau, comparez ce que chaque mise de départ pourrait produire, puis décidez d’attendre le déblocage des fonds ou de maintenir actifs les emplacements sélectionnés.",
+    availabilityTitle: "Quand les gains des campagnes deviennent disponibles",
+    availabilityIntro: "Les gains quotidiens s’affichent avant de pouvoir être utilisés.",
+    campaignDays: "Jours de campagne 1 à 12",
+    earningsAppear: "Les gains s’affichent chaque jour",
+    earningsAppearDetail:
+      "Ils s’accumulent dans le portefeuille « Earned Wallet » au fil des jours de campagne, mais ne peuvent pas encore être réutilisés.",
+    nextSevenDays: "Les 7 jours suivants",
+    earningsHeld: "Les gains sont bloqués",
+    earningsHeldDetail:
+      "La période de blocage de sept jours ne commence qu’une fois les 12 jours de campagne terminés.",
+    afterHold: "Après la période de blocage",
+    fundsAvailable: "Les fonds deviennent disponibles",
+    fundsAvailableDetail:
+      "Ils passent dans le solde « Available Balance » et peuvent alors être réutilisés ou retirés.",
+    availabilityNote:
+      "« Vers le jour 19 » suppose qu’un jour de campagne est effectué chaque jour. Tout jour manqué repousserait les dates.",
+    fastest: "Résultat le plus rapide avec ces choix",
+    moneyNeededToday: "Somme nécessaire aujourd’hui",
+    firstEstimatedWithdrawal: "Premier retrait net estimé",
+    firstBatchRoi: "ROI de la première série",
+    estimatedTime: "Délai estimé pour atteindre 3 campagnes de niveau 7",
+    averageNetAfterGoal: "Gain net mensuel moyen après l’objectif",
+    yourCampaigns: "Vos campagnes",
+    referralCommissions: "Commissions de parrainage",
+    combined: "Total",
+    longTermExcess: "Excédent net à long terme :",
+    averageAfterGoal:
+      "en moyenne par mois pendant les 12 premiers mois suivant l’obtention de trois campagnes de niveau 7.",
+    goalTimingFollows: "Le délai de l’objectif suit l’option",
+    estimatedTimeToReach: "Délai estimé pour atteindre 3 campagnes de niveau 7",
+    goalActiveToday: "Objectif atteint aujourd’hui",
+    realNumbers: "Votre plan en chiffres",
+    campaignsOnly: "campagnes uniquement",
+    takeFirstRelease: "Si vous retirez les premiers fonds débloqués",
+    requestFirstWithdrawal: "Demander le premier retrait",
+    estimatedAround: "retrait de campagne estimé vers le jour",
+    netGain: "Gain net",
+    roiInAbout: "ROI en environ",
+    days: "jours",
+    referralNetAddon: "Supplément net du parrainage",
+    combinedFirstWithdrawal: "Premier retrait total",
+    campaignRoiExcludes: "Le ROI des campagnes exclut",
+    separateDay12Reserve: "la réserve distincte du jour 12",
+    and: "et",
+    referralIncome: "les revenus de parrainage",
+    keepCompounding: "Si vous continuez à réinvestir",
+    buildCapacity: "Atteindre la capacité maximale de campagnes",
+    outsideMoneyToGoal: "Fonds externes utilisés pour atteindre l’objectif",
+    reachGoal: "Atteindre 3 campagnes de niveau 7",
+    netSurplus: "Excédent net par série terminée",
+    campaignRoi: "de ROI sur les campagnes",
+    perCompletedSet: "par série terminée",
+    cadenceWithBridge:
+      "de nouvelles séries peuvent commencer tous les 12 jours ; chacune débloque ses fonds après environ 19 jours",
+    cadenceWithoutBridge: "chaque série débloque ses fonds après environ 19 jours",
+    ongoingPlan: "Votre plan continu à capacité maximale",
+    keep: "Maintenez",
+    workingWithdraw: "en activité. Retirez les gains nets.",
+    averageCampaignNetGain: "Gain net moyen des campagnes par mois",
+    averageCombinedNetGain: "Gain net total moyen par mois",
+    campaigns: "Campagnes",
+    referrals: "Parrainages",
+    monthlyAverageNote: "Total sur 12 mois divisé par 12",
+    twelveMonthCampaignNetGain: "Gain net des campagnes sur 12 mois",
+    twelveMonthCombinedNetGain: "Gain net total sur 12 mois",
+    afterWithdrawalFee: "Après les frais de retrait modélisés",
+    twelveMonthCampaignRoi: "ROI en espèces des campagnes sur 12 mois",
+    gainDividedByCapital: "Gain des campagnes ÷ capital total en activité",
+    totalsAssumption:
+      "Les totaux sur 12 mois comptent les déblocages simulés pendant les 365 jours suivant l’objectif ; le montant mensuel correspond au total divisé par 12.",
+    referralAssumptionStart:
+      "Les estimations de parrainage supposent que les filleuls sélectionnés recommencent tous les",
+    referralAssumptionEnd: "jours et financent leurs propres campagnes.",
+    chooseModel: "Choisissez les éléments à simuler",
+    chooseModelDetail: "Sélectionnez votre niveau, puis ajoutez un exemple de parrainage si vous le souhaitez.",
+    yourLevel: "Niveau de votre campagne",
+    level: "Niveau",
+    directReferrals: "Filleuls directs (0 si aucun)",
+    theirLevel: "Niveau de leur campagne",
+    campaignsPerPerson: "Campagnes par personne",
+    referralExample: "Exemple de parrainage",
+    person: "personne",
+    people: "personnes",
+    each: "par personne",
+    referralsPay:
+      "Ils financent leurs propres campagnes. Le calculateur ne compte que vos commissions de parrainage, considérées comme disponibles après environ 19 jours.",
+    incomeShownSeparately:
+      "Les revenus de vos campagnes, les commissions de parrainage et le total sont indiqués séparément ci-dessous.",
+    chooseCampaignCount: "Choisissez combien de campagnes lancer aujourd’hui",
+    campaignCountDetailStart:
+      "Si vous disposez des fonds aujourd’hui, les mettre en activité dès maintenant produit le démarrage simulé le plus rapide. Comparez le coût et le résultat au niveau",
+    chooseAfterTwelve: "Choisissez ce qui se passe après 12 jours terminés",
+    chooseAfterTwelveDetail:
+      "Ce choix facultatif modifie la réserve et le calendrier, mais pas le nombre de campagnes lancées aujourd’hui.",
+    afterDayTwelveChoice: "Choix après le jour 12",
+    noAdditionalReserve: "Aucune réserve supplémentaire",
+    waitForFunds: "Attendre le déblocage des fonds",
+    waitForFundsDetail:
+      "N’ajoutez aucun fonds externe au jour 12. Lancez les campagnes suivantes lorsque les fonds deviennent disponibles, vers le jour 19.",
+    dayTwelveReserve: "Réserve du jour 12",
+    optionalOutsideMoney: "Fonds externes facultatifs",
+    keepSpotsMoving: "Maintenir actifs les emplacements sélectionnés",
+    keepSpotsMovingDetail:
+      "Prévoyez une réserve de transition pour remplacer les campagnes sélectionnées après 12 jours terminés. Les fonds débloqués suivent ensuite le calendrier de réinvestissement simulé.",
+    initialDayTwelveReserve: "Réserve initiale du jour 12",
+    selected: "Vous avez sélectionné",
+    selectedNoteEnd:
+      "Le délai de l’objectif et les estimations à long terme des trois cartes tiennent compte de ce choix.",
+    assumptionsSummary: "Voir les hypothèses",
+    assumptionAvailability:
+      "Les gains des campagnes s’affichent chaque jour dans le portefeuille « Earned Wallet », mais restent indisponibles jusqu’à la fin des 12 jours de campagne et de la période de blocage de sept jours qui suit.",
+    assumptionCards:
+      "Les trois cartes de départ comparent une, deux ou trois campagnes achetées ensemble au niveau sélectionné. Chaque montant nécessaire aujourd’hui comprend des frais d’activation uniques.",
+    assumptionContinuation:
+      "« Attendre le déblocage des fonds » n’ajoute aucun fonds de remplacement au jour 12. « Maintenir actifs les emplacements sélectionnés » ajoute des fonds distincts, égaux au nombre de campagnes sélectionné multiplié par le prix d’une campagne, après 12 jours terminés. Cette réserve de transition n’est utilisée qu’une fois dans le modèle de croissance ; les achats suivants utilisent les fonds débloqués.",
+    assumptionGoal:
+      "L’objectif affiché correspond au parcours le plus rapide trouvé par la règle d’achat automatique du calculateur ; il ne garantit pas le calendrier le plus court pour toutes les décisions d’achat possibles.",
+    assumptionReferrals:
+      "L’estimation de parrainage modélise le nombre de filleuls directs saisi ci-dessus, avec le niveau et le nombre de campagnes sélectionnés, toutes lancées en même temps. Les filleuls paient leurs propres campagnes ; ces coûts ne sont pas inclus dans votre mise de départ ni dans la réserve du jour 12.",
+    assumptionReferralTiming:
+      "Hypothèse sur le calendrier du parrainage : le modèle considère que la totalité de la commission directe devient disponible lorsque la campagne du filleul termine ses 12 jours et la période de blocage de sept jours, soit vers le jour 19. Une règle distincte de déblocage du portefeuille de parrainage n’a pas été vérifiée indépendamment.",
+    assumptionWithdrawal:
+      "Les réinvestissements internes ne sont pas soumis aux frais de retrait. Les estimations nettes et sur 12 mois appliquent les frais de retrait simulés de 10 %.",
+    disclaimerStart:
+      "Stratégie fournie à titre d’illustration uniquement : ni gains garantis, ni conseil financier, ni projection d’investissement. La disponibilité des campagnes, l’activité des membres, les règles du programme, les frais et les délais peuvent changer. La source des fonds et les coûts de financement ne sont pas modélisés. Consultez les",
+    officialRules: "règles officielles en vigueur",
+    close: "Fermer le calculateur",
+  },
+} as const;
+
+const moneyFormatters: Record<SiteLocale, Intl.NumberFormat> = {
+  en: new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }),
+  fr: new Intl.NumberFormat("fr-FR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }),
+};
+
+const percentFormatters: Record<SiteLocale, Intl.NumberFormat> = {
+  en: new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }),
+  fr: new Intl.NumberFormat("fr-FR", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }),
+};
+
+const integerFormatters: Record<SiteLocale, Intl.NumberFormat> = {
+  en: new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }),
+  fr: new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }),
+};
 
 function ChoiceButtons({
   label,
@@ -68,17 +402,6 @@ function ChoiceButtons({
   );
 }
 
-type JourneyIconName =
-  | "start"
-  | "growth"
-  | "continuity"
-  | "person"
-  | "people"
-  | "sliders"
-  | "clock"
-  | "wallet"
-  | "recovered";
-
 function JourneyIcon({ name }: { name: JourneyIconName }) {
   return (
     <svg
@@ -105,239 +428,573 @@ function JourneyIcon({ name }: { name: JourneyIconName }) {
           <path d="M6.2 7.3A7 7 0 0 1 18.7 10M17.8 16.7A7 7 0 0 1 5.3 14" />
         </>
       )}
-      {name === "person" && (
-        <>
-          <circle cx="12" cy="8" r="3" />
-          <path d="M6.5 20a5.5 5.5 0 0 1 11 0" />
-        </>
-      )}
-      {name === "people" && (
-        <>
-          <circle cx="12" cy="7" r="2.5" />
-          <circle cx="5.5" cy="10" r="2" />
-          <circle cx="18.5" cy="10" r="2" />
-          <path d="M8 19a4 4 0 0 1 8 0M2.5 19a3 3 0 0 1 4.8-2.4M21.5 19a3 3 0 0 0-4.8-2.4" />
-        </>
-      )}
-      {name === "sliders" && (
-        <>
-          <path d="M4 6h5M15 6h5M4 12h9M17 12h3M4 18h3M11 18h9" />
-          <circle cx="12" cy="6" r="2" />
-          <circle cx="15" cy="12" r="2" />
-          <circle cx="9" cy="18" r="2" />
-        </>
-      )}
-      {name === "clock" && (
-        <>
-          <circle cx="12" cy="12" r="8" />
-          <path d="M12 8v4l3 2" />
-        </>
-      )}
-      {name === "wallet" && (
-        <>
-          <path d="M4 7.5h14a2 2 0 0 1 2 2v8H6a2 2 0 0 1-2-2v-10a2 2 0 0 1 2-2h10" />
-          <path d="M15 11h5v4h-5a2 2 0 0 1 0-4Z" />
-        </>
-      )}
-      {name === "recovered" && (
-        <>
-          <circle cx="12" cy="12" r="8" />
-          <path d="m8.5 12 2.2 2.2 4.8-5" />
-        </>
-      )}
     </svg>
   );
 }
 
-function percent(value: number) {
-  const rounded = Math.round(value);
-  return `${rounded > 0 ? "+" : ""}${rounded}%`;
+function formatMoney(value: number, locale: SiteLocale) {
+  return moneyFormatters[locale].format(value);
 }
 
-export default function ReferralSimulator() {
+function percent(value: number, locale: SiteLocale) {
+  const rounded = Math.round(value * 10) / 10;
+  const space = locale === "fr" ? " " : "";
+  return `${rounded > 0 ? "+" : ""}${percentFormatters[locale].format(rounded)}${space}%`;
+}
+
+function signedMoney(value: number, locale: SiteLocale) {
+  const sign = value >= 0 ? "+" : "−";
+  return `${sign}${formatMoney(Math.abs(value), locale)} USDT`;
+}
+
+function exactDayLabel(day: number, locale: SiteLocale) {
+  if (day < 0) return locale === "fr" ? "Non atteint" : "Not reached";
+  if (day === 0) return locale === "fr" ? "Point de départ" : "Starting point";
+  return locale === "fr" ? `Jour ${day}` : `Day ${day}`;
+}
+
+function campaignLabel(count: number, locale: SiteLocale) {
+  if (locale === "fr") return `campagne${count === 1 ? "" : "s"}`;
+  return `campaign${count === 1 ? "" : "s"}`;
+}
+
+function startingCampaignLabel(
+  count: number,
+  level: number,
+  locale: SiteLocale,
+) {
+  if (locale === "fr") {
+    return `Lancez ${count} ${campaignLabel(count, locale)} de niveau ${level} aujourd’hui`;
+  }
+  return `Start ${count} Level ${level} ${campaignLabel(count, locale)} today`;
+}
+
+function CampaignAvailabilityTimeline({ locale }: { locale: SiteLocale }) {
+  const t = calculatorCopy[locale];
+
+  return (
+    <section className="campaign-availability">
+      <header>
+        <strong>{t.availabilityTitle}</strong>
+        <small>{t.availabilityIntro}</small>
+      </header>
+      <ol className="campaign-availability-steps">
+        <li className="is-earning">
+          <span>{t.campaignDays}</span>
+          <strong>{t.earningsAppear}</strong>
+          <small>{t.earningsAppearDetail}</small>
+        </li>
+        <li className="is-held">
+          <span>{t.nextSevenDays}</span>
+          <strong>{t.earningsHeld}</strong>
+          <small>{t.earningsHeldDetail}</small>
+        </li>
+        <li className="is-available">
+          <span>{t.afterHold}</span>
+          <strong>{t.fundsAvailable}</strong>
+          <small>{t.fundsAvailableDetail}</small>
+        </li>
+      </ol>
+      <p>{t.availabilityNote}</p>
+    </section>
+  );
+}
+
+function StartingCampaignCard({
+  path,
+  count,
+  startingLevel,
+  selected,
+  fastestForInputs,
+  referralsIncluded,
+  continuationMode,
+  locale,
+  onSelect,
+}: {
+  path: StrategyPathResult;
+  count: (typeof startingCampaignOptions)[number];
+  startingLevel: number;
+  selected: boolean;
+  fastestForInputs: boolean;
+  referralsIncluded: boolean;
+  continuationMode: ContinuationMode;
+  locale: SiteLocale;
+  onSelect: () => void;
+}) {
+  const t = calculatorCopy[locale];
+  const meta = t.startingCampaignMeta[count];
+  const goalReachedToday = path.goalDay === 0;
+
+  return (
+    <button
+      type="button"
+      className={`strategy-card${selected ? " is-selected" : ""}`}
+      data-starting-campaigns={count}
+      aria-pressed={selected}
+      aria-controls="selected-strategy-detail"
+      onClick={onSelect}
+    >
+      <span className="strategy-card__icon" aria-hidden="true">
+        <JourneyIcon name={meta.icon} />
+      </span>
+      <span className="strategy-card__kicker">{meta.kicker}</span>
+      <strong className="strategy-card__title">
+        {startingCampaignLabel(count, startingLevel, locale)}
+      </strong>
+      <span className="strategy-card__badge-slot">
+        {fastestForInputs && (
+          <span className="strategy-card__fastest">
+            {t.fastest}
+          </span>
+        )}
+      </span>
+      <span className="strategy-card__copy">{meta.description}</span>
+
+      <span className="strategy-card__funding">
+        <span className="strategy-card__metric">
+          <span>{t.moneyNeededToday}</span>
+          <strong>{formatMoney(path.neededToday, locale)} USDT</strong>
+        </span>
+        <span className="strategy-card__metric">
+          <span>{t.firstEstimatedWithdrawal}</span>
+          <strong>{formatMoney(path.firstNetWithdrawal, locale)} USDT</strong>
+        </span>
+        <span className="strategy-card__metric">
+          <span>{t.firstBatchRoi}</span>
+          <strong>{percent(path.firstBatchRoi, locale)}</strong>
+        </span>
+      </span>
+
+      <span className="strategy-card__goal">
+        <span>{t.estimatedTime}</span>
+        <strong>{exactDayLabel(path.goalDay, locale)}</strong>
+        {!goalReachedToday && <small>{timeLabel(path.goalDay, locale)}</small>}
+      </span>
+      {referralsIncluded ? (
+        <span className="strategy-card__income-split">
+          <span>{t.averageNetAfterGoal}</span>
+          <span>
+            <span>{t.yourCampaigns}</span>
+            <strong>
+              {formatMoney(path.ongoingProjection.averageCampaignNetPerMonth, locale)} USDT
+            </strong>
+          </span>
+          <span>
+            <span>{t.referralCommissions}</span>
+            <strong>
+              {formatMoney(path.ongoingProjection.averageReferralNetPerMonth, locale)} USDT
+            </strong>
+          </span>
+          <span className="is-combined">
+            <span>{t.combined}</span>
+            <strong>
+              {formatMoney(path.ongoingProjection.averageCombinedNetPerMonth, locale)} USDT
+            </strong>
+          </span>
+        </span>
+      ) : (
+        <span className="strategy-card__benefit">
+          <b>{t.longTermExcess}</b>{" "}
+          {formatMoney(path.ongoingProjection.averageCampaignNetPerMonth, locale)} USDT{" "}
+          {t.averageAfterGoal}
+        </span>
+      )}
+      <span className="strategy-card__cadence">
+        {locale === "fr" ? (
+          <>{t.goalTimingFollows} « {t.continuationLabels[continuationMode]} ».</>
+        ) : (
+          <>{t.goalTimingFollows} “{t.continuationLabels[continuationMode]}.”</>
+        )}
+      </span>
+    </button>
+  );
+}
+
+function SelectedStrategyDetail({
+  path,
+  startingLevel,
+  continuationMode,
+  includeReferrals,
+  referralPeople,
+  referralLevel,
+  referralCampaigns,
+  locale,
+}: {
+  path: StrategyPathResult;
+  startingLevel: number;
+  continuationMode: ContinuationMode;
+  includeReferrals: boolean;
+  referralPeople: number;
+  referralLevel: number;
+  referralCampaigns: number;
+  locale: SiteLocale;
+}) {
+  const t = calculatorCopy[locale];
+  const startingCount = path.funding.startingCampaigns as 1 | 2 | 3;
+  const planLabel = startingCampaignLabel(startingCount, startingLevel, locale);
+  const continuationLabel = t.continuationLabels[continuationMode];
+  const levelSeven = calculateLevelSevenCapacity();
+  const keepsSpotsMoving = continuationMode === "keep-spots-moving";
+  const ongoing = path.ongoingProjection;
+  const goalReachedToday = path.goalDay === 0;
+  const selectedLevel = levels[startingLevel - 1] ?? levels[0];
+  const firstCampaignGross =
+    selectedLevel.earnings * path.funding.startingCampaigns;
+  const firstReferralGross = includeReferrals
+    ? path.referralEstimates.releaseFunded.grossPerRelease
+    : 0;
+  const firstGrossAvailable = firstCampaignGross + firstReferralGross;
+  const firstCampaignNet = path.firstNetWithdrawal;
+  const firstReferralNet = firstReferralGross * withdrawalRate;
+  const combinedFirstWithdrawalNet = firstGrossAvailable * withdrawalRate;
+  const firstWithdrawalProfit = path.firstBatchProfit;
+  const firstWithdrawalRoi = path.firstBatchRoi;
+
+  return (
+    <section
+      id="selected-strategy-detail"
+      className="selected-strategy-detail"
+      data-starting-campaigns={startingCount}
+    >
+      <p className="sr-only" aria-live="polite">
+        {locale === "fr"
+          ? `${planLabel}, ${continuationLabel} : ${exactDayLabel(path.goalDay, locale)} pour atteindre trois campagnes de niveau 7.`
+          : `${planLabel}, ${continuationLabel}: ${exactDayLabel(path.goalDay, locale)} to three Level 7 campaigns.`}
+      </p>
+      <header className="selected-strategy-hero">
+        <h3>{planLabel}</h3>
+        <p>{t.estimatedTimeToReach}</p>
+        <strong>{exactDayLabel(path.goalDay, locale)}</strong>
+        <small>
+          {goalReachedToday
+            ? t.goalActiveToday
+            : timeLabel(path.goalDay, locale)}
+        </small>
+      </header>
+
+      <section className="outcome-dashboard" aria-labelledby="outcome-title">
+        <header className="outcome-dashboard__header">
+          <h4 id="outcome-title">{t.realNumbers}</h4>
+          <p>
+            {locale === "fr" ? (
+              <>
+                {path.funding.startingCampaigns}{" "}
+                {campaignLabel(path.funding.startingCampaigns, locale)} de niveau{" "}
+                {startingLevel} lancée
+                {path.funding.startingCampaigns === 1 ? "" : "s"} aujourd’hui ·{" "}
+                {continuationLabel} · {includeReferrals
+                  ? `${referralPeople} ${referralPeople === 1 ? "filleul direct" : "filleuls directs"}, avec chacun ${referralCampaigns} ${campaignLabel(referralCampaigns, locale)} de niveau ${referralLevel}`
+                  : t.campaignsOnly}
+              </>
+            ) : (
+              <>
+                {path.funding.startingCampaigns} Level {startingLevel}{" "}
+                {campaignLabel(path.funding.startingCampaigns, locale)} started today ·{" "}
+                {continuationLabel} · {includeReferrals
+                  ? `${referralPeople} direct referral${referralPeople === 1 ? "" : "s"} with ${referralCampaigns} Level ${referralLevel} ${campaignLabel(referralCampaigns, locale)} each`
+                  : t.campaignsOnly}
+              </>
+            )}
+          </p>
+        </header>
+
+        <div
+          className={`outcome-choice-grid${goalReachedToday ? " is-goal-start" : ""}`}
+        >
+          <article className="outcome-card is-withdraw">
+            <header className="outcome-card__header">
+              <span aria-hidden="true">1</span>
+              <div>
+                <small>{t.takeFirstRelease}</small>
+                <h5>{t.requestFirstWithdrawal}</h5>
+              </div>
+            </header>
+
+            <strong className="outcome-card__value">
+              {formatMoney(firstCampaignNet, locale)} USDT
+            </strong>
+            <span className="outcome-card__value-label">
+              {t.estimatedAround} {cycleDays}
+            </span>
+
+            <div className="outcome-card__key-results">
+              <div>
+                <span>{t.netGain}</span>
+                <strong>{signedMoney(firstWithdrawalProfit, locale)}</strong>
+              </div>
+              <div>
+                <span>{t.roiInAbout} {cycleDays} {t.days}</span>
+                <strong>{percent(firstWithdrawalRoi, locale)}</strong>
+              </div>
+            </div>
+
+            {includeReferrals && (
+              <div className="outcome-card__referral-result">
+                <div>
+                  <span>{t.referralNetAddon}</span>
+                  <strong>+{formatMoney(firstReferralNet, locale)} USDT</strong>
+                </div>
+                <div>
+                  <span>{t.combinedFirstWithdrawal}</span>
+                  <strong>{formatMoney(combinedFirstWithdrawalNet, locale)} USDT</strong>
+                </div>
+              </div>
+            )}
+
+            {(path.neededByDay12 > 0 || includeReferrals) && (
+              <p className="outcome-card__note">
+                {t.campaignRoiExcludes}{" "}
+                {path.neededByDay12 > 0 ? t.separateDay12Reserve : ""}
+                {path.neededByDay12 > 0 && includeReferrals ? ` ${t.and} ` : ""}
+                {includeReferrals ? t.referralIncome : ""}.
+              </p>
+            )}
+          </article>
+
+          <article className="outcome-card is-compound">
+            <header className="outcome-card__header">
+              <span aria-hidden="true">2</span>
+              <div>
+                <small>{t.keepCompounding}</small>
+                <h5>{t.buildCapacity}</h5>
+              </div>
+            </header>
+
+            <ol className="outcome-card__compound-story">
+              <li>
+                <span>{t.outsideMoneyToGoal}</span>
+                <strong>{formatMoney(path.externalFundingByGoal, locale)} USDT</strong>
+              </li>
+              <li>
+                <span>{t.reachGoal}</span>
+                <strong>
+                  {goalReachedToday
+                    ? exactDayLabel(0, locale)
+                    : `${exactDayLabel(path.goalDay, locale)} · ${timeLabel(path.goalDay, locale)}`}
+                </strong>
+              </li>
+              <li>
+                <span>{t.netSurplus}</span>
+                <strong>{formatMoney(levelSeven.netSurplusPerRelease, locale)} USDT</strong>
+                <small>
+                  <b>
+                    {percent(levelSeven.netSurplusRoiPerRelease, locale)} {t.campaignRoi}
+                  </b>{" "}
+                  {t.perCompletedSet} · {keepsSpotsMoving
+                    ? t.cadenceWithBridge
+                    : t.cadenceWithoutBridge}
+                </small>
+              </li>
+            </ol>
+          </article>
+        </div>
+
+        <section
+          className="long-term-outcome never-stop-outcome"
+          aria-labelledby="long-term-title"
+        >
+          <header className="long-term-outcome__header">
+            <span>3 · {t.ongoingPlan}</span>
+            <h4 id="long-term-title">
+              {t.keep} {formatMoney(ongoing.committedCampaignCapital, locale)} USDT{" "}
+              {t.workingWithdraw}
+            </h4>
+          </header>
+
+          <div className="never-stop-story">
+            <article className="is-average">
+              <span>
+                {includeReferrals
+                  ? t.averageCombinedNetGain
+                  : t.averageCampaignNetGain}
+              </span>
+              <strong>{formatMoney(ongoing.averageCombinedNetPerMonth, locale)} USDT</strong>
+              {includeReferrals ? (
+                <dl>
+                  <div>
+                    <dt>{t.campaigns}</dt>
+                    <dd>{formatMoney(ongoing.averageCampaignNetPerMonth, locale)} USDT</dd>
+                  </div>
+                  <div>
+                    <dt>{t.referrals}</dt>
+                    <dd>{formatMoney(ongoing.averageReferralNetPerMonth, locale)} USDT</dd>
+                  </div>
+                </dl>
+              ) : (
+                <small>{t.monthlyAverageNote}</small>
+              )}
+            </article>
+            <article className="is-total">
+              <span>
+                {includeReferrals
+                  ? t.twelveMonthCombinedNetGain
+                  : t.twelveMonthCampaignNetGain}
+              </span>
+              <strong>{formatMoney(ongoing.combinedNetWithdrawals, locale)} USDT</strong>
+              {includeReferrals ? (
+                <dl>
+                  <div>
+                    <dt>{t.campaigns}</dt>
+                    <dd>{formatMoney(ongoing.campaignNetWithdrawals, locale)} USDT</dd>
+                  </div>
+                  <div>
+                    <dt>{t.referrals}</dt>
+                    <dd>{formatMoney(ongoing.referralNetWithdrawals, locale)} USDT</dd>
+                  </div>
+                </dl>
+              ) : (
+                <small>{t.afterWithdrawalFee}</small>
+              )}
+            </article>
+            <article className="is-roi">
+              <span>{t.twelveMonthCampaignRoi}</span>
+              <strong>{percent(ongoing.campaignCashRoi, locale)}</strong>
+              <small>{t.gainDividedByCapital}</small>
+            </article>
+          </div>
+
+          <p className="outcome-assumption-note">
+            {t.totalsAssumption}
+            {includeReferrals && (
+              <>
+                {" "}{t.referralAssumptionStart} {ongoing.referralCadenceDays}{" "}
+                {t.referralAssumptionEnd}
+              </>
+            )}
+          </p>
+        </section>
+      </section>
+    </section>
+  );
+}
+
+export default function ReferralSimulator({
+  locale = "en",
+}: {
+  locale?: SiteLocale;
+}) {
+  const t = calculatorCopy[locale];
+  const [hasOpened, setHasOpened] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    function handleCalculatorLinkClick(event: MouseEvent) {
+      if (
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey ||
+        !(event.target instanceof Element)
+      ) {
+        return;
+      }
+
+      const calculatorLink = event.target.closest<HTMLAnchorElement>(
+        'a[href="#calculator"]',
+      );
+      if (!calculatorLink) return;
+
+      event.preventDefault();
+      setHasOpened(true);
+      setIsOpen(true);
+    }
+
+    document.addEventListener("click", handleCalculatorLinkClick);
+    return () =>
+      document.removeEventListener("click", handleCalculatorLinkClick);
+  }, []);
+
+  if (hasOpened) {
+    return (
+      <ActiveReferralSimulator
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        locale={locale}
+      />
+    );
+  }
+
+  return (
+    <div className="calculator-launch" id="calculator">
+      <button
+        type="button"
+        className="calculator-launch-button"
+        onClick={() => {
+          setHasOpened(true);
+          setIsOpen(true);
+        }}
+      >
+        {t.launch} <span aria-hidden="true">↗</span>
+      </button>
+    </div>
+  );
+}
+
+function ActiveReferralSimulator({
+  isOpen,
+  setIsOpen,
+  locale,
+}: {
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+  locale: SiteLocale;
+}) {
+  const t = calculatorCopy[locale];
   const [startingLevel, setStartingLevel] = useState(3);
   const [startingCampaigns, setStartingCampaigns] = useState(1);
-  const [journeyMode, setJourneyMode] = useState<JourneyMode>("start");
-  const [referralMode, setReferralMode] = useState<ReferralMode>("none");
-  const [customPeopleInput, setCustomPeopleInput] = useState("3");
-  const [customReferralLevel, setCustomReferralLevel] = useState(3);
-  const [customReferralCampaigns, setCustomReferralCampaigns] = useState(3);
-  const [householdAccounts, setHouseholdAccounts] = useState(1);
+  const [continuationMode, setContinuationMode] =
+    useState<ContinuationMode>("wait-for-release");
+  const [referralPeopleInput, setReferralPeopleInput] = useState("0");
+  const [referralLevel, setReferralLevel] = useState(3);
+  const [referralCampaigns, setReferralCampaigns] = useState(1);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const modalRef = useRef<HTMLElement>(null);
+  const parsedReferralPeople = Number(referralPeopleInput);
+  const referralPeople = Number.isFinite(parsedReferralPeople)
+    ? Math.min(
+        Number.MAX_SAFE_INTEGER,
+        Math.max(0, Math.floor(parsedReferralPeople)),
+      )
+    : 0;
+  const includeReferrals = referralPeople > 0;
 
-  const customPeople = Math.min(
-    100,
-    Math.max(0, Number(customPeopleInput) || 0),
-  );
-  const referralPlan =
-    referralMode === "refer3"
-      ? { people: 3, level: 3, campaigns: 3 }
-      : referralMode === "custom"
-        ? {
-            people: customPeople,
-            level: customReferralLevel,
-            campaigns: customReferralCampaigns,
-          }
-        : { people: 0, level: 3, campaigns: 1 };
-
-  const baselinePath = useMemo(
+  const pathsByStartingCount = useMemo(
     () =>
-      simulateCompoundPath({
+      simulateStartingCampaignOptions({
         startingLevel,
-        startingCampaigns,
-        people: 0,
-        referralLevel: 3,
-        referralCampaigns: 1,
-      }),
-    [startingLevel, startingCampaigns],
-  );
-
-  const selectedPath = useMemo(
-    () =>
-      simulateCompoundPath({
-        startingLevel,
-        startingCampaigns,
-        people: referralPlan.people,
-        referralLevel: referralPlan.level,
-        referralCampaigns: referralPlan.campaigns,
+        continuationMode,
+        people: referralPeople,
+        referralLevel,
+        referralCampaigns,
+        referralCadence: "release-funded",
       }),
     [
       startingLevel,
-      startingCampaigns,
-      referralPlan.people,
-      referralPlan.level,
-      referralPlan.campaigns,
+      continuationMode,
+      referralPeople,
+      referralLevel,
+      referralCampaigns,
     ],
   );
-
-  const starting = getLevel(startingLevel);
-  const oneRoundFunds =
-    (starting.campaign * startingCampaigns + starting.activation) *
-    householdAccounts;
-  const continuityReserve =
-    starting.campaign * startingCampaigns * householdAccounts;
-  const readyToRollFunds = oneRoundFunds + continuityReserve;
-  const selectedStartingFunds =
-    journeyMode === "continuity" ? readyToRollFunds : oneRoundFunds;
-  const firstReleaseGross =
-    starting.earnings * startingCampaigns * householdAccounts;
-  const firstReleaseNet = firstReleaseGross * withdrawalRate;
-  const firstRoundDifference = firstReleaseNet - oneRoundFunds;
-  const firstRoundReturn = (firstRoundDifference / oneRoundFunds) * 100;
-
-  const referralMonthlyPotential = monthlyReferralPotential(
-    referralPlan.people,
-    referralPlan.campaigns,
-    referralPlan.level,
+  const selectedPath = pathsByStartingCount[startingCampaigns as 1 | 2 | 3];
+  const fastestGoalDay = Math.min(
+    ...startingCampaignOptions.map(
+      (campaignCount) => pathsByStartingCount[campaignCount].goalDay,
+    ),
   );
-  const currentRoundNetSurplus =
-    (starting.earnings - starting.campaign) *
-    startingCampaigns *
-    withdrawalRate *
-    householdAccounts;
-  const currentRoundInterval = journeyMode === "continuity" ? clickDays : cycleDays;
-  const currentCampaignMonthlyPotential =
-    (currentRoundNetSurplus * 30) / currentRoundInterval;
-  const currentReferralMonthlyPotential =
-    referralMonthlyPotential * householdAccounts;
-
-  const levelSeven = getLevel(7);
-  const levelSevenCampaignMonthlyPotential =
-    ((levelSeven.earnings - levelSeven.campaign) *
-      3 *
-      30 *
-      withdrawalRate) /
-    cycleDays;
-  const goalCampaignMonthlyPotential =
-    levelSevenCampaignMonthlyPotential * householdAccounts;
-  const goalReferralMonthlyPotential =
-    referralMonthlyPotential * householdAccounts;
-  const goalCombinedMonthlyPotential =
-    goalCampaignMonthlyPotential + goalReferralMonthlyPotential;
-
-  const monthsSaved =
-    baselinePath.goalDay >= 0 && selectedPath.goalDay >= 0
-      ? Math.max(
-          0,
-          Math.round((baselinePath.goalDay - selectedPath.goalDay) / 30),
-        )
-      : 0;
-
-  const cashPath = useMemo(
-    () =>
-      simulateCashPath(
-        {
-          startingLevel,
-          startingCampaigns,
-          people: referralPlan.people,
-          referralLevel: referralPlan.level,
-          referralCampaigns: referralPlan.campaigns,
-        },
-        journeyMode === "continuity" ? clickDays : cycleDays,
-      ),
-    [
-      startingLevel,
-      startingCampaigns,
-      referralPlan.people,
-      referralPlan.level,
-      referralPlan.campaigns,
-      journeyMode,
-    ],
-  );
-
-  const cashAtDay = (day: number) => {
-    if (day < 0) return 0;
-    const index = Math.min(day, maximumProjectionDays);
-    const perAccount =
-      journeyMode === "compound"
-        ? selectedPath.cashAvailableByDay[index]
-        : cashPath.cashAvailableByDay[index];
-    return perAccount * householdAccounts;
-  };
-
-  const campaignValueAtDay = (day: number) => {
-    const index = Math.min(Math.max(day, 0), maximumProjectionDays);
-    const perAccount =
-      journeyMode === "compound"
-        ? selectedPath.campaignValueByDay[index]
-        : cashPath.campaignValueByDay[index];
-    return perAccount * householdAccounts;
-  };
-
-  let breakEvenDay = -1;
-  for (let day = 1; day <= maximumProjectionDays; day += 1) {
-    if (cashAtDay(day) + 0.0001 >= selectedStartingFunds) {
-      breakEvenDay = day;
-      break;
-    }
-  }
-
-  const horizons: HorizonResult[] = horizonDays.map(({ months, days }) => {
-    const cashAvailable = cashAtDay(days);
-    return {
-      months,
-      cashAvailable,
-      activeCampaignValue: campaignValueAtDay(days),
-      recoveredPercent: (cashAvailable / selectedStartingFunds) * 100,
-      differencePercent:
-        ((cashAvailable - selectedStartingFunds) / selectedStartingFunds) * 100,
-    };
-  });
-
-  const selectedMonthlyPotential =
-    journeyMode === "compound"
-      ? goalCombinedMonthlyPotential
-      : currentCampaignMonthlyPotential + currentReferralMonthlyPotential;
-  const householdGoalCampaigns = householdAccounts * 3;
+  const selectedLevel = levels[startingLevel - 1] ?? levels[0];
+  const continuityReserve = selectedLevel.campaign * startingCampaigns;
 
   useEffect(() => {
     if (!isOpen) return;
 
     const previousOverflow = document.body.style.overflow;
-    const triggerElement = triggerRef.current;
+    const triggerElement =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : triggerRef.current;
     document.body.style.overflow = "hidden";
     closeRef.current?.focus();
 
@@ -368,7 +1025,7 @@ export default function ReferralSimulator() {
       document.removeEventListener("keydown", handleKeyDown);
       triggerElement?.focus();
     };
-  }, [isOpen]);
+  }, [isOpen, setIsOpen]);
 
   return (
     <div className="calculator-launch" id="calculator">
@@ -378,7 +1035,7 @@ export default function ReferralSimulator() {
         className="calculator-launch-button"
         onClick={() => setIsOpen(true)}
       >
-        Explore your campaign path <span aria-hidden="true">↗</span>
+        {t.launch} <span aria-hidden="true">↗</span>
       </button>
 
       {isOpen && (
@@ -390,7 +1047,7 @@ export default function ReferralSimulator() {
         >
           <section
             ref={modalRef}
-            className={`calculator-modal planner-modal journey-modal journey-mode-${journeyMode}`}
+            className="calculator-modal planner-modal journey-modal strategy-calculator-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="calculator-title"
@@ -400,528 +1057,270 @@ export default function ReferralSimulator() {
               type="button"
               className="calculator-modal-close"
               onClick={() => setIsOpen(false)}
-              aria-label="Close campaign path calculator"
+              aria-label={t.closeAria}
             >
               ×
             </button>
 
-            <p className="eyebrow">Your campaign journey</p>
-            <h2 id="calculator-title">
-              Start where you are. See where it could lead.
-            </h2>
+            <header className="simple-calculator-header">
+              <p className="eyebrow">{t.eyebrow}</p>
+              <h2 id="calculator-title">{t.title}</h2>
+              <p>{t.introduction}</p>
+            </header>
 
-            <div className="planner-section journey-step-start">
-              <div className="planner-section-heading journey-heading-split">
+            <CampaignAvailabilityTimeline locale={locale} />
+
+            <section className="simple-calculator-setup">
+              <header className="simple-section-heading">
                 <span>01</span>
                 <div>
-                  <strong>Choose your starting point</strong>
+                  <h3>{t.chooseModel}</h3>
+                  <p>{t.chooseModelDetail}</p>
                 </div>
-                <b className="journey-reassurance">✓ Every starting point counts</b>
-              </div>
+              </header>
 
-              <div className="level-path-start-grid">
+              <div
+                className={`simple-setup-grid${includeReferrals ? " has-referrals" : ""}`}
+              >
                 <label className="planner-field">
-                  <span>Starting campaign level</span>
+                  <span>{t.yourLevel}</span>
                   <select
                     value={startingLevel}
                     onChange={(event) =>
                       setStartingLevel(Number(event.target.value))
                     }
                   >
-                    {levels.map((item) => (
-                      <option value={item.id} key={item.id}>
-                        Level {item.id} · {item.campaign.toLocaleString()} USDT
+                    {levels.map((level) => (
+                      <option value={level.id} key={level.id}>
+                        {t.level} {level.id} · {integerFormatters[locale].format(level.campaign)} USDT
                       </option>
                     ))}
                   </select>
                 </label>
 
-                <ChoiceButtons
-                  label="Campaigns to start"
-                  value={startingCampaigns}
-                  options={[
-                    { value: 1, label: "1 campaign" },
-                    { value: 2, label: "2 campaigns" },
-                    { value: 3, label: "3 campaigns" },
-                  ]}
-                  onChange={setStartingCampaigns}
-                />
-              </div>
+                <label className="planner-field referral-count-field">
+                  <span>{t.directReferrals}</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    inputMode="numeric"
+                    value={referralPeopleInput}
+                    onChange={(event) =>
+                      setReferralPeopleInput(event.target.value)
+                    }
+                    onBlur={() =>
+                      setReferralPeopleInput(String(referralPeople))
+                    }
+                  />
+                </label>
 
-              <div className="first-step-preview">
-                <div>
-                  <span>Your starting amount</span>
-                  <strong>{money.format(oneRoundFunds)} USDT</strong>
-                  <small>
-                    {startingCampaigns === 1
-                      ? "One campaign round plus level activation"
-                      : "Campaigns funded up front and started one week apart"}
-                  </small>
-                </div>
-                <i aria-hidden="true">→</i>
-                <div>
-                  <span>
-                    {startingCampaigns === 1
-                      ? "First value available"
-                      : "First stagger total"}
-                  </span>
-                  <strong>{money.format(firstReleaseGross)} USDT</strong>
-                  <small>
-                    {startingCampaigns === 1
-                      ? "Day 19 after activity and hold"
-                      : `Released on days ${Array.from(
-                          { length: startingCampaigns },
-                          (_, index) => 19 + index * 7,
-                        ).join(", ")}`}
-                  </small>
-                </div>
-                <i aria-hidden="true">→</i>
-                <div className="first-step-net">
-                  <span>Net if withdrawn</span>
-                  <strong>{money.format(firstReleaseNet)} USDT</strong>
-                  <small>
-                    {percent(firstRoundReturn)} versus the starting amount
-                  </small>
-                </div>
-              </div>
-            </div>
+                {includeReferrals && (
+                  <>
+                    <div className="simple-referral-settings">
+                      <label className="planner-field">
+                        <span>{t.theirLevel}</span>
+                        <select
+                          value={referralLevel}
+                          onChange={(event) =>
+                            setReferralLevel(Number(event.target.value))
+                          }
+                        >
+                          {levels.map((level) => (
+                            <option value={level.id} key={level.id}>
+                              {t.level} {level.id}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
 
-            <div className="planner-section journey-step-mode">
-              <div className="planner-section-heading">
+                      <ChoiceButtons
+                        label={t.campaignsPerPerson}
+                        value={referralCampaigns}
+                        options={[
+                          { value: 1, label: "1" },
+                          { value: 2, label: "2" },
+                          { value: 3, label: "3" },
+                        ]}
+                        onChange={setReferralCampaigns}
+                      />
+                    </div>
+
+                    <div className="simple-referral-summary">
+                      <div>
+                        <b>{t.referralExample}</b>
+                        <strong>
+                          {referralPeople} {referralPeople === 1 ? t.person : t.people}
+                          {" × "}
+                          {referralCampaigns} {locale === "en" ? `${t.level} ${referralLevel} ` : ""}
+                          {campaignLabel(referralCampaigns, locale)}{locale === "fr" ? ` de niveau ${referralLevel}` : ""}{" "}
+                          {t.each}
+                        </strong>
+                      </div>
+                      <p>{t.referralsPay}</p>
+                      <small>{t.incomeShownSeparately}</small>
+                    </div>
+                  </>
+                )}
+              </div>
+            </section>
+
+            <section className="strategy-comparison">
+              <header className="simple-section-heading">
                 <span>02</span>
                 <div>
-                  <strong>Choose your path</strong>
-                </div>
-              </div>
-
-              <div className="journey-mode-cards">
-                <button
-                  type="button"
-                  className={`journey-card-start ${journeyMode === "start" ? "is-selected" : ""}`}
-                  aria-pressed={journeyMode === "start"}
-                  onClick={() => setJourneyMode("start")}
-                >
-                  <JourneyIcon name="start" />
-                  <span>Start here</span>
-                  <strong>Start &amp; learn</strong>
-                  <small>One round. Decide what comes next.</small>
-                </button>
-                <button
-                  type="button"
-                  className={`journey-card-compound ${journeyMode === "compound" ? "is-selected" : ""}`}
-                  aria-pressed={journeyMode === "compound"}
-                  onClick={() => setJourneyMode("compound")}
-                >
-                  <JourneyIcon name="growth" />
-                  <span>Grow over time</span>
-                  <strong>Build momentum</strong>
-                  <small>Compound toward three Level 7 campaigns.</small>
-                </button>
-                <button
-                  type="button"
-                  className={`journey-card-continuity ${journeyMode === "continuity" ? "is-selected" : ""}`}
-                  aria-pressed={journeyMode === "continuity"}
-                  onClick={() => setJourneyMode("continuity")}
-                >
-                  <JourneyIcon name="continuity" />
-                  <span>Reduce downtime</span>
-                  <strong>Maintain continuity</strong>
-                  <small>Prepare two rounds to reduce downtime.</small>
-                </button>
-              </div>
-            </div>
-
-            <div className="planner-section journey-step-referral">
-              <div className="planner-section-heading">
-                <span>03</span>
-                <div>
-                  <strong>Optional referrals</strong>
-                </div>
-              </div>
-
-              <div className="referral-mode-cards">
-                <button
-                  type="button"
-                  className={referralMode === "none" ? "is-selected" : ""}
-                  aria-pressed={referralMode === "none"}
-                  onClick={() => setReferralMode("none")}
-                >
-                  <JourneyIcon name="person" />
-                  <span>Campaign only</span>
-                  <strong>No referrals</strong>
-                  <small>Campaigns only</small>
-                </button>
-                <button
-                  type="button"
-                  className={referralMode === "refer3" ? "is-selected" : ""}
-                  aria-pressed={referralMode === "refer3"}
-                  onClick={() => setReferralMode("refer3")}
-                >
-                  <JourneyIcon name="people" />
-                  <span>Illustrative example</span>
-                  <strong>Refer 3</strong>
-                  <small>Level 3 · 3 staggered each</small>
-                </button>
-                <button
-                  type="button"
-                  className={referralMode === "custom" ? "is-selected" : ""}
-                  aria-pressed={referralMode === "custom"}
-                  onClick={() => setReferralMode("custom")}
-                >
-                  <JourneyIcon name="sliders" />
-                  <span>Build your own</span>
-                  <strong>Custom</strong>
-                  <small>Choose your assumptions</small>
-                </button>
-              </div>
-
-              {referralMode === "custom" && (
-                <div className="planner-referral-grid custom-referral-fields">
-                  <label className="planner-field">
-                    <span>People you personally refer</span>
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      step="1"
-                      inputMode="numeric"
-                      value={customPeopleInput}
-                      onFocus={(event) => event.currentTarget.select()}
-                      onBlur={() => {
-                        if (customPeopleInput === "") setCustomPeopleInput("0");
-                      }}
-                      onChange={(event) => {
-                        const nextValue = event.target.value;
-                        if (nextValue === "") {
-                          setCustomPeopleInput("");
-                          return;
-                        }
-                        const withoutLeadingZeros = nextValue.replace(
-                          /^0+(?=\d)/,
-                          "",
-                        );
-                        const clamped = Math.min(
-                          100,
-                          Math.max(0, Number(withoutLeadingZeros) || 0),
-                        );
-                        setCustomPeopleInput(String(clamped));
-                      }}
-                    />
-                  </label>
-
-                  <label className="planner-field">
-                    <span>Typical referral level</span>
-                    <select
-                      value={customReferralLevel}
-                      onChange={(event) =>
-                        setCustomReferralLevel(Number(event.target.value))
-                      }
-                    >
-                      {levels.map((item) => (
-                        <option value={item.id} key={item.id}>
-                          Level {item.id}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <ChoiceButtons
-                    label="Their campaigns"
-                    value={customReferralCampaigns}
-                    options={[
-                      { value: 1, label: "1 campaign" },
-                      { value: 3, label: "3 staggered" },
-                    ]}
-                    onChange={setCustomReferralCampaigns}
-                  />
-                </div>
-              )}
-            </div>
-
-            <details className="household-options">
-              <summary>
-                <span>
-                  Household view
-                  <small>Apply this same path to more than one household account</small>
-                </span>
-                <i aria-hidden="true">+</i>
-              </summary>
-              <div>
-                <ChoiceButtons
-                  label="Household accounts"
-                  value={householdAccounts}
-                  options={[
-                    { value: 1, label: "1 account" },
-                    { value: 2, label: "2 accounts" },
-                    { value: 3, label: "3 accounts" },
-                  ]}
-                  onChange={setHouseholdAccounts}
-                />
-                <p>
-                  The household view applies the same starting plan and referral
-                  profile to each selected account. Official household account
-                  rules still apply.
-                </p>
-              </div>
-            </details>
-
-            <div className="level-path-result journey-result" aria-live="polite">
-              <div className="goal-time-result">
-                <span>Estimated cash break-even on this path</span>
-                <strong>{timeLabel(breakEvenDay)}</strong>
-                <p>
-                  Cumulative illustrated net cash available equals the selected
-                  starting funds while campaigns remain active.
-                </p>
-              </div>
-
-              <div className="journey-funding-metrics">
-                <div className="journey-funding-start">
-                  <span>Start with</span>
-                  <strong>{money.format(oneRoundFunds)} USDT</strong>
-                  <small>Any selected starting point is valid</small>
-                </div>
-                {journeyMode === "continuity" ? (
-                  <div className="journey-funding-reserve">
-                    <span>Continuity reserve</span>
-                    <strong>{money.format(continuityReserve)} USDT</strong>
-                    <small>One additional round held ready</small>
-                  </div>
-                ) : journeyMode === "compound" ? (
-                  <div className="journey-funding-growth">
-                    <span>Level 7 destination</span>
-                    <strong>{householdGoalCampaigns} campaigns</strong>
-                    <small>Three per household account</small>
-                  </div>
-                ) : (
-                  <div className="journey-funding-growth">
-                    <span>Optional future target</span>
-                    <strong>{money.format(readyToRollFunds)} USDT</strong>
-                    <small>Build toward two-round continuity later</small>
-                  </div>
-                )}
-                <div className="journey-funding-total">
-                  <span>
-                    {journeyMode === "continuity"
-                      ? "Ready-to-roll total"
-                      : journeyMode === "compound"
-                        ? "Goal timing"
-                        : "First release"}
-                  </span>
-                  <strong>
-                    {journeyMode === "continuity"
-                      ? `${money.format(readyToRollFunds)} USDT`
-                      : journeyMode === "compound"
-                        ? timeLabel(selectedPath.goalDay)
-                        : "About 19 days"}
-                  </strong>
-                  <small>
-                    {journeyMode === "continuity"
-                      ? "Two rounds plus one-time activation"
-                      : journeyMode === "compound"
-                        ? selectedPath.goalDay === 0
-                          ? "Three Level 7 campaigns selected at the start"
-                          : referralPlan.people === 0
-                            ? "Campaign activity only"
-                            : `${monthsSaved} ${monthsSaved === 1 ? "month" : "months"} sooner with selected referrals`
-                        : "Then choose to withdraw, restart, or grow"}
-                  </small>
-                </div>
-              </div>
-
-              <div className="goal-monthly-heading">
-                <span>
-                  {journeyMode === "compound" ? "At the Level 7 goal" : "On this selected rhythm"}
-                </span>
-                <strong>Illustrative ongoing monthly potential</strong>
-              </div>
-
-              <div className="goal-monthly-metrics">
-                <div className="campaign-potential">
-                  <span>Campaigns</span>
-                  <strong>
-                    {money.format(
-                      journeyMode === "compound"
-                        ? goalCampaignMonthlyPotential
-                        : currentCampaignMonthlyPotential,
-                    )} USDT
-                  </strong>
-                  <small>30-day average after replacement and withdrawal fee</small>
-                </div>
-                <b aria-hidden="true">+</b>
-                <div className="referral-potential">
-                  <span>Direct referrals</span>
-                  <strong>
-                    {money.format(
-                      journeyMode === "compound"
-                        ? goalReferralMonthlyPotential
-                        : currentReferralMonthlyPotential,
-                    )} USDT
-                  </strong>
-                  <small>
-                    {referralPlan.people === 0
-                      ? "No referrals included"
-                      : `${referralPlan.people} people · ${referralPlan.campaigns} ${referralPlan.campaigns === 1 ? "campaign" : "campaigns"} each`}
-                  </small>
-                </div>
-                <b aria-hidden="true">=</b>
-                <div className="combined-potential">
-                  <span>Combined</span>
-                  <strong>{money.format(selectedMonthlyPotential)} USDT</strong>
-                  <small>Illustrative 30-day cash-availability pace</small>
-                </div>
-              </div>
-
-              <div className="journey-storyline">
-                {journeyMode === "compound" ? (
-                  <>
-                    <div className="story-campaign">
-                      <i aria-hidden="true"><JourneyIcon name="start" /></i>
-                      <span>{milestoneLabel(selectedPath.threeCampaignsDay)}</span>
-                      <strong>Three campaigns running</strong>
-                    </div>
-                    <div className="story-growth">
-                      <i aria-hidden="true"><JourneyIcon name="growth" /></i>
-                      <span>{milestoneLabel(selectedPath.firstLevelSevenDay)}</span>
-                      <strong>First Level 7 campaign</strong>
-                    </div>
-                    <div className="story-growth">
-                      <i aria-hidden="true"><JourneyIcon name="continuity" /></i>
-                      <span>{milestoneLabel(selectedPath.goalDay)}</span>
-                      <strong>Three Level 7 campaigns</strong>
-                    </div>
-                    <div className="story-recovered">
-                      <i aria-hidden="true"><JourneyIcon name="recovered" /></i>
-                      <span>{timeLabel(breakEvenDay)}</span>
-                      <strong>Starting funds recovered</strong>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="story-campaign">
-                      <i aria-hidden="true"><JourneyIcon name="start" /></i>
-                      <span>Day 1</span>
-                      <strong>{startingCampaigns} campaign{startingCampaigns === 1 ? "" : "s"} begin</strong>
-                    </div>
-                    <div className={journeyMode === "continuity" ? "story-reserve" : "story-activity"}>
-                      <i aria-hidden="true">
-                        <JourneyIcon name={journeyMode === "continuity" ? "continuity" : "clock"} />
-                      </i>
-                      <span>Day 12</span>
-                      <strong>
-                        {journeyMode === "continuity"
-                          ? "Reserve can start the next round"
-                          : "Campaign activity completes"}
-                      </strong>
-                    </div>
-                    <div className="story-release">
-                      <i aria-hidden="true"><JourneyIcon name="wallet" /></i>
-                      <span>Day 19</span>
-                      <strong>First value becomes available</strong>
-                    </div>
-                    <div className="story-recovered">
-                      <i aria-hidden="true"><JourneyIcon name="recovered" /></i>
-                      <span>{timeLabel(breakEvenDay)}</span>
-                      <strong>Starting funds recovered</strong>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              <div className="return-story">
-                <div className="return-story-heading">
-                  <div>
-                    <span>See the numbers behind your journey</span>
-                    <strong>3-, 6-, and 12-month cash view</strong>
-                  </div>
+                  <h3>{t.chooseCampaignCount}</h3>
                   <p>
-                    Campaign value stays separate and is not counted as cash recovered.
+                    {t.campaignCountDetailStart} {startingLevel}.
                   </p>
                 </div>
-                <div className="return-horizons">
-                  {horizons.map((horizon) => (
-                    <div className={`return-horizon return-horizon-${horizon.months}`} key={horizon.months}>
-                      <span>{horizon.months} months</span>
-                      <strong>{money.format(horizon.cashAvailable)} USDT</strong>
-                      <small>illustrative net cash available</small>
-                      <dl>
-                        <div>
-                          <dt>Starting funds recovered</dt>
-                          <dd>{Math.round(horizon.recoveredPercent)}%</dd>
-                        </div>
-                        <div>
-                          <dt>Cash vs. starting funds</dt>
-                          <dd className={horizon.differencePercent >= 0 ? "is-positive" : "is-negative"}>
-                            {percent(horizon.differencePercent)}
-                          </dd>
-                        </div>
-                        <div>
-                          <dt>Active campaign value</dt>
-                          <dd>{money.format(horizon.activeCampaignValue)} USDT</dd>
-                        </div>
-                      </dl>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+              </header>
 
-            <details className="planner-assumptions">
+              <div className="strategy-comparison-grid">
+                {startingCampaignOptions.map((campaignCount) => (
+                  <StartingCampaignCard
+                    key={campaignCount}
+                    path={pathsByStartingCount[campaignCount]}
+                    count={campaignCount}
+                    startingLevel={startingLevel}
+                    selected={startingCampaigns === campaignCount}
+                    fastestForInputs={
+                      pathsByStartingCount[campaignCount].goalDay ===
+                      fastestGoalDay
+                    }
+                    referralsIncluded={includeReferrals}
+                    continuationMode={continuationMode}
+                    locale={locale}
+                    onSelect={() => setStartingCampaigns(campaignCount)}
+                  />
+                ))}
+              </div>
+            </section>
+
+            <section className="continuation-choice-section">
+              <header className="simple-section-heading">
+                <span>03</span>
+                <div>
+                  <h3>{t.chooseAfterTwelve}</h3>
+                  <p>{t.chooseAfterTwelveDetail}</p>
+                </div>
+              </header>
+
+              <fieldset className="continuation-choice">
+                <legend className="sr-only">{t.afterDayTwelveChoice}</legend>
+                <button
+                  type="button"
+                  className={
+                    continuationMode === "wait-for-release"
+                      ? "is-selected"
+                      : ""
+                  }
+                  aria-pressed={continuationMode === "wait-for-release"}
+                  onClick={() => setContinuationMode("wait-for-release")}
+                >
+                  <span className="continuation-choice__icon" aria-hidden="true">
+                    <JourneyIcon name="start" />
+                  </span>
+                  <span className="continuation-choice__eyebrow">
+                    {t.noAdditionalReserve}
+                  </span>
+                  <strong>{t.waitForFunds}</strong>
+                  <small>{t.waitForFundsDetail}</small>
+                  <b>{t.dayTwelveReserve}: {formatMoney(0, locale)} USDT</b>
+                </button>
+
+                <button
+                  type="button"
+                  className={
+                    continuationMode === "keep-spots-moving"
+                      ? "is-selected"
+                      : ""
+                  }
+                  aria-pressed={continuationMode === "keep-spots-moving"}
+                  onClick={() => setContinuationMode("keep-spots-moving")}
+                >
+                  <span className="continuation-choice__icon" aria-hidden="true">
+                    <JourneyIcon name="continuity" />
+                  </span>
+                  <span className="continuation-choice__eyebrow">
+                    {t.optionalOutsideMoney}
+                  </span>
+                  <strong>{t.keepSpotsMoving}</strong>
+                  <small>{t.keepSpotsMovingDetail}</small>
+                  <b>
+                    {t.initialDayTwelveReserve}: {formatMoney(continuityReserve, locale)} USDT
+                  </b>
+                </button>
+              </fieldset>
+
+              <p className="continuation-choice-note" aria-live="polite">
+                {locale === "fr" ? (
+                  <>
+                    {t.selected} {startingCampaigns}{" "}
+                    {campaignLabel(startingCampaigns, locale)} de niveau {startingLevel}{" "}
+                    aujourd’hui et l’option « {t.continuationLabels[continuationMode]} ».
+                    {" "}{t.selectedNoteEnd}
+                  </>
+                ) : (
+                  <>
+                    {t.selected} {startingCampaigns} Level {startingLevel}{" "}
+                    {campaignLabel(startingCampaigns, locale)} today and “
+                    {t.continuationLabels[continuationMode]}.” {t.selectedNoteEnd}
+                  </>
+                )}
+              </p>
+            </section>
+
+            <SelectedStrategyDetail
+              path={selectedPath}
+              startingLevel={startingLevel}
+              continuationMode={continuationMode}
+              includeReferrals={includeReferrals}
+              referralPeople={referralPeople}
+              referralLevel={referralLevel}
+              referralCampaigns={referralCampaigns}
+              locale={locale}
+            />
+
+            <details className="planner-assumptions simple-assumptions">
               <summary>
-                How this illustration is calculated <i aria-hidden="true">+</i>
+                {t.assumptionsSummary} <i aria-hidden="true">+</i>
               </summary>
               <div>
-                <p>
-                  The model uses published campaign costs and earnings, a
-                  12-day activity period plus a 7-day hold, one-time activation
-                  fees, selected direct-referral commissions, and a 10%
-                  withdrawal fee.
-                </p>
-                <p>
-                  Cash vs. starting funds equals illustrated net cash available
-                  minus selected starting funds, divided by those starting
-                  funds. Active campaign value is shown separately and is not
-                  counted as recovered cash.
-                </p>
-                <p>
-                  Start &amp; learn assumes campaigns restart when value becomes
-                  available. Maintain continuity assumes one additional round
-                  is held ready so completed campaigns can be replaced during
-                  the hold period. Multiple selected campaigns are modeled one
-                  week apart.
-                </p>
-                <p>
-                  Build momentum compounds available value, fills three
-                  campaigns at the starting level, and upgrades only when the
-                  ledger can also replace every campaign due that day. Once
-                  three Level 7 campaigns are active, later release events are
-                  shown as net cash after replacement and the withdrawal fee.
-                </p>
-                <p>
-                  Referral commissions are modeled as immediately available.
-                  The official minimum, one-withdrawal-per-week limit, manual
-                  request, and processing time are not used to delay the cash
-                  dates shown here.
-                </p>
+                <p>{t.assumptionAvailability}</p>
+                <p>{t.assumptionCards}</p>
+                <p>{t.assumptionContinuation}</p>
+                <p>{t.assumptionGoal}</p>
+                <p>{t.assumptionReferrals}</p>
+                <p>{t.assumptionReferralTiming}</p>
+                <p>{t.assumptionWithdrawal}</p>
               </div>
             </details>
 
             <p className="calculator-modal-note">
-              Illustrative strategy only—not guaranteed earnings, financial
-              advice, or an investment projection. Campaign availability,
-              member activity, program rules, fees, and timing can change.
-              Funding source and financing costs are not modeled; borrowed
-              funds create repayment obligations regardless of campaign
-              performance. Review the{" "}
+              {t.disclaimerStart}{" "}
               <a
-                href="https://clickbaitpays.me/questions.php"
-                target="_blank"
-                rel="noopener noreferrer"
+                href={
+                  locale === "fr"
+                    ? "/fr/faq"
+                    : "https://clickbaitpays.me/questions.php"
+                }
+                {...(locale === "en"
+                  ? { target: "_blank", rel: "noopener noreferrer" }
+                  : {})}
               >
-                current official rules
+                {t.officialRules}
               </a>
               .
             </p>
+
+            <button
+              type="button"
+              className="calculator-modal-done"
+              onClick={() => setIsOpen(false)}
+            >
+              {t.close}
+            </button>
           </section>
         </div>
       )}

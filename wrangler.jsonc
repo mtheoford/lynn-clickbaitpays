@@ -89,6 +89,7 @@
       "name": "proneurs-personal-cbp-sites",
       "routes": [
         { "pattern": "lynn-theobald.cbp.proneurs.org", "custom_domain": true },
+        { "pattern": "your-name.cbp.proneurs.org", "custom_domain": true },
         { "pattern": "admin.cbp.proneurs.org", "custom_domain": true },
         { "pattern": "cbp.proneurs.org/*", "zone_name": "proneurs.org" },
         { "pattern": "*.cbp.proneurs.org/*", "zone_name": "proneurs.org" }

@@ -1,6 +1,11 @@
 export const INVALID_MAGIC_LINK_MESSAGE =
   "That sign-in link has expired or was already used. Request a fresh link below, then open the newest email within 15 minutes.";
 
+export const INVALID_MAGIC_LINK_MESSAGE_FR =
+  "Ce lien de connexion a expiré ou a déjà été utilisé. Demandez un nouveau lien ci-dessous, puis ouvrez l’e-mail le plus récent dans les 15 minutes.";
+
+export type CustomerAuthLocale = "en" | "fr";
+
 export type CustomerMagicLinkSession = {
   sessionToken: string;
   expiresAt: Date;
@@ -9,9 +14,30 @@ export type CustomerMagicLinkSession = {
 
 export function customerSignInErrorMessage(
   error: string | string[] | undefined,
+  locale: CustomerAuthLocale = "en",
 ): string | null {
   const errorCode = Array.isArray(error) ? error[0] : error;
-  return errorCode === "invalid-link" ? INVALID_MAGIC_LINK_MESSAGE : null;
+  if (errorCode !== "invalid-link") return null;
+  return locale === "fr"
+    ? INVALID_MAGIC_LINK_MESSAGE_FR
+    : INVALID_MAGIC_LINK_MESSAGE;
+}
+
+export function customerAuthLocale(
+  value: string | string[] | null | undefined,
+): CustomerAuthLocale {
+  const candidate = Array.isArray(value) ? value[0] : value;
+  return candidate === "fr" ? "fr" : "en";
+}
+
+export function customerManagePath(
+  locale: CustomerAuthLocale,
+  suffix = "",
+): string {
+  const normalizedSuffix = suffix && !suffix.startsWith("/")
+    ? `/${suffix}`
+    : suffix;
+  return `${locale === "fr" ? "/fr" : ""}/manage${normalizedSuffix}`;
 }
 
 export async function inspectCustomerMagicLink(

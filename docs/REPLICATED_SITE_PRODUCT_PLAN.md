@@ -11,7 +11,7 @@ subscription product. A customer supplies their contact details and official
 ClickBaitPays referral URL, pays for a subscription, and receives a personalized
 site at a ProNeurs subdomain such as:
 
-`https://lynn-theobald.cbp.proneurs.org`
+`https://your-name.cbp.proneurs.org`
 
 The product must use one centrally maintained application and template. It must
 not copy, deploy, or maintain a separate codebase for each customer.
@@ -70,7 +70,7 @@ growth CTA:
 
 The CTA links to the marketing flow with source attribution, for example:
 
-`https://cbp.proneurs.org/signup?source=lynn-theobald`
+`https://cbp.proneurs.org/get-your-site?source=your-name`
 
 This CTA cannot be edited or removed by subscribers. It must not be visually
 confused with the sponsor's "Join ClickBaitPays" buttons.

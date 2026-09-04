@@ -5,9 +5,35 @@ import { useEffect, useState } from "react";
 
 type ProvisioningState = "processing" | "ready" | "action_required";
 
-export default function ProvisioningStatus({ sessionId }: { sessionId: string }) {
+const copy = {
+  en: {
+    viewPage: "View my new page",
+    managePage: "Manage my page",
+    accountHelp: "Get account help",
+    returnToSites: "Return to Personal CBP Sites",
+    confirming: "Confirming payment and publishing your page…",
+    signIn: "Sign in to check your account",
+  },
+  fr: {
+    viewPage: "Voir ma nouvelle page",
+    managePage: "Gérer ma page",
+    accountHelp: "Obtenir de l’aide pour mon compte",
+    returnToSites: "Retourner aux sites CBP personnalisés",
+    confirming: "Confirmation du paiement et publication de votre page…",
+    signIn: "Se connecter pour consulter mon compte",
+  },
+} as const;
+
+export default function ProvisioningStatus({
+  sessionId,
+  locale = "en",
+}: {
+  sessionId: string;
+  locale?: "en" | "fr";
+}) {
   const [state, setState] = useState<ProvisioningState>("processing");
   const [publicUrl, setPublicUrl] = useState("");
+  const t = copy[locale];
 
   useEffect(() => {
     let canceled = false;
@@ -18,7 +44,7 @@ export default function ProvisioningStatus({ sessionId }: { sessionId: string })
       attempts += 1;
       try {
         const response = await fetch(
-          `/api/checkout/status?session_id=${encodeURIComponent(sessionId)}`,
+          `/api/checkout/status?session_id=${encodeURIComponent(sessionId)}&locale=${locale}`,
           { cache: "no-store" },
         );
         const result = (await response.json()) as {
@@ -47,13 +73,13 @@ export default function ProvisioningStatus({ sessionId }: { sessionId: string })
       canceled = true;
       if (timer) clearTimeout(timer);
     };
-  }, [sessionId]);
+  }, [locale, sessionId]);
 
   if (state === "ready") {
     return (
       <div className="checkout-success-actions">
-        <a className="join-button" href={publicUrl}>View my new page <i aria-hidden="true">→</i></a>
-        <Link href="/manage">Manage my page</Link>
+        <a className="join-button" href={publicUrl}>{t.viewPage} <i aria-hidden="true">→</i></a>
+        <Link href={locale === "fr" ? "/fr/manage" : "/manage"}>{t.managePage}</Link>
       </div>
     );
   }
@@ -61,16 +87,16 @@ export default function ProvisioningStatus({ sessionId }: { sessionId: string })
   if (state === "action_required") {
     return (
       <div className="checkout-success-actions">
-        <Link className="join-button" href="/manage/sign-in">Get account help <i aria-hidden="true">→</i></Link>
-        <Link href="/get-your-site">Return to Personal CBP Sites</Link>
+        <Link className="join-button" href={locale === "fr" ? "/fr/manage/sign-in" : "/manage/sign-in"}>{t.accountHelp} <i aria-hidden="true">→</i></Link>
+        <Link href={locale === "fr" ? "/fr/get-your-site" : "/get-your-site"}>{t.returnToSites}</Link>
       </div>
     );
   }
 
   return (
     <div className="checkout-success-actions" aria-live="polite">
-      <span>Confirming payment and publishing your page…</span>
-      <Link href="/manage/sign-in">Sign in to check your account</Link>
+      <span>{t.confirming}</span>
+      <Link href={locale === "fr" ? "/fr/manage/sign-in" : "/manage/sign-in"}>{t.signIn}</Link>
     </div>
   );
 }

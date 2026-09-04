@@ -16,7 +16,12 @@ import {
   siteStatusWithPublicationOverride,
   subscriptionPeriodEnd,
 } from "@/lib/billing-lifecycle";
-import { deliverWelcomeEmailForSite, enqueueWelcomeEmail } from "@/lib/email";
+import {
+  deliverCheckoutReminderForSite,
+  deliverDueCheckoutReminders,
+  deliverWelcomeEmailForSite,
+  enqueueWelcomeEmail,
+} from "@/lib/email";
 import { getRuntimeEnv, type BillingQueueMessage } from "@/lib/runtime";
 import { getStripe, type BillingPlan } from "@/lib/stripe";
 import { purgeExpiredCheckoutReservations } from "@/lib/checkout-cleanup";
@@ -79,7 +84,17 @@ export async function processBillingMessages(
   for (const message of messages) {
     try {
       if (message.body.type === "welcome_email") {
-        await deliverWelcomeEmailForSite(message.body.siteId, message.body.deliveryId);
+        await deliverWelcomeEmailForSite(
+          message.body.siteId,
+          message.body.deliveryId,
+          message.body.locale,
+        );
+      } else if (message.body.type === "checkout_reminder") {
+        await deliverCheckoutReminderForSite(
+          message.body.siteId,
+          message.body.deliveryId,
+          message.body.locale,
+        );
       } else {
         await processStripeEvent(message.body.stripeEventId);
       }
@@ -90,7 +105,8 @@ export async function processBillingMessages(
           message: "billing queue message failed",
           jobType: message.body.type ?? "stripe_event",
           jobId:
-            message.body.type === "welcome_email"
+            message.body.type === "welcome_email" ||
+            message.body.type === "checkout_reminder"
               ? message.body.siteId
               : message.body.stripeEventId,
           error: error instanceof Error ? error.message : "Unknown queue failure",
@@ -183,6 +199,7 @@ async function applyCompletedCheckout(session: Stripe.Checkout.Session): Promise
   const customerId = stripeId(session.customer);
   const subscriptionId = stripeId(session.subscription);
   const plan: BillingPlan = session.metadata?.plan === "annual" ? "annual" : "monthly";
+  const locale = session.metadata?.locale === "fr" ? "fr" : "en";
   if (!siteId || !userId || !customerId || !subscriptionId) {
     throw new Error("Completed Checkout session is missing provisioning metadata.");
   }
@@ -257,7 +274,7 @@ async function applyCompletedCheckout(session: Stripe.Checkout.Session): Promise
   }
 
   if (siteStatus === "active") {
-    await enqueueWelcomeEmail(siteId, `welcome-${siteId}`);
+    await enqueueWelcomeEmail(siteId, `welcome-${siteId}`, locale);
   }
 }
 
@@ -326,6 +343,7 @@ async function applySubscription(
 export async function enforceScheduledBillingState(now = new Date()): Promise<void> {
   const db = await getDb();
   await purgeExpiredCheckoutReservations(now);
+  await deliverDueCheckoutReminders(now);
   await db.delete(customerSessions).where(lte(customerSessions.expiresAt, now));
   await db.delete(magicLinkTokens).where(lte(magicLinkTokens.expiresAt, now));
 

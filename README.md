@@ -153,7 +153,14 @@ expiration every 15 minutes. The same cron permanently purges sites whose
 administrator-scheduled 30-day deletion window has elapsed. Subscription
 cancellation is managed in Stripe; deletion is a separate administrator action.
 
-Verify the Resend sending domain before testing welcome and magic-link email.
+Creating a Stripe Checkout Session also schedules one reminder for 30 minutes
+later. Before sending it, the queue consumer verifies that the local site is
+still pending, no subscription is connected, and the current Stripe Checkout
+Session is still open. The reminder links directly to that hosted Checkout
+Session. Resend idempotency and a non-personal audit record prevent duplicate
+delivery; the 15-minute cron also recovers reminders that could not be queued.
+
+Verify the Resend sending domain before testing reminder, welcome, and magic-link email.
 Until Resend is configured, the hosted pilot exposes Sign in with ChatGPT as a
 customer and administrator fallback; the account email must match the purchase
 or administrator allowlist email.

@@ -4,7 +4,10 @@ import { getChatGPTUser } from "@/app/chatgpt-auth";
 import { getDb } from "@/db";
 import { auditLogs, customerSessions, magicLinkTokens, users } from "@/db/schema";
 import { sendTransactionalEmail } from "@/lib/email";
-import type { CustomerMagicLinkSession } from "@/lib/magic-link-flow";
+import type {
+  CustomerAuthLocale,
+  CustomerMagicLinkSession,
+} from "@/lib/magic-link-flow";
 import { runtimeValue } from "@/lib/runtime";
 import { hashToken } from "@/lib/token";
 
@@ -31,8 +34,10 @@ function cookieName(): string {
   return process.env.NODE_ENV === "production" ? SECURE_SESSION_COOKIE : SESSION_COOKIE;
 }
 
-export function customerSignOutPath(): string {
-  return "/api/auth/sign-out";
+export function customerSignOutPath(locale: CustomerAuthLocale = "en"): string {
+  return locale === "fr"
+    ? "/api/auth/sign-out?locale=fr"
+    : "/api/auth/sign-out";
 }
 
 async function recordCustomerAuthEvent(input: {
@@ -107,6 +112,7 @@ export async function getSignedInCustomer() {
 export async function requestCustomerMagicLink(
   emailInput: string,
   origin: string,
+  locale: CustomerAuthLocale = "en",
 ): Promise<{ accepted: true; developmentUrl?: string }> {
   const email = emailInput.trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { accepted: true };
@@ -154,18 +160,30 @@ export async function requestCustomerMagicLink(
     action: "customer.magic_link.requested",
     actorEmail: customer.email,
     userId: customer.id,
-    details: { expiresAt: expiresAt.toISOString() },
+    details: { expiresAt: expiresAt.toISOString(), locale },
   });
 
   const verifyUrl = new URL("/auth/verify", origin);
   verifyUrl.searchParams.set("token", token);
+  if (locale === "fr") verifyUrl.searchParams.set("locale", "fr");
+  const emailContent = locale === "fr"
+    ? {
+        subject: "Connectez-vous pour gérer votre site ProNeurs",
+        text: `Bonjour ${customer.name},\n\nUtilisez ce lien sécurisé pour gérer votre site CBP personnel ProNeurs :\n${verifyUrl}\n\nCe lien expire après 15 minutes et ne peut être utilisé qu’une seule fois.`,
+        html: `<p>Bonjour ${escapeHtml(customer.name)},</p><p><a href="${escapeHtml(verifyUrl.toString())}">Connectez-vous pour gérer votre site</a></p><p>Ce lien expire après 15 minutes et ne peut être utilisé qu’une seule fois.</p>`,
+      }
+    : {
+        subject: "Sign in to manage your ProNeurs site",
+        text: `Hi ${customer.name},\n\nUse this secure link to manage your ProNeurs Personal CBP Site:\n${verifyUrl}\n\nThis link expires in 15 minutes and can be used only once.`,
+        html: `<p>Hi ${escapeHtml(customer.name)},</p><p><a href="${escapeHtml(verifyUrl.toString())}">Sign in to manage your site</a></p><p>This link expires in 15 minutes and can be used only once.</p>`,
+      };
   try {
     await sendTransactionalEmail({
       to: customer.email,
-      subject: "Sign in to manage your ProNeurs site",
+      subject: emailContent.subject,
       idempotencyKey: `magic-link-${tokenId}`,
-      text: `Hi ${customer.name},\n\nUse this secure link to manage your ProNeurs Personal CBP Site:\n${verifyUrl}\n\nThis link expires in 15 minutes and can be used only once.`,
-      html: `<p>Hi ${escapeHtml(customer.name)},</p><p><a href="${escapeHtml(verifyUrl.toString())}">Sign in to manage your site</a></p><p>This link expires in 15 minutes and can be used only once.</p>`,
+      text: emailContent.text,
+      html: emailContent.html,
     });
   } catch (error) {
     await recordCustomerAuthEvent({
@@ -194,7 +212,7 @@ export async function requestCustomerMagicLink(
     action: "customer.magic_link.delivered",
     actorEmail: customer.email,
     userId: customer.id,
-    details: { provider: "resend" },
+    details: { provider: "resend", locale },
   });
 
   return process.env.NODE_ENV === "production"

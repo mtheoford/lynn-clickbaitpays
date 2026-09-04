@@ -60,7 +60,8 @@ export default async function AdminPage({
           <h1>This account is not authorized.</h1>
           <p>Add the signed-in email to the protected administrator allowlist before using this page.</p>
           <Link href={signInPath}>Sign in with an administrator account</Link>
-          {signInPath !== signOutPath ? <Link href={signOutPath}>Sign out and use another account</Link> : null}
+          {/* Authentication logout endpoints must use a full navigation; Next.js prefetch would sign the user out. */}
+          {signInPath !== signOutPath ? <a href={signOutPath}>Sign out and use another account</a> : null}
         </div>
       </main>
     );
@@ -101,14 +102,17 @@ export default async function AdminPage({
       .leftJoin(subscriptions, eq(subscriptions.siteId, sites.id))
       .where(
         query
-          ? or(
-              like(sites.displayName, `%${query}%`),
-              like(sites.slug, `%${query}%`),
-              like(users.email, `%${query}%`),
-              like(users.phone, `%${query}%`),
-              like(users.stripeCustomerId, `%${query}%`),
+          ? and(
+              eq(sites.isDemo, false),
+              or(
+                like(sites.displayName, `%${query}%`),
+                like(sites.slug, `%${query}%`),
+                like(users.email, `%${query}%`),
+                like(users.phone, `%${query}%`),
+                like(users.stripeCustomerId, `%${query}%`),
+              ),
             )
-          : undefined,
+          : eq(sites.isDemo, false),
       )
       .orderBy(desc(sites.createdAt));
   } catch {
@@ -160,7 +164,11 @@ export default async function AdminPage({
     <main className="admin-page">
       <header className="admin-header">
         <div><span>PN</span><div><strong>Personal CBP Sites</strong><small>Administration</small></div></div>
-        <div><span>Signed in as {admin.email}</span><Link href={signOutPath}>Sign out</Link></div>
+        <div>
+          <span>Signed in as {admin.email}</span>
+          {/* Cloudflare Access treats a GET to this endpoint as a logout, including a Next.js prefetch. */}
+          <a href={signOutPath}>Sign out</a>
+        </div>
       </header>
 
       <section className="admin-title-row">

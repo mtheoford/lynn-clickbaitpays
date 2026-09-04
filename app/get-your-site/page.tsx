@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { siteUrl } from "@/lib/site-config";
+import { defaultSponsorSite, siteUrl } from "@/lib/site-config";
 import SignupDialog from "./SignupDialog";
 import { SignupPageViewTracker, TrackedDemoLink } from "./SignupPageAnalytics";
 
@@ -38,6 +38,11 @@ const benefits = [
   },
   {
     number: "03",
+    title: "Built-in campaign calculator",
+    copy: "Let visitors model 1, 2, or 3 campaigns, referral scenarios, and potential paths to full campaign capacity.",
+  },
+  {
+    number: "04",
     title: "Built to help you grow",
     copy: "Share one memorable link in every text, email, post, or real-life CBP conversation.",
   },
@@ -49,8 +54,11 @@ export default async function GetYourSitePage({
   searchParams: Promise<{ source?: string; checkout?: string }>;
 }) {
   const params = await searchParams;
-  const exampleSiteUrl = siteUrl("your-name");
-  const [addressPrefix, addressSuffix = ""] = exampleSiteUrl.split("your-name");
+  const exampleSiteUrl = siteUrl(defaultSponsorSite.slug);
+  const [addressPrefix, addressSuffix = ""] = exampleSiteUrl.split(defaultSponsorSite.slug);
+  const frenchOfferHref = params.source
+    ? `/fr/get-your-site?source=${encodeURIComponent(params.source)}`
+    : "/fr/get-your-site";
   const signupProps = {
     source: params.source,
     addressPrefix,
@@ -73,18 +81,22 @@ export default async function GetYourSitePage({
           </div>
         </Link>
         <nav aria-label="Page navigation">
-          <TrackedDemoLink href="/s/lynn-theobald" placement="header" source={params.source}>See a live site <span aria-hidden="true">↗</span></TrackedDemoLink>
+          <TrackedDemoLink href={exampleSiteUrl} placement="header" source={params.source} target="_blank" rel="noopener noreferrer">See a live site <span aria-hidden="true">↗</span></TrackedDemoLink>
           <Link href="/manage">Customer login</Link>
+          <Link href={frenchOfferHref} hrefLang="fr" lang="fr">FR</Link>
         </nav>
       </header>
 
       <section className="cbp-offer-hero" aria-labelledby="cbp-offer-title">
         <div className="cbp-offer-copy">
           <h1 id="cbp-offer-title">
-            Supercharge your CBP growth with a <em>replicated site.</em>
+            <span className="cbp-offer-title-line">Supercharge your</span>
+            <span className="cbp-offer-title-brand">ClickBaitPays</span>
+            <span className="cbp-offer-title-line">growth with a</span>
+            <span className="cbp-offer-title-line"><em>replicated site</em></span>
           </h1>
           <p className="cbp-offer-lead">
-            Your own custom growth hub—personalized with your referral link and packed with high-impact videos, resources, and marketing materials that are ready to share.
+            Your own custom growth hub—personalized with your referral link, high-impact videos, resources, and an interactive calculator visitors can use to model campaign potential.
           </p>
 
           <div className="cbp-offer-actions">
@@ -96,13 +108,14 @@ export default async function GetYourSitePage({
             />
             <TrackedDemoLink
               className="cbp-offer-demo-link"
-              href="/s/lynn-theobald"
+              href={exampleSiteUrl}
               placement="hero"
               source={params.source}
               target="_blank"
               rel="noopener noreferrer"
             >
-              See a replicated site <span aria-hidden="true">↗</span>
+              <span>See a replicated site</span>
+              <span className="cbp-offer-demo-icon" aria-hidden="true">↗</span>
             </TrackedDemoLink>
           </div>
 
@@ -126,7 +139,7 @@ export default async function GetYourSitePage({
           <figure className="cbp-product-browser">
             <div className="cbp-product-browser-bar">
               <span className="cbp-product-dots" aria-hidden="true"><i /><i /><i /></span>
-              <span className="cbp-product-address">lynn-theobald.cbp.proneurs.org</span>
+              <span className="cbp-product-address">{exampleSiteUrl.replace(/^https?:\/\//, "")}</span>
               <span className="cbp-product-live"><i /> Live example</span>
             </div>
             <div className="cbp-product-screen">
@@ -140,7 +153,7 @@ export default async function GetYourSitePage({
             </div>
             <figcaption>
               <div><span>Personalized replicated site</span><strong>Professional from the very first click.</strong></div>
-              <TrackedDemoLink href="/s/lynn-theobald" placement="product_preview" source={params.source} ariaLabel="Open Lynn Theobald's live example site">Open live site <span aria-hidden="true">↗</span></TrackedDemoLink>
+              <TrackedDemoLink href={exampleSiteUrl} placement="product_preview" source={params.source} target="_blank" rel="noopener noreferrer" ariaLabel="Open the replicated-site example">Open live site <span aria-hidden="true">↗</span></TrackedDemoLink>
             </figcaption>
           </figure>
           <p className="cbp-product-member-note"><span /> Made for ClickBaitPays members</p>

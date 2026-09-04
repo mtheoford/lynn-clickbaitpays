@@ -37,6 +37,9 @@ export default async function CustomerSignInPage({
           <span>PN</span>
           <div><strong>ProNeurs™</strong><small>Personal CBP Sites</small></div>
         </Link>
+        <div className="marketing-account-links">
+          <Link href="/fr/manage/sign-in" hrefLang="fr" lang="fr">Français</Link>
+        </div>
       </header>
       <section className="marketing-builder">
         <div className="builder-copy">

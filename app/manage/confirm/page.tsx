@@ -41,6 +41,7 @@ export default async function CustomerSignInConfirmationPage({
         <div>
           <form className="site-signup-form" action="/auth/verify" method="post">
             <input type="hidden" name="token" value={token} />
+            <input type="hidden" name="locale" value="en" />
             <p className="signup-safe-note">
               Only continue if you requested this sign-in email.
             </p>

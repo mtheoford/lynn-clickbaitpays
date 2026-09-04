@@ -1,13 +1,19 @@
 # Dependency security exceptions
 
-- Last reviewed: August 3, 2026
-- Next mandatory review: September 3, 2026
+- Last reviewed: September 4, 2026
+- Next mandatory review: October 4, 2026
 
 `npm audit` currently reports nine affected dependency entries that resolve to
 six upstream advisories. The application uses the latest compatible releases of
 Next.js, OpenNext, and Drizzle Kit. npm's forced remediation would downgrade
 those packages to incompatible releases, so the findings are handled as
 temporary, expiring exceptions rather than silently ignored.
+
+The September 4 review confirmed the same six advisory roots and seven affected
+dependency entries, with no critical findings. The documented controls and
+exposure boundaries remain unchanged, so the exceptions were renewed for one
+short review cycle while supported Next.js, OpenNext, and Drizzle Kit upgrades
+are evaluated together.
 
 Cloudflare's current Miniflare release pins `undici` 7.28.0. The project
 temporarily overrides that transitive dependency to the compatible patched

@@ -32,3 +32,22 @@ test("welcome email escapes customer-controlled HTML", () => {
   assert.match(content.html, /&lt;img src=x onerror=&quot;alert\(1\)&quot;&gt;/);
   assert.match(content.html, /a=1&amp;b=2/);
 });
+
+test("French welcome email uses French copy and localized site-management links", () => {
+  const content = buildWelcomeEmail({
+    name: "Camille Martin",
+    publicUrl: "https://cbp.proneurs.org/fr/s/camille-martin",
+    manageUrl: "https://cbp.proneurs.org/fr/manage",
+    supportEmail: "support@proneurs.org",
+    locale: "fr",
+  });
+
+  assert.equal(content.subject, "Votre site CBP personnel ProNeurs est prêt");
+  assert.match(content.text, /Bonjour Camille Martin/);
+  assert.match(content.text, /https:\/\/cbp\.proneurs\.org\/fr\/s\/camille-martin/);
+  assert.match(content.text, /https:\/\/cbp\.proneurs\.org\/fr\/manage/);
+  assert.match(content.text, /lien de connexion sécurisé et à usage unique/i);
+  assert.match(content.html, /lang="fr"/);
+  assert.match(content.html, /Voir votre site en ligne/);
+  assert.match(content.html, /Enregistrer les modifications/);
+});

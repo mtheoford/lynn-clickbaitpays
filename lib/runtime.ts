@@ -1,14 +1,29 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { platformRuntimeEnv } from "@runtime-platform";
+import type { SiteLocale } from "@/lib/i18n";
 
 export type BillingQueueMessage =
   | { type?: "stripe_event"; stripeEventId: string }
-  | { type: "welcome_email"; siteId: string; deliveryId: string };
+  | {
+      type: "welcome_email";
+      siteId: string;
+      deliveryId: string;
+      locale?: SiteLocale;
+    }
+  | {
+      type: "checkout_reminder";
+      siteId: string;
+      deliveryId: string;
+      locale?: SiteLocale;
+    };
 
 export type RuntimeEnv = {
   DB?: D1Database;
   BILLING_QUEUE?: {
-    send(message: BillingQueueMessage): Promise<unknown>;
+    send(
+      message: BillingQueueMessage,
+      options?: { delaySeconds?: number },
+    ): Promise<unknown>;
   };
   APP_ENV?: string;
   ADMIN_EMAILS?: string;

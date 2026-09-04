@@ -3,13 +3,17 @@ import test from "node:test";
 
 import {
   MAGIC_LINK_SUCCESS_MESSAGE,
+  MAGIC_LINK_SUCCESS_MESSAGE_FR,
   submitMagicLinkRequest,
 } from "../app/manage/sign-in/magic-link-submission.ts";
 import {
   completeCustomerMagicLinkSignIn,
+  customerAuthLocale,
+  customerManagePath,
   customerSignInErrorMessage,
   inspectCustomerMagicLink,
   INVALID_MAGIC_LINK_MESSAGE,
+  INVALID_MAGIC_LINK_MESSAGE_FR,
 } from "../lib/magic-link-flow.ts";
 
 test("submits the email, resets the captured form, and returns the success message", async () => {
@@ -28,9 +32,32 @@ test("submits the email, resets the captured form, and returns the success messa
   );
 
   assert.equal(requestedUrl, "/api/auth/magic-link");
-  assert.deepEqual(JSON.parse(requestedBody), { email: "customer@example.com" });
+  assert.deepEqual(JSON.parse(requestedBody), {
+    email: "customer@example.com",
+    locale: "en",
+  });
   assert.equal(resetCount, 1);
   assert.equal(message, MAGIC_LINK_SUCCESS_MESSAGE);
+});
+
+test("a French request preserves its locale and returns a French status", async () => {
+  let requestedBody = "";
+
+  const message = await submitMagicLinkRequest(
+    "client@example.fr",
+    { reset: () => {} },
+    async (_url, init) => {
+      requestedBody = String(init.body);
+      return { ok: true };
+    },
+    "fr",
+  );
+
+  assert.deepEqual(JSON.parse(requestedBody), {
+    email: "client@example.fr",
+    locale: "fr",
+  });
+  assert.equal(message, MAGIC_LINK_SUCCESS_MESSAGE_FR);
 });
 
 test("a reset failure cannot replace the successful request message", async () => {
@@ -129,6 +156,21 @@ test("a rejected confirmation does not set a session", async () => {
 test("invalid links receive a clear customer-facing explanation", () => {
   assert.equal(customerSignInErrorMessage("invalid-link"), INVALID_MAGIC_LINK_MESSAGE);
   assert.equal(customerSignInErrorMessage(["invalid-link"]), INVALID_MAGIC_LINK_MESSAGE);
+  assert.equal(
+    customerSignInErrorMessage("invalid-link", "fr"),
+    INVALID_MAGIC_LINK_MESSAGE_FR,
+  );
   assert.equal(customerSignInErrorMessage("unknown-error"), null);
   assert.equal(customerSignInErrorMessage(undefined), null);
+});
+
+test("customer auth locale and route helpers default safely to English", () => {
+  assert.equal(customerAuthLocale("fr"), "fr");
+  assert.equal(customerAuthLocale(["fr", "en"]), "fr");
+  assert.equal(customerAuthLocale("de"), "en");
+  assert.equal(customerAuthLocale(undefined), "en");
+  assert.equal(customerManagePath("en"), "/manage");
+  assert.equal(customerManagePath("fr"), "/fr/manage");
+  assert.equal(customerManagePath("fr", "sign-in"), "/fr/manage/sign-in");
+  assert.equal(customerManagePath("en", "/confirm"), "/manage/confirm");
 });

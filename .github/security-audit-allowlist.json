@@ -1,34 +1,34 @@
 {
   "schemaVersion": 1,
-  "reviewedAt": "2026-08-03",
+  "reviewedAt": "2026-09-04",
   "exceptions": {
     "GHSA-67mh-4wv8-2f99": {
-      "expires": "2026-09-03",
+      "expires": "2026-10-04",
       "scope": "development-only",
       "reason": "Legacy esbuild is reached through Drizzle Kit tooling. No esbuild development server is exposed."
     },
     "GHSA-qx2v-qp2m-jg93": {
-      "expires": "2026-09-03",
+      "expires": "2026-10-04",
       "scope": "build-only",
       "reason": "Next pins the affected PostCSS version; the build accepts only repository-controlled CSS."
     },
     "GHSA-6g55-p6wh-862q": {
-      "expires": "2026-09-03",
+      "expires": "2026-10-04",
       "scope": "build-only",
       "reason": "Next pins the affected PostCSS version; untrusted CSS and source maps are not processed."
     },
     "GHSA-r28c-9q8g-f849": {
-      "expires": "2026-09-03",
+      "expires": "2026-10-04",
       "scope": "build-only",
       "reason": "Next pins the affected PostCSS version; untrusted CSS and source maps are not processed."
     },
     "GHSA-fxqj-rqcc-2cmp": {
-      "expires": "2026-09-03",
+      "expires": "2026-10-04",
       "scope": "build-only",
       "reason": "Next pins the affected PostCSS version; untrusted CSS and source maps are not processed."
     },
     "GHSA-f88m-g3jw-g9cj": {
-      "expires": "2026-09-03",
+      "expires": "2026-10-04",
       "scope": "not-shipped",
       "reason": "Next installs Sharp optionally, but image optimization and uploads are disabled and Sharp is absent from the Worker artifact."
     }

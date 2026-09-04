@@ -46,6 +46,7 @@ export const sites = sqliteTable(
     })
       .notNull()
       .default("pending"),
+    isDemo: integer("is_demo", { mode: "boolean" }).notNull().default(false),
     publicationOverride: text("publication_override", {
       enum: ["suspended", "canceled"],
     }),

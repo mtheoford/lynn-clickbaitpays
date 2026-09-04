@@ -3,11 +3,23 @@ import { headers } from "next/headers";
 import { getDb } from "@/db";
 import { sites } from "@/db/schema";
 import {
+  DEMO_SITE_SLUG,
+  LEGACY_DEMO_SITE_SLUG,
   normalizeSiteSlug,
   slugFromHost,
 } from "@/lib/site-routing";
 
 export {
+  formatPhoneForDisplay,
+  generatedSponsorBio,
+  localizeSponsorBio,
+  phoneHref,
+} from "@/lib/site-presentation";
+
+export {
+  DEMO_SITE_SLUG,
+  isLegacyDemoSiteSlug,
+  LEGACY_DEMO_SITE_SLUG,
   normalizeSiteSlug,
   siteUrl,
   slugFromHost,
@@ -26,20 +38,22 @@ export type PublicSponsorSite = {
   showPhone: boolean;
   bio: string;
   referralUrl: string;
+  isDemo: boolean;
   status: "pending" | "active" | "past_due" | "suspended" | "canceled" | "deleted";
 };
 
 export const defaultSponsorSite: PublicSponsorSite = {
   id: "site_lynn_theobald",
-  slug: "lynn-theobald",
-  displayName: "Lynn Theobald",
-  initials: "LT",
-  publicEmail: "lynntheo@gmail.com",
-  publicPhone: "8017170563",
-  showEmail: true,
-  showPhone: true,
-  bio: "Questions before joining? Lynn is here to help you find the facts and take the next step with confidence.",
-  referralUrl: "https://clickbaitpays.me/?ref=thinleo",
+  slug: DEMO_SITE_SLUG,
+  displayName: "Your Name",
+  initials: "YN",
+  publicEmail: "demo@proneurs.org",
+  publicPhone: "0000000000",
+  showEmail: false,
+  showPhone: false,
+  bio: "Your introduction will appear here, giving visitors a clear and welcoming way to learn about ClickBaitPays with you.",
+  referralUrl: "https://clickbaitpays.me/",
+  isDemo: true,
   status: "active",
 };
 
@@ -61,7 +75,10 @@ export async function resolveSponsorSite(
         requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host"),
       );
 
-  const siteSlug = requestedSlug ?? defaultSponsorSite.slug;
+  const siteSlug =
+    requestedSlug === LEGACY_DEMO_SITE_SLUG
+      ? defaultSponsorSite.slug
+      : requestedSlug ?? defaultSponsorSite.slug;
 
   try {
     const db = await getDb();
@@ -77,6 +94,7 @@ export async function resolveSponsorSite(
         showPhone: sites.showPhone,
         bio: sites.bio,
         referralUrl: sites.referralUrl,
+        isDemo: sites.isDemo,
         status: sites.status,
       })
       .from(sites)
@@ -85,7 +103,7 @@ export async function resolveSponsorSite(
 
     if (site) return site;
   } catch {
-    // The hardcoded Lynn profile keeps the existing preview available during cutover.
+    // The hardcoded demo keeps the preview available during database cutovers.
   }
   if (siteSlug === defaultSponsorSite.slug) return defaultSponsorSite;
   return { ...defaultSponsorSite, slug: siteSlug, status: "suspended" };
@@ -110,20 +128,4 @@ export async function requestSurface(): Promise<"marketing" | "admin" | "tenant"
   if (hostname === marketingHost) return "marketing";
   if (hostname === `admin.${marketingHost}`) return "admin";
   return "tenant";
-}
-
-export function formatPhoneForDisplay(value: string): string {
-  const digits = value.replace(/\D/g, "");
-  if (digits.length === 10) {
-    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
-  }
-  if (digits.length === 11 && digits.startsWith("1")) {
-    return `+1 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
-  }
-  return value;
-}
-
-export function phoneHref(value: string): string {
-  const digits = value.replace(/\D/g, "");
-  return `tel:${digits}`;
 }

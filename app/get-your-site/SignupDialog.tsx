@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import SignupForm from "./SignupForm";
 import { recordSignupPageEvent } from "./SignupPageAnalytics";
+import type { SiteLocale } from "@/lib/i18n";
 
 export default function SignupDialog({
   source,
@@ -12,6 +13,7 @@ export default function SignupDialog({
   dialogId,
   triggerLabel,
   analyticsPlacement,
+  locale = "en",
 }: {
   source?: string;
   addressPrefix: string;
@@ -20,6 +22,7 @@ export default function SignupDialog({
   dialogId: string;
   triggerLabel: string;
   analyticsPlacement: "hero" | "closing";
+  locale?: SiteLocale;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -52,18 +55,19 @@ export default function SignupDialog({
         <div className="signup-dialog-shell">
           <header>
             <div>
-              <p className="eyebrow">Your replicated site starts here</p>
-              <h2 id={`${dialogId}-title`}>Get your personalized replicated site.</h2>
+              <p className="eyebrow">{locale === "fr" ? "Votre site personnalisé commence ici" : "Your replicated site starts here"}</p>
+              <h2 id={`${dialogId}-title`}>{locale === "fr" ? "Créez votre site personnalisé." : "Get your personalized replicated site."}</h2>
             </div>
-            <button type="button" onClick={closeDialog} aria-label="Close signup form">×</button>
+            <button type="button" onClick={closeDialog} aria-label={locale === "fr" ? "Fermer le formulaire d’inscription" : "Close signup form"}>×</button>
           </header>
           {checkoutCanceled ? (
-            <p className="checkout-note">Checkout was canceled. Your page has not been activated.</p>
+            <p className="checkout-note">{locale === "fr" ? "Le paiement a été annulé. Votre page n’a pas été activée." : "Checkout was canceled. Your page has not been activated."}</p>
           ) : null}
           <SignupForm
             source={source}
             addressPrefix={addressPrefix}
             addressSuffix={addressSuffix}
+            locale={locale}
           />
         </div>
       </dialog>

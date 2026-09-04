@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Manrope } from "next/font/google";
+import DocumentLocale from "./DocumentLocale";
 import SiteCopyright from "./SiteCopyright";
 import "./globals.css";
 
@@ -25,6 +26,11 @@ export const metadata: Metadata = {
   },
   description:
     "Personalized ClickBaitPays replicated sites with your referral link and ready-to-share marketing materials.",
+  icons: {
+    icon: [{ url: "/cbp-mark.png", type: "image/png", sizes: "256x256" }],
+    shortcut: "/cbp-mark.png",
+    apple: [{ url: "/cbp-mark.png", type: "image/png", sizes: "256x256" }],
+  },
   openGraph: {
     title: "ClickBaitPays Replicated Sites by ProNeurs™",
     description:
@@ -51,6 +57,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${manrope.variable}`}
       >
+        <DocumentLocale />
         {children}
         <SiteCopyright />
       </body>

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getDb } from "@/db";
 import { sites, users } from "@/db/schema";
 import {
+  generatedSponsorBio,
   normalizeSiteSlug,
   validateReferralUrl,
   validateSiteSlug,
@@ -20,6 +21,7 @@ import {
 } from "@/lib/checkout-reservation";
 import { purgeExpiredCheckoutReservations } from "@/lib/checkout-cleanup";
 import { resolveSiteIdentity } from "@/lib/site-identity";
+import { enqueueCheckoutReminder } from "@/lib/email";
 
 type CheckoutInput = {
   firstName?: string;
@@ -33,6 +35,7 @@ type CheckoutInput = {
   source?: string;
   plan?: string;
   acceptedTerms?: boolean;
+  locale?: string;
 };
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -68,6 +71,7 @@ export async function POST(request: Request) {
   const referralUrl = input.referralUrl?.trim() ?? "";
   const sourceSlug = normalizeSiteSlug(input.source ?? "");
   const plan: BillingPlan = input.plan === "annual" ? "annual" : "monthly";
+  const locale = input.locale === "fr" ? "fr" : "en";
 
   if (!EMAIL_PATTERN.test(email)) return error("Enter a valid email address.");
   if (phone.replace(/\D/g, "").length < 10) return error("Enter a valid phone number.");
@@ -182,7 +186,7 @@ export async function POST(request: Request) {
     publicPhone: phone,
     showEmail: true,
     showPhone: true,
-    bio: `Questions before joining? ${identity.displayName} is here to help you understand the information and take your next step with confidence.`,
+    bio: generatedSponsorBio(locale, identity.displayName),
     referralUrl,
     status: "pending" as const,
     publicationOverride: null,
@@ -270,9 +274,11 @@ export async function POST(request: Request) {
   }
 
   const origin = new URL(request.url).origin;
+  const checkoutBasePath = locale === "fr" ? "/fr/get-your-site" : "/get-your-site";
   const session = await stripe.checkout.sessions.create(
     {
       mode: "subscription",
+      locale: locale === "fr" ? "fr" : "auto",
       ...(existingUser?.stripeCustomerId
         ? { customer: existingUser.stripeCustomerId }
         : { customer_email: email }),
@@ -280,10 +286,10 @@ export async function POST(request: Request) {
       line_items: [{ price: await priceForPlan(plan), quantity: 1 }],
       allow_promotion_codes: true,
       expires_at: Math.floor(reservationExpiresAt.getTime() / 1000),
-      success_url: `${origin}/get-your-site/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/get-your-site?checkout=canceled&site=${encodeURIComponent(slug)}`,
-      metadata: { siteId, userId, plan, sourceSlug },
-      subscription_data: { metadata: { siteId, userId, plan, sourceSlug } },
+      success_url: `${origin}${checkoutBasePath}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}${checkoutBasePath}?checkout=canceled&site=${encodeURIComponent(slug)}`,
+      metadata: { siteId, userId, plan, sourceSlug, locale },
+      subscription_data: { metadata: { siteId, userId, plan, sourceSlug, locale } },
     },
     {
       idempotencyKey: `site-checkout-${siteId}-${plan}-${reservationExpiresAt.getTime()}`,
@@ -296,6 +302,19 @@ export async function POST(request: Request) {
     .update(sites)
     .set({ stripeCheckoutSessionId: session.id, updatedAt: new Date() })
     .where(eq(sites.id, siteId));
+
+  try {
+    await enqueueCheckoutReminder(siteId, undefined, locale);
+  } catch (cause) {
+    console.error(
+      JSON.stringify({
+        message: "checkout reminder could not be scheduled",
+        siteId,
+        checkoutSessionId: session.id,
+        error: cause instanceof Error ? cause.message : "Unknown queue failure",
+      }),
+    );
+  }
 
   return NextResponse.json({ checkoutUrl: session.url });
 }

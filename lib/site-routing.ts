@@ -10,6 +10,9 @@ const RESERVED_SLUGS = new Set([
   "www",
 ]);
 
+export const DEMO_SITE_SLUG = "your-name";
+export const LEGACY_DEMO_SITE_SLUG = "lynn-theobald";
+
 export function normalizeSiteSlug(value: string): string {
   return value
     .trim()
@@ -20,6 +23,10 @@ export function normalizeSiteSlug(value: string): string {
     .replace(/^-+|-+$/g, "")
     .replace(/-{2,}/g, "-")
     .slice(0, 48);
+}
+
+export function isLegacyDemoSiteSlug(value: string): boolean {
+  return normalizeSiteSlug(value) === LEGACY_DEMO_SITE_SLUG;
 }
 
 export function validateSiteSlug(value: string): string | null {
