@@ -6,10 +6,13 @@ import { checkoutReservationDecision } from "@/lib/checkout-reservation";
 import { normalizeSiteSlug, validateSiteSlug } from "@/lib/site-config";
 import { isSameOriginMutation } from "@/lib/request-security";
 import { purgeExpiredCheckoutReservations } from "@/lib/checkout-cleanup";
+import { billingLocale } from "@/lib/checkout-localization";
+import { localizedCustomerError } from "@/lib/customer-messages";
 
 type AvailabilityInput = {
   slug?: string;
   email?: string;
+  locale?: string;
 };
 
 function response(body: { available: boolean; message: string }, status = 200) {
@@ -32,9 +35,13 @@ export async function POST(request: Request) {
   }
 
   const slug = normalizeSiteSlug(input.slug ?? "");
+  const locale = billingLocale(input.locale);
+  function localizedResponse(available: boolean, message: string, status = 200) {
+    return response({ available, message: localizedCustomerError(message, locale) }, status);
+  }
   const email = input.email?.trim().toLowerCase() ?? "";
   const slugError = validateSiteSlug(slug);
-  if (slugError) return response({ available: false, message: slugError }, 400);
+  if (slugError) return localizedResponse(false, slugError, 400);
 
   const db = await getDb();
   const now = new Date();
@@ -55,11 +62,8 @@ export async function POST(request: Request) {
   const decision = checkoutReservationDecision(existingSite, purchaser?.id, now);
 
   if (decision === "new" || decision === "replace" || decision === "reuse") {
-    return response({ available: true, message: "This site address is available." });
+    return localizedResponse(true, "This site address is available.");
   }
 
-  return response({
-    available: false,
-    message: "That site address is already taken. Please enter another name.",
-  });
+  return localizedResponse(false, "That site address is already taken. Please enter another name.");
 }

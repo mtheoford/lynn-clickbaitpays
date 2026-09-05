@@ -4,6 +4,7 @@ import { getChatGPTUser } from "@/app/chatgpt-auth";
 import { getDb } from "@/db";
 import { auditLogs, customerSessions, magicLinkTokens, users } from "@/db/schema";
 import { sendTransactionalEmail } from "@/lib/email";
+import { buildMagicLinkEmail } from "@/lib/magic-link-email";
 import type {
   CustomerAuthLocale,
   CustomerMagicLinkSession,
@@ -12,6 +13,7 @@ import { runtimeValue } from "@/lib/runtime";
 import { hashToken } from "@/lib/token";
 
 export { hashToken } from "@/lib/token";
+export { customerSignOutPath } from "@/lib/magic-link-flow";
 
 const SESSION_COOKIE = "proneurs_session";
 const SECURE_SESSION_COOKIE = "__Host-proneurs_session";
@@ -32,12 +34,6 @@ export type CustomerIdentity = {
 
 function cookieName(): string {
   return process.env.NODE_ENV === "production" ? SECURE_SESSION_COOKIE : SESSION_COOKIE;
-}
-
-export function customerSignOutPath(locale: CustomerAuthLocale = "en"): string {
-  return locale === "fr"
-    ? "/api/auth/sign-out?locale=fr"
-    : "/api/auth/sign-out";
 }
 
 async function recordCustomerAuthEvent(input: {
@@ -163,20 +159,7 @@ export async function requestCustomerMagicLink(
     details: { expiresAt: expiresAt.toISOString(), locale },
   });
 
-  const verifyUrl = new URL("/auth/verify", origin);
-  verifyUrl.searchParams.set("token", token);
-  if (locale === "fr") verifyUrl.searchParams.set("locale", "fr");
-  const emailContent = locale === "fr"
-    ? {
-        subject: "Connectez-vous pour gérer votre site ProNeurs",
-        text: `Bonjour ${customer.name},\n\nUtilisez ce lien sécurisé pour gérer votre site CBP personnel ProNeurs :\n${verifyUrl}\n\nCe lien expire après 15 minutes et ne peut être utilisé qu’une seule fois.`,
-        html: `<p>Bonjour ${escapeHtml(customer.name)},</p><p><a href="${escapeHtml(verifyUrl.toString())}">Connectez-vous pour gérer votre site</a></p><p>Ce lien expire après 15 minutes et ne peut être utilisé qu’une seule fois.</p>`,
-      }
-    : {
-        subject: "Sign in to manage your ProNeurs site",
-        text: `Hi ${customer.name},\n\nUse this secure link to manage your ProNeurs Personal CBP Site:\n${verifyUrl}\n\nThis link expires in 15 minutes and can be used only once.`,
-        html: `<p>Hi ${escapeHtml(customer.name)},</p><p><a href="${escapeHtml(verifyUrl.toString())}">Sign in to manage your site</a></p><p>This link expires in 15 minutes and can be used only once.</p>`,
-      };
+  const emailContent = buildMagicLinkEmail({ name: customer.name, token, origin, locale });
   try {
     await sendTransactionalEmail({
       to: customer.email,
@@ -217,7 +200,7 @@ export async function requestCustomerMagicLink(
 
   return process.env.NODE_ENV === "production"
     ? { accepted: true }
-    : { accepted: true, developmentUrl: verifyUrl.toString() };
+    : { accepted: true, developmentUrl: emailContent.verifyUrl };
 }
 
 export async function isCustomerMagicLinkValid(token: string): Promise<boolean> {
@@ -342,17 +325,4 @@ function randomToken(): string {
   const bytes = new Uint8Array(32);
   crypto.getRandomValues(bytes);
   return Buffer.from(bytes).toString("base64url");
-}
-
-function escapeHtml(value: string): string {
-  return value.replace(/[&<>'"]/g, (character) => {
-    const entities: Record<string, string> = {
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      "'": "&#39;",
-      '"': "&quot;",
-    };
-    return entities[character] ?? character;
-  });
 }

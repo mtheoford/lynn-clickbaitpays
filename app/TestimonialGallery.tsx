@@ -179,6 +179,20 @@ const frenchTestimonials: Testimonial[] = [
   },
 ];
 
+const germanTestimonials: Testimonial[] = englishTestimonials.map((testimonial, index) => ({
+  ...testimonial,
+  ...[
+    { name: "Brady White", quote: "Ich habe heute meine zweite Auszahlung erhalten, und alles lief reibungslos.", imageAlt: "Englischer Originalbeitrag von Brady White über seine reibungslose zweite Auszahlung." },
+    { name: "Pamela Baden", quote: "Heute war mein erster Tag mit den Klicks. Es war einfach und hat Spaß gemacht, und ich freue mich auf meine nächste Klickrunde morgen!", imageAlt: "Englischer Originalbeitrag von Pamela Baden über ihren ersten Tag bei ClickBaitPays." },
+    { name: "Roger Mitchell", quote: "Gerade meine dritte erfolgreiche Auszahlung um 23 Uhr Panama-Zeit erhalten. Es dauerte nur 25 Minuten, bis sie in meiner Exodus-Wallet ankam.", imageAlt: "Englischer Originalbeitrag von Roger Mitchell über seine dritte Auszahlung." },
+    { name: "Mitglied der Community", quote: "Ich habe bei ClickBaitPays eine Auszahlung beantragt, und 33 Minuten später war das Guthaben in meiner persönlichen Wallet. Schnell. Reibungslos. Ausgezahlt.", imageAlt: "Englischer Originalbeitrag eines anonymen Mitglieds über eine Auszahlung, die nach 33 Minuten in seiner persönlichen Wallet ankam." },
+    { name: "Dan Dupey", quote: "Ich habe gerade die E-Mail erhalten, dass meine neue Auszahlung problemlos abgewickelt wurde.", imageAlt: "Englischer Originalbeitrag von Dan Dupey, der sich nach der E-Mail zu seiner Auszahlung beim Team bedankt." },
+    { name: "Mitglied aus Neuseeland", quote: "Ich habe gestern Abend um 22 Uhr neuseeländischer Zeit die Auszahlung beantragt. Als ich heute Morgen um 7 Uhr aufwachte, war sie in meiner Exodus-Wallet.", imageAlt: "Englischer Originalbeitrag eines Mitglieds aus Neuseeland über eine Auszahlung über Nacht." },
+    { name: "Michael C. Parker", quote: "Ich habe heute meine erste Auszahlung erhalten – nach nur wenigen Stunden. Ich kann es kaum glauben.", imageAlt: "Englischer Originalbeitrag von Michael C. Parker über seine erste Auszahlung." },
+    { name: "Richard", quote: "Innerhalb von 5 Stunden ausgezahlt. Auszahlungsbetrag: 875,00 USDT. Netto ausgezahlt: 787,50 USDT.", imageAlt: "Englischer Originalbeitrag von Richard mit Auszahlungsbetrag, Gebühr und Nettobetrag." },
+  ][index],
+}));
+
 const testimonialUi = {
   en: {
     previous: "Previous member stories",
@@ -191,6 +205,11 @@ const testimonialUi = {
     next: "Témoignages suivants",
     disclosure:
       "Ces commentaires individuels ont été partagés par des membres dans un espace communautaire. ProNeurs n’a pas vérifié chaque déclaration de façon indépendante, et les expériences présentées ne reflètent pas nécessairement des gains ou des délais de retrait habituels. Les résultats varient ; les gains et les retraits ne sont pas garantis. Les captures originales sont en anglais et les citations affichées sont des traductions françaises.",
+  },
+  de: {
+    previous: "Vorherige Erfahrungsberichte",
+    next: "Nächste Erfahrungsberichte",
+    disclosure: "Dies sind einzelne Kommentare von Mitgliedern aus einem Community-Kanal. ProNeurs hat nicht jede Aussage unabhängig überprüft. Die gezeigten Erfahrungen belegen weder typische Einnahmen noch übliche Auszahlungszeiten. Ergebnisse können unterschiedlich ausfallen; Einnahmen und Auszahlungen sind nicht garantiert. Die Original-Screenshots sind auf Englisch, die angezeigten Zitate sind deutsche Übersetzungen.",
   },
 } satisfies Record<SiteLocale, object>;
 
@@ -253,7 +272,7 @@ export default function TestimonialGallery({
   locale?: SiteLocale;
 }) {
   const testimonials =
-    locale === "fr" ? frenchTestimonials : englishTestimonials;
+    locale === "fr" ? frenchTestimonials : locale === "de" ? germanTestimonials : englishTestimonials;
   const loopedTestimonials = [...testimonials, ...testimonials.slice(0, 3)];
   const ui = testimonialUi[locale];
   const trackRef = useRef<HTMLDivElement>(null);

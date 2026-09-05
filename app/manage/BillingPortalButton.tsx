@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { SiteLocale } from "@/lib/i18n";
+import { getCustomerCopy } from "@/app/manage/customer-copy";
 
 export default function BillingPortalButton({
   enabled,
@@ -12,7 +13,7 @@ export default function BillingPortalButton({
 }) {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const isFrench = locale === "fr";
+  const t = getCustomerCopy(locale);
 
   async function openPortal() {
     setLoading(true);
@@ -25,11 +26,11 @@ export default function BillingPortalButton({
       });
       const result = (await response.json()) as { url?: string; error?: string };
       if (!response.ok || !result.url) {
-        throw new Error(isFrench ? "Impossible d’ouvrir la gestion de la facturation." : result.error ?? "Billing could not be opened.");
+        throw new Error(locale === "en" ? result.error ?? t["Billing could not be opened."] : t["Billing could not be opened."]);
       }
       window.location.assign(result.url);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : isFrench ? "Impossible d’ouvrir la gestion de la facturation." : "Billing could not be opened.");
+      setMessage(locale === "de" ? t["Billing could not be opened."] : error instanceof Error ? error.message : t["Billing could not be opened."]);
       setLoading(false);
     }
   }
@@ -38,13 +39,11 @@ export default function BillingPortalButton({
     <div className="manage-billing-action">
       <button type="button" onClick={openPortal} disabled={!enabled || loading}>
         {loading
-          ? (isFrench ? "Ouverture de la facturation…" : "Opening billing…")
-          : (isFrench ? "Gérer la facturation" : "Manage billing")}
+          ? (t["Opening billing…"])
+          : (t["Manage billing"])}
       </button>
       {!enabled ? (
-        <small>{isFrench
-          ? "L’accès à la facturation apparaît après l’activation du premier abonnement."
-          : "Billing access appears after the first subscription is activated."}</small>
+        <small>{t["Billing access appears after the first subscription is activated."]}</small>
       ) : null}
       {message ? <small role="alert">{message}</small> : null}
     </div>

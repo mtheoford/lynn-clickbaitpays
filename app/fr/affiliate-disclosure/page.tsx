@@ -2,7 +2,6 @@ import FrenchLegalPage, { frenchLegalMetadata, FrenchSupportContact } from "../l
 
 export const metadata = frenchLegalMetadata({
   path: "affiliate-disclosure",
-  englishPath: "/affiliate-disclosure",
   title: "Divulgation d’affiliation",
   description: "Informations sur le caractère indépendant des pages de parrain et leur rémunération potentielle.",
 });

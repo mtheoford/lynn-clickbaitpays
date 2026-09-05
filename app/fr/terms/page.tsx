@@ -2,7 +2,6 @@ import FrenchLegalPage, { frenchLegalMetadata, FrenchSupportContact } from "../l
 
 export const metadata = frenchLegalMetadata({
   path: "terms",
-  englishPath: "/terms",
   title: "Conditions d’abonnement",
   description: "Conditions applicables au service indépendant de sites CBP personnels de ProNeurs.",
 });

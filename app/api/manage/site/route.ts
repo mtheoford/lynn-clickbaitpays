@@ -6,6 +6,8 @@ import { getSignedInCustomer } from "@/lib/customer-auth";
 import { validateReferralUrl } from "@/lib/site-config";
 import { resolveSiteIdentity } from "@/lib/site-identity";
 import { isSameOriginMutation } from "@/lib/request-security";
+import { billingLocale } from "@/lib/checkout-localization";
+import { localizedCustomerError } from "@/lib/customer-messages";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -25,24 +27,29 @@ export async function PATCH(request: Request) {
     referralUrl?: string;
     showEmail?: boolean;
     showPhone?: boolean;
+    locale?: string;
   };
+  const locale = billingLocale(input.locale);
+  function error(message: string, status = 400) {
+    return NextResponse.json({ error: localizedCustomerError(message, locale) }, { status });
+  }
   const identityResult = resolveSiteIdentity(input);
-  if (!identityResult.identity) return NextResponse.json({ error: identityResult.error }, { status: 400 });
+  if (!identityResult.identity) return error(identityResult.error);
   const identity = identityResult.identity;
   const publicEmail = input.publicEmail?.trim().toLowerCase() ?? "";
   const publicPhone = input.publicPhone?.trim() ?? "";
   const bio = input.bio?.trim() ?? "";
   const referralUrl = input.referralUrl?.trim() ?? "";
 
-  if (!EMAIL_PATTERN.test(publicEmail)) return NextResponse.json({ error: "Enter a valid public email address." }, { status: 400 });
-  if (publicPhone.replace(/\D/g, "").length < 10) return NextResponse.json({ error: "Enter a valid public phone number." }, { status: 400 });
-  if (bio.length < 20 || bio.length > 400) return NextResponse.json({ error: "Keep your introduction between 20 and 400 characters." }, { status: 400 });
+  if (!EMAIL_PATTERN.test(publicEmail)) return error("Enter a valid public email address.");
+  if (publicPhone.replace(/\D/g, "").length < 10) return error("Enter a valid public phone number.");
+  if (bio.length < 20 || bio.length > 400) return error("Keep your introduction between 20 and 400 characters.");
   const referralError = validateReferralUrl(referralUrl);
-  if (referralError) return NextResponse.json({ error: referralError }, { status: 400 });
+  if (referralError) return error(referralError);
 
   const db = await getDb();
   const [site] = await db.select().from(sites).where(eq(sites.userId, signedIn.customer.id)).limit(1);
-  if (!site) return NextResponse.json({ error: "Site not found." }, { status: 404 });
+  if (!site) return error("Site not found.", 404);
   const now = new Date();
 
   await db.update(users).set({

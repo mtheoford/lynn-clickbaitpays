@@ -2,7 +2,6 @@ import FrenchLegalPage, { frenchLegalMetadata, FrenchSupportContact } from "../l
 
 export const metadata = frenchLegalMetadata({
   path: "refund-policy",
-  englishPath: "/refund-policy",
   title: "Politique de résiliation et de remboursement",
   description: "Modalités de résiliation, d’échec de paiement et de remboursement des sites CBP personnels.",
 });

@@ -4,16 +4,19 @@ import test from "node:test";
 import {
   MAGIC_LINK_SUCCESS_MESSAGE,
   MAGIC_LINK_SUCCESS_MESSAGE_FR,
+  MAGIC_LINK_SUCCESS_MESSAGE_DE,
   submitMagicLinkRequest,
 } from "../app/manage/sign-in/magic-link-submission.ts";
 import {
   completeCustomerMagicLinkSignIn,
   customerAuthLocale,
   customerManagePath,
+  customerSignOutPath,
   customerSignInErrorMessage,
   inspectCustomerMagicLink,
   INVALID_MAGIC_LINK_MESSAGE,
   INVALID_MAGIC_LINK_MESSAGE_FR,
+  INVALID_MAGIC_LINK_MESSAGE_DE,
 } from "../lib/magic-link-flow.ts";
 
 test("submits the email, resets the captured form, and returns the success message", async () => {
@@ -73,6 +76,25 @@ test("a reset failure cannot replace the successful request message", async () =
   } finally {
     console.error = originalConsoleError;
   }
+});
+
+test("a German request preserves its locale and gives localized success and failure messages", async () => {
+  let requestedBody = "";
+  const message = await submitMagicLinkRequest(
+    "kunde@example.de",
+    { reset: () => {} },
+    async (_url, init) => {
+      requestedBody = String(init.body);
+      return { ok: true };
+    },
+    "de",
+  );
+  assert.deepEqual(JSON.parse(requestedBody), { email: "kunde@example.de", locale: "de" });
+  assert.equal(message, MAGIC_LINK_SUCCESS_MESSAGE_DE);
+  await assert.rejects(
+    submitMagicLinkRequest("kunde@example.de", { reset: () => {} }, async () => ({ ok: false }), "de"),
+    /Die E-Mail mit dem Anmeldelink konnte nicht gesendet werden/,
+  );
 });
 
 test("a failed email request does not reset the form", async () => {
@@ -162,15 +184,23 @@ test("invalid links receive a clear customer-facing explanation", () => {
   );
   assert.equal(customerSignInErrorMessage("unknown-error"), null);
   assert.equal(customerSignInErrorMessage(undefined), null);
+  assert.equal(customerSignInErrorMessage("invalid-link", "de"), INVALID_MAGIC_LINK_MESSAGE_DE);
 });
 
 test("customer auth locale and route helpers default safely to English", () => {
   assert.equal(customerAuthLocale("fr"), "fr");
   assert.equal(customerAuthLocale(["fr", "en"]), "fr");
-  assert.equal(customerAuthLocale("de"), "en");
+  assert.equal(customerAuthLocale("de"), "de");
+  assert.equal(customerAuthLocale("es"), "en");
   assert.equal(customerAuthLocale(undefined), "en");
   assert.equal(customerManagePath("en"), "/manage");
   assert.equal(customerManagePath("fr"), "/fr/manage");
   assert.equal(customerManagePath("fr", "sign-in"), "/fr/manage/sign-in");
   assert.equal(customerManagePath("en", "/confirm"), "/manage/confirm");
+  assert.equal(customerManagePath("de"), "/de/manage");
+  assert.equal(customerManagePath("de", "sign-in"), "/de/manage/sign-in");
+  assert.equal(customerManagePath("de", "/confirm"), "/de/manage/confirm");
+  assert.equal(customerSignOutPath("de"), "/api/auth/sign-out?locale=de");
+  assert.equal(customerSignOutPath("fr"), "/api/auth/sign-out?locale=fr");
+  assert.equal(customerSignOutPath(), "/api/auth/sign-out");
 });

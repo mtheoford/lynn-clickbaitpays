@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
         source: "/fr/:path*",
         headers: [{ key: "Content-Language", value: "fr" }],
       },
+      {
+        source: "/de/:path*",
+        headers: [{ key: "Content-Language", value: "de" }],
+      },
     ];
   },
   async redirects() {

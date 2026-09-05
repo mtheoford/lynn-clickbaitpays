@@ -299,11 +299,109 @@ const siteCopy = {
       contact: (name: string) => `Contacter ${name}`,
     },
   },
+  de: {
+    join: "Bei ClickBaitPays anmelden",
+    metadata: {
+      demoTitle: "Vorschau Ihrer persönlichen ClickBaitPays-Website",
+      demoDescription: "Entdecken Sie, wie Ihre persönliche ClickBaitPays-Website aussehen und funktionieren kann.",
+      title: (name: string) => `ClickBaitPays mit ${name} entdecken`,
+      description: (name: string) => `Lernen Sie ClickBaitPays kennen und starten Sie mit Ihrem unabhängigen Sponsor ${name}.`,
+      image: "/og-de.png",
+    },
+    unavailable: {
+      eyebrow: "Persönliche CBP-Website",
+      title: "Diese Seite ist derzeit nicht verfügbar.",
+      body: "Möglicherweise wird die Seite gerade aktualisiert. Prüfen Sie die Adresse und versuchen Sie es später erneut.",
+      cta: "Ihre persönliche CBP-Website erstellen",
+    },
+    brand: {
+      home: (name: string) => `CBP mit ${name} – Startseite`,
+      name: (name: string) => `CBP mit ${name}`,
+      demoSubtitle: "Vorschau der persönlichen Website",
+      sponsorSubtitle: "Ihr unabhängiger Sponsor begleitet Sie",
+    },
+    nav: {
+      label: "Hauptnavigation",
+      strategy: "Einnahmenstrategie",
+      tour: "Mitgliederbereich",
+      stories: "Erfahrungsberichte",
+      calculator: "Kampagnenrechner",
+    },
+    hero: {
+      line1: "So funktioniert es.",
+      line2: "Verstehen Sie die Möglichkeiten.",
+      line3: "Entscheiden Sie gut informiert.",
+      secondaryCta: "So funktioniert es",
+      demoDisclosure: "Demoseite. Die Anmeldeschaltflächen öffnen die neutrale ClickBaitPays-Website; auf Kundenseiten wird der offizielle Empfehlungslink des jeweiligen Kunden verwendet. ",
+      sponsorDisclosure: "Unabhängige Affiliate-Website. Wenn Sie sich über einen Empfehlungslink anmelden, kann der Sponsor eine Vergütung erhalten. ",
+      riskDisclosure: "Die Teilnahme ist mit finanziellen Risiken und Risiken im Zusammenhang mit Kryptowährungen verbunden. Einnahmen sind nicht garantiert. ",
+      disclosureLink: "Hinweise zur Affiliate-Beziehung lesen.",
+    },
+    welcomeVideo: {
+      callout: "Hier beginnen · Willkommen bei ClickBaitPays",
+      title: "Willkommen bei ClickBaitPays (englischer Originalton)",
+      heading: "Überblick ansehen",
+      summary: "Ein schneller Überblick über die Möglichkeiten. Das Video verwendet den englischen Originalton; deutsche Untertitel werden angefordert, sofern verfügbar.",
+    },
+    momentum: {
+      label: "Das erwartet Sie",
+      items: ["Die Plattform verstehen", "Kampagnenstrategien entdecken", "Eigene Szenarien berechnen"],
+    },
+    strategy: {
+      eyebrow: "01 · Die Strategie entdecken",
+      heading: "So können Kampagnen und Empfehlungen zusammenwirken.",
+      videoLabel: "Im Fokus · Einnahmenstrategien",
+      videoTitle: "ClickBaitPays-Einnahmenstrategien (englischer Originalton)",
+      topics: ["Kampagnen", "Zeitversetzter Start", "Direkte Empfehlungen"],
+      watch: "Jetzt ansehen",
+      summary: "Diese Einführung erklärt den Ansatz mit drei Kampagnen, den zeitversetzten Start, Provisionen für direkte Empfehlungen und die Möglichkeiten, sobald Kampagnenguthaben verfügbar wird. Das Video verwendet den englischen Originalton; deutsche Untertitel werden angefordert, sofern verfügbar.",
+    },
+    transition: { next: "Als Nächstes", label: "Den Mitgliederbereich kennenlernen" },
+    tour: {
+      eyebrow: "02 · Den Mitgliederbereich erkunden",
+      heading: "Ihr Dashboard kennenlernen.",
+      videoTitle: "Rundgang durch den ClickBaitPays-Mitgliederbereich (englischer Originalton)",
+      label: "Rundgang für Mitglieder",
+      title: "Einblick in den Mitgliederbereich",
+      summary: "Lernen Sie Kampagnen, Klicks, Guthaben, Empfehlungen, Einzahlungen und Auszahlungen kennen. Das Video verwendet den englischen Originalton; deutsche Untertitel werden angefordert, sofern verfügbar.",
+    },
+    testimonialsHeading: "Das sagen Mitglieder.",
+    resourcesHeading: "Hilfreiche Informationen",
+    resourcesEyebrow: "Dokumentation",
+    resourcesTitle: "Ein Blick lohnt sich.",
+    resources: [
+      { title: "Erste Schritte", eyebrow: "Schritt-für-Schritt-Anleitung auf Deutsch", href: "/docs/clickbaitpays-startanleitung-de.pdf" },
+      { title: "Offizielle FAQ", eyebrow: "Deutsche Übersetzung · Regeln und Gebühren", href: "/de/faq" },
+    ],
+    faqEyebrow: "Häufige Fragen",
+    faqTitle: "Klare Antworten.",
+    faqs: [
+      { question: "Ist die Anmeldung kostenlos?", answer: "Die öffentlichen Programmunterlagen unterscheiden zwischen der Kontoeröffnung und kostenpflichtigen Kampagnen. Informieren Sie sich vor jeder Zahlung in der offiziellen FAQ und im Dashboard über die aktuellen Kosten." },
+      { question: "Muss ich andere Personen werben?", answer: "Laut ClickBaitPays sind Empfehlungen derzeit freiwillig. Prüfen Sie vor der Teilnahme die aktuellen Regeln in den offiziellen Unterlagen." },
+      { question: "Wann können Einnahmen ausgezahlt werden?", answer: "Auszahlungsfristen, Mindestbeträge, Gebühren, Voraussetzungen und Bearbeitungsregeln können sich ändern. Maßgeblich für aktuelle Informationen sind die offizielle FAQ und das Dashboard im Mitgliederbereich." },
+    ],
+    sponsor: {
+      demoEyebrow: "Hier erscheint Ihr Profil",
+      eyebrow: "Ihr unabhängiger Sponsor",
+      heading: (name: string) => `Mit ${name} starten.`,
+      demoBio: "Hier erscheint Ihre Vorstellung, damit Besucher ClickBaitPays gemeinsam mit Ihnen kennenlernen können.",
+      growthPrompt: "Möchten Sie auch eine solche Seite?",
+      growthCta: "Ihre persönliche CBP-Website erstellen",
+    },
+    footer: {
+      disclosure: "Unabhängige Affiliate-Website, nicht von ClickBaitPays betrieben. Die Teilnahme ist mit finanziellen Risiken und Risiken im Zusammenhang mit Kryptowährungen verbunden. Einnahmen sind nicht garantiert. Lesen Sie vor der Teilnahme die offiziellen Bedingungen.",
+      proneursTerms: "ProNeurs™-Bedingungen",
+      proneursPrivacy: "ProNeurs™-Datenschutz",
+      cbpTerms: "ClickBaitPays-Bedingungen (Englisch)",
+      affiliateDisclosure: "Affiliate-Hinweise",
+      contact: (name: string) => `${name} kontaktieren`,
+    },
+  },
 } satisfies Record<SiteLocale, object>;
 
 function videoUrl(videoId: string, locale: SiteLocale): string {
   if (locale === "en") return `https://www.youtube.com/embed/${videoId}`;
-  return `https://www.youtube.com/embed/${videoId}?cc_load_policy=1&cc_lang_pref=fr&hl=fr`;
+  return `https://www.youtube.com/embed/${videoId}?cc_load_policy=1&cc_lang_pref=${locale}&hl=${locale}`;
 }
 
 function JoinButton({
@@ -361,14 +459,15 @@ export async function generateSponsorMetadata({
       languages: {
         "en-US": sponsorSitePath("en", slug ? site.slug : undefined),
         "fr-FR": sponsorSitePath("fr", slug ? site.slug : undefined),
+        "de-DE": sponsorSitePath("de", slug ? site.slug : undefined),
       },
     },
     openGraph: {
       title,
       description,
       type: "website",
-      locale: locale === "fr" ? "fr_FR" : "en_US",
-      alternateLocale: [locale === "fr" ? "en_US" : "fr_FR"],
+      locale: { en: "en_US", fr: "fr_FR", de: "de_DE" }[locale],
+      alternateLocale: Object.entries({ en: "en_US", fr: "fr_FR", de: "de_DE" }).filter(([language]) => language !== locale).map(([, language]) => language),
       images: [{ url: copy.metadata.image, width: 1536, height: 1024 }],
     },
     twitter: {
@@ -393,8 +492,6 @@ export async function SponsorSitePage({
 }) {
   const site = await resolveSponsorSite(slug);
   const copy = siteCopy[locale];
-  const englishHref = sponsorSitePath("en", slug ? site.slug : undefined);
-  const frenchHref = sponsorSitePath("fr", slug ? site.slug : undefined);
   const growthUrl = localizedGrowthSignupUrl(growthSignupUrl(site.slug), locale);
 
   if (site.status !== "active" && site.status !== "past_due") {
@@ -431,27 +528,6 @@ export async function SponsorSitePage({
           <a className="nav-calculator-link" href="#calculator">
             {copy.nav.calculator}
           </a>
-          <span className="language-switcher" aria-label={copy.languageSelector} role="group">
-            <a
-              href={englishHref}
-              hrefLang="en"
-              lang="en"
-              aria-current={locale === "en" ? "page" : undefined}
-              aria-label="View this page in English"
-            >
-              {copy.english}
-            </a>
-            <span aria-hidden="true">/</span>
-            <a
-              href={frenchHref}
-              hrefLang="fr"
-              lang="fr"
-              aria-current={locale === "fr" ? "page" : undefined}
-              aria-label="Afficher cette page en français"
-            >
-              {copy.french}
-            </a>
-          </span>
           <JoinButton href={site.referralUrl} siteSlug={site.slug} label={copy.join} />
         </nav>
       </header>
@@ -619,8 +695,8 @@ export async function SponsorSitePage({
                 {copy.resources.map((resource) => (
                   <a
                     href={resource.href}
-                    target={resource.href === "/fr/faq" ? undefined : "_blank"}
-                    rel={resource.href === "/fr/faq" ? undefined : "noopener noreferrer"}
+                    target={resource.href.endsWith("/faq") ? undefined : "_blank"}
+                    rel={resource.href.endsWith("/faq") ? undefined : "noopener noreferrer"}
                     key={resource.title}
                   >
                     <span>

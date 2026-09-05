@@ -55,13 +55,13 @@ export default function SignupDialog({
         <div className="signup-dialog-shell">
           <header>
             <div>
-              <p className="eyebrow">{locale === "fr" ? "Votre site personnalisé commence ici" : "Your replicated site starts here"}</p>
-              <h2 id={`${dialogId}-title`}>{locale === "fr" ? "Créez votre site personnalisé." : "Get your personalized replicated site."}</h2>
+              <p className="eyebrow">{locale === "fr" ? "Votre site personnalisé commence ici" : locale === "de" ? "Hier beginnt Ihre persönliche Website" : "Your replicated site starts here"}</p>
+              <h2 id={`${dialogId}-title`}>{locale === "fr" ? "Créez votre site personnalisé." : locale === "de" ? "Erstellen Sie Ihre persönliche Website." : "Get your personalized replicated site."}</h2>
             </div>
-            <button type="button" onClick={closeDialog} aria-label={locale === "fr" ? "Fermer le formulaire d’inscription" : "Close signup form"}>×</button>
+            <button type="button" onClick={closeDialog} aria-label={locale === "fr" ? "Fermer le formulaire d’inscription" : locale === "de" ? "Anmeldeformular schließen" : "Close signup form"}>×</button>
           </header>
           {checkoutCanceled ? (
-            <p className="checkout-note">{locale === "fr" ? "Le paiement a été annulé. Votre page n’a pas été activée." : "Checkout was canceled. Your page has not been activated."}</p>
+            <p className="checkout-note">{locale === "fr" ? "Le paiement a été annulé. Votre page n’a pas été activée." : locale === "de" ? "Die Zahlung wurde abgebrochen. Ihre Website wurde nicht aktiviert." : "Checkout was canceled. Your page has not been activated."}</p>
           ) : null}
           <SignupForm
             source={source}

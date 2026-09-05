@@ -25,6 +25,7 @@ import {
 import { getRuntimeEnv, type BillingQueueMessage } from "@/lib/runtime";
 import { getStripe, type BillingPlan } from "@/lib/stripe";
 import { purgeExpiredCheckoutReservations } from "@/lib/checkout-cleanup";
+import { billingLocale } from "@/lib/checkout-localization";
 
 function stripeId(value: string | { id: string } | null | undefined): string | null {
   if (!value) return null;
@@ -199,7 +200,7 @@ async function applyCompletedCheckout(session: Stripe.Checkout.Session): Promise
   const customerId = stripeId(session.customer);
   const subscriptionId = stripeId(session.subscription);
   const plan: BillingPlan = session.metadata?.plan === "annual" ? "annual" : "monthly";
-  const locale = session.metadata?.locale === "fr" ? "fr" : "en";
+  const locale = billingLocale(session.metadata?.locale);
   if (!siteId || !userId || !customerId || !subscriptionId) {
     throw new Error("Completed Checkout session is missing provisioning metadata.");
   }

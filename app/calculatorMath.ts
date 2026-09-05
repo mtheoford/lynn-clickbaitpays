@@ -2293,7 +2293,14 @@ export function monthNumber(day: number) {
   return Math.max(1, Math.round(day / 30));
 }
 
-export function timeLabel(day: number, locale: "en" | "fr" = "en") {
+export function timeLabel(day: number, locale: "en" | "fr" | "de" = "en") {
+  if (locale === "de") {
+    if (day < 0) return "Außerhalb dieser Simulation";
+    if (day === 0) return "Ausgangspunkt";
+    if (day <= 45) return `Etwa ${day} ${day === 1 ? "Tag" : "Tage"}`;
+    const months = monthNumber(day);
+    return `Etwa ${months} ${months === 1 ? "Monat" : "Monate"}`;
+  }
   if (day < 0) return locale === "fr" ? "Au-delà de cette simulation" : "Beyond this model";
   if (day === 0) return locale === "fr" ? "Point de départ" : "Starting point";
   if (day <= 45) {

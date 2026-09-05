@@ -1,6 +1,7 @@
 import LegalPage, { SupportContact } from "../legal-page";
+import { policyAlternates } from "@/lib/policy-metadata";
 
-export const metadata = { title: "Cancellation and Refund Policy", robots: { index: true, follow: true } };
+export const metadata = { title: "Cancellation and Refund Policy", robots: { index: true, follow: true }, alternates: policyAlternates("en", "refund-policy") };
 
 export default function RefundPolicyPage() {
   return (

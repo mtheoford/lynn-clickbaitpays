@@ -1,6 +1,7 @@
 import LegalPage, { SupportContact } from "../legal-page";
+import { policyAlternates } from "@/lib/policy-metadata";
 
-export const metadata = { title: "Acceptable Use Policy", robots: { index: true, follow: true } };
+export const metadata = { title: "Acceptable Use Policy", robots: { index: true, follow: true }, alternates: policyAlternates("en", "acceptable-use") };
 
 export default function AcceptableUsePage() {
   return (

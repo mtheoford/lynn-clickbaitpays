@@ -5,6 +5,7 @@ import { getDb } from "@/db";
 import { analyticsEvents, sites, subscriptions, users } from "@/db/schema";
 import { customerSignOutPath, getSignedInCustomer } from "@/lib/customer-auth";
 import type { SiteLocale } from "@/lib/i18n";
+import { getCustomerCopy } from "@/app/manage/customer-copy";
 import { customerManagePath } from "@/lib/magic-link-flow";
 import { localizeSponsorBio, siteUrl } from "@/lib/site-config";
 import BillingPortalButton from "./BillingPortalButton";
@@ -37,6 +38,14 @@ const subscriptionStatusFr: Record<string, string> = {
   paused: "En pause",
 };
 
+const siteStatusDe: Record<string, string> = {
+  pending: "Ausstehend", active: "Aktiv", past_due: "Zahlung überfällig", suspended: "Gesperrt", canceled: "Gekündigt", deleted: "Gelöscht",
+};
+const planDe: Record<string, string> = { monthly: "Monatlich", annual: "Jährlich", complimentary: "Kostenlos" };
+const subscriptionStatusDe: Record<string, string> = {
+  active: "Aktiv", trialing: "Testzeitraum", incomplete: "Zahlung unvollständig", incomplete_expired: "Zahlung abgelaufen", past_due: "Zahlung überfällig", canceled: "Gekündigt", unpaid: "Unbezahlt", paused: "Pausiert",
+};
+
 function translatedValue(
   value: string | null,
   translations: Record<string, string>,
@@ -48,7 +57,7 @@ function translatedValue(
 
 function localizedPublicUrl(slug: string, locale: SiteLocale): string {
   const url = new URL(siteUrl(slug));
-  if (locale === "fr") url.pathname = `/fr/s/${encodeURIComponent(slug)}`;
+  if (locale !== "en") url.pathname = `/${locale}/s/${encodeURIComponent(slug)}`;
   return url.toString();
 }
 
@@ -58,6 +67,7 @@ export default async function CustomerManagePage({
   locale?: SiteLocale;
 }) {
   const isFrench = locale === "fr";
+  const t = getCustomerCopy(locale);
   const signedIn = await getSignedInCustomer();
   if (!signedIn) redirect(customerManagePath(locale, "sign-in"));
   const { identity, customer } = signedIn;
@@ -93,17 +103,13 @@ export default async function CustomerManagePage({
 
   if (!account) {
     return (
-      <main className="admin-access-page" lang={isFrench ? "fr" : undefined}>
+      <main className="admin-access-page" lang={locale}>
         <div>
-          <p className="eyebrow">{isFrench ? "Sites CBP personnels" : "Personal CBP Sites"}</p>
-          <h1>{isFrench
-            ? "Nous n’avons trouvé aucun site associé à cette adresse e-mail."
-            : "We couldn’t find a site for this email."}</h1>
-          <p>{isFrench
-            ? "Connectez-vous avec l’adresse e-mail utilisée lors de l’achat ou contactez l’assistance ProNeurs™ pour relier votre compte."
-            : "Sign in with the same email address used during purchase, or contact ProNeurs™ support for help connecting your account."}</p>
+          <p className="eyebrow">{t["Personal CBP Sites"]}</p>
+          <h1>{t["We couldn’t find a site for this email."]}</h1>
+          <p>{t["Sign in with the same email address used during purchase, or contact ProNeurs™ support for help connecting your account."]}</p>
           <Link href={customerManagePath(locale, "sign-in")}>
-            {isFrench ? "Revenir à la connexion" : "Return to sign in"}
+            {t["Return to sign in"]}
           </Link>
         </div>
       </main>
@@ -119,65 +125,60 @@ export default async function CustomerManagePage({
   const publicUrl = localizedPublicUrl(account.slug, locale);
 
   return (
-    <main className="manage-page" lang={isFrench ? "fr" : undefined}>
+    <main className="manage-page" lang={locale}>
       <header className="manage-header">
         <div>
           <span>PN</span>
           <div>
-            <strong>{isFrench ? "Sites CBP personnels" : "Personal CBP Sites"}</strong>
-            <small>{isFrench ? "Espace client" : "Customer account"}</small>
+            <strong>{t["Personal CBP Sites"]}</strong>
+            <small>{t["Customer account"]}</small>
           </div>
         </div>
         <div>
-          <Link href={isFrench ? "/manage" : "/fr/manage"} hrefLang={isFrench ? "en" : "fr"}>
-            {isFrench ? "English" : "Français"}
-          </Link>
           <span>{identity.email}</span>
           <form action={customerSignOutPath(locale)} method="post">
-            <button type="submit">{isFrench ? "Se déconnecter" : "Sign out"}</button>
+            <button type="submit">{t["Sign out"]}</button>
           </form>
         </div>
       </header>
 
       <section className="manage-welcome">
         <div>
-          <p className="eyebrow">{isFrench ? "Votre espace de partage" : "Your sharing headquarters"}</p>
-          <h1>{isFrench ? "Bienvenue" : "Welcome"}, {account.displayName}.</h1>
-          <p>{isFrench
-            ? "Gardez vos informations de sponsor à jour, partagez votre page et découvrez comment les visiteurs interagissent avec elle."
-            : "Keep your sponsor information current, share your page, and see how visitors are engaging."}</p>
+          <p className="eyebrow">{t["Your sharing headquarters"]}</p>
+          <h1>{t["Welcome"]}, {account.displayName}.</h1>
+          <p>{t["Keep your sponsor information current, share your page, and see how visitors are engaging."]}</p>
         </div>
         <a href={publicUrl} target="_blank" rel="noreferrer">
-          {isFrench ? "Voir la page publique" : "View public page"} ↗
+          {t["View public page"]} ↗
         </a>
       </section>
 
       <section className="manage-site-card">
         <div>
-          <small>{isFrench ? "Votre adresse publique" : "Your public address"}</small>
+          <small>{t["Your public address"]}</small>
           <strong>{publicUrl}</strong>
           <span className={`status-pill status-${account.status}`}>
-            {isFrench ? siteStatusFr[account.status] : account.status.replace("_", " ")}
+            {locale === "de" ? siteStatusDe[account.status] : isFrench ? siteStatusFr[account.status] : account.status.replace("_", " ")}
           </span>
         </div>
         <ShareTools url={publicUrl} displayName={account.displayName} locale={locale} />
       </section>
 
-      <section className="manage-metric-grid" aria-label={isFrench ? "Activité du site" : "Site activity"}>
+      <section className="manage-metric-grid" aria-label={t["Site activity"]}>
         <article>
-          <span>{isFrench ? "Vues de la page" : "Page views"}</span>
+          <span>{t["Page views"]}</span>
           <strong>{metric("page_view")}</strong>
-          <small>{isFrench ? "Visites enregistrées" : "Recorded visits"}</small>
+          <small>{t["Recorded visits"]}</small>
         </article>
         <article>
-          <span>{isFrench ? "Clics de parrainage" : "Referral clicks"}</span>
+          <span>{t["Referral clicks"]}</span>
           <strong>{metric("referral_click")}</strong>
-          <small>{isFrench ? "Clics vers ClickBaitPays" : "Clicks to ClickBaitPays"}</small>
+          <small>{t["Clicks to ClickBaitPays"]}</small>
         </article>
         <article>
-          <span>{isFrench ? "Intérêt pour un site" : "Site-interest clicks"}</span>
+          <span>{t["Site-interest clicks"]}</span>
           <strong>{metric("growth_click")}</strong>
-          <small>{isFrench ? "Visiteurs ayant demandé leur propre site" : "Visitors requesting their own site"}</small>
+          <small>{t["Visitors requesting their own site"]}</small>
         </article>
       </section>
 
@@ -200,11 +201,11 @@ export default async function CustomerManagePage({
 
         <aside className="manage-account-panel">
           <div>
-            <span>{isFrench ? "Abonnement" : "Subscription"}</span>
-            <strong>{isFrench
+            <span>{t["Subscription"]}</span>
+            <strong>{locale === "de" ? translatedValue(account.plan, planDe, "Nicht aktiv") : isFrench
               ? translatedValue(account.plan, planFr, "Inactif")
               : account.plan ?? "Not active"}</strong>
-            <small>{isFrench
+            <small>{locale === "de" ? translatedValue(account.subscriptionStatus, subscriptionStatusDe, "Kein Stripe-Abonnement verknüpft.") : isFrench
               ? translatedValue(account.subscriptionStatus, subscriptionStatusFr, "Aucun abonnement Stripe n’est associé.")
               : account.subscriptionStatus ?? "No Stripe subscription is connected."}</small>
           </div>
@@ -212,9 +213,7 @@ export default async function CustomerManagePage({
             enabled={Boolean(account.stripeCustomerId && account.plan)}
             locale={locale}
           />
-          <p>{isFrench
-            ? "Les modifications de facturation sont effectuées de manière sécurisée sur Stripe. ProNeurs™ n’affiche ni ne conserve jamais les données de votre carte bancaire."
-            : "Billing changes are completed securely on Stripe. ProNeurs™ never displays or stores your payment-card details."}</p>
+          <p>{t["Billing changes are completed securely on Stripe. ProNeurs™ never displays or stores your payment-card details."]}</p>
         </aside>
       </section>
     </main>

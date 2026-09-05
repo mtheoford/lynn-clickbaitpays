@@ -6,7 +6,6 @@ const officialFaqUrl = "https://clickbaitpays.me/questions.php";
 
 export const metadata = frenchLegalMetadata({
   path: "faq",
-  englishPath: officialFaqUrl,
   title: "FAQ ClickBaitPays en français",
   description: "Traduction française des 15 questions fréquentes officielles de ClickBaitPays.",
 });

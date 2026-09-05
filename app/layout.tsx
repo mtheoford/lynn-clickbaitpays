@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Geist, Manrope } from "next/font/google";
 import DocumentLocale from "./DocumentLocale";
 import SiteCopyright from "./SiteCopyright";
+import LanguageSelector from "./LanguageSelector";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -58,6 +60,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${manrope.variable}`}
       >
         <DocumentLocale />
+        <Suspense fallback={<div className="language-banner-placeholder" aria-hidden="true" />}>
+          <LanguageSelector />
+        </Suspense>
         {children}
         <SiteCopyright />
       </body>

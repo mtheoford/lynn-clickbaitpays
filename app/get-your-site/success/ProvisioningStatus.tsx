@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { localizedPath, type SiteLocale } from "@/lib/i18n";
 
 type ProvisioningState = "processing" | "ready" | "action_required";
 
@@ -22,6 +23,11 @@ const copy = {
     confirming: "Confirmation du paiement et publication de votre page…",
     signIn: "Se connecter pour consulter mon compte",
   },
+  de: {
+    viewPage: "Meine neue Seite ansehen", managePage: "Meine Seite verwalten",
+    accountHelp: "Hilfe zu meinem Konto", returnToSites: "Zurück zu den persönlichen CBP-Websites",
+    confirming: "Zahlung wird bestätigt und Ihre Seite veröffentlicht…", signIn: "Anmelden und Konto prüfen",
+  },
 } as const;
 
 export default function ProvisioningStatus({
@@ -29,7 +35,7 @@ export default function ProvisioningStatus({
   locale = "en",
 }: {
   sessionId: string;
-  locale?: "en" | "fr";
+  locale?: SiteLocale;
 }) {
   const [state, setState] = useState<ProvisioningState>("processing");
   const [publicUrl, setPublicUrl] = useState("");
@@ -79,7 +85,7 @@ export default function ProvisioningStatus({
     return (
       <div className="checkout-success-actions">
         <a className="join-button" href={publicUrl}>{t.viewPage} <i aria-hidden="true">→</i></a>
-        <Link href={locale === "fr" ? "/fr/manage" : "/manage"}>{t.managePage}</Link>
+        <Link href={localizedPath(locale, "/manage")}>{t.managePage}</Link>
       </div>
     );
   }
@@ -87,8 +93,8 @@ export default function ProvisioningStatus({
   if (state === "action_required") {
     return (
       <div className="checkout-success-actions">
-        <Link className="join-button" href={locale === "fr" ? "/fr/manage/sign-in" : "/manage/sign-in"}>{t.accountHelp} <i aria-hidden="true">→</i></Link>
-        <Link href={locale === "fr" ? "/fr/get-your-site" : "/get-your-site"}>{t.returnToSites}</Link>
+        <Link className="join-button" href={localizedPath(locale, "/manage/sign-in")}>{t.accountHelp} <i aria-hidden="true">→</i></Link>
+        <Link href={localizedPath(locale, "/get-your-site")}>{t.returnToSites}</Link>
       </div>
     );
   }
@@ -96,7 +102,7 @@ export default function ProvisioningStatus({
   return (
     <div className="checkout-success-actions" aria-live="polite">
       <span>{t.confirming}</span>
-      <Link href={locale === "fr" ? "/fr/manage/sign-in" : "/manage/sign-in"}>{t.signIn}</Link>
+      <Link href={localizedPath(locale, "/manage/sign-in")}>{t.signIn}</Link>
     </div>
   );
 }

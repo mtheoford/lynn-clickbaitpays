@@ -1,3 +1,5 @@
+import type { SiteLocale } from "./i18n.ts";
+
 export type CheckoutReminderEmailContent = {
   subject: string;
   text: string;
@@ -10,13 +12,14 @@ type CheckoutReminderEmailInput = {
   checkoutUrl: string;
   supportEmail: string;
   manageUrl?: string;
-  locale?: "en" | "fr";
+  locale?: SiteLocale;
 };
 
 export function buildCheckoutReminderEmail(
   input: CheckoutReminderEmailInput,
 ): CheckoutReminderEmailContent {
   if (input.locale === "fr") return buildFrenchCheckoutReminderEmail(input);
+  if (input.locale === "de") return buildGermanCheckoutReminderEmail(input);
 
   const subject = "Finish setting up your ProNeurs Personal CBP Site";
   const completedCheckoutText = input.manageUrl
@@ -98,6 +101,51 @@ ProNeurs fournit un service de site web indépendant et ne garantit ni trafic, n
           ${completedCheckoutHtml}
           <p>Besoin d’aide ? <a href="mailto:${escapeHtml(input.supportEmail)}" style="color:#2ee7f2">Écrivez-nous à ${escapeHtml(input.supportEmail)}</a>.</p>
           <p style="margin:28px 0 0;padding-top:20px;border-top:1px solid #29324b;color:#818ba8;font-size:12px">ProNeurs fournit un service de site web indépendant et ne garantit ni trafic, ni parrainages, ni participation, ni revenus.</p>
+        </div>
+      </div>
+    </div>`;
+
+  return { subject, text, html };
+}
+
+function buildGermanCheckoutReminderEmail(
+  input: CheckoutReminderEmailInput,
+): CheckoutReminderEmailContent {
+  const subject = "Schließen Sie die Einrichtung Ihrer persönlichen CBP-Website von ProNeurs ab";
+  const completedCheckoutText = input.manageUrl
+    ? `Wenn Sie die Zahlung bereits abgeschlossen haben, können Sie sich anmelden und Ihre Website verwalten: ${input.manageUrl}`
+    : "Wenn Sie die Zahlung bereits abgeschlossen haben, können Sie diese E-Mail ignorieren.";
+  const completedCheckoutHtml = input.manageUrl
+    ? `<p>Wenn Sie die Zahlung bereits abgeschlossen haben, können Sie sich <a href="${escapeHtml(input.manageUrl)}" style="color:#2ee7f2">anmelden und Ihre Website verwalten</a>.</p>`
+    : "<p>Wenn Sie die Zahlung bereits abgeschlossen haben, können Sie diese E-Mail ignorieren.</p>";
+  const text = `Guten Tag ${input.name},
+
+Ihre Website-Adresse ${input.siteAddress} ist reserviert, aber Ihre Zahlung ist noch nicht abgeschlossen.
+
+Schließen Sie die sichere Zahlung über Stripe ab:
+${input.checkoutUrl}
+
+Sobald Stripe Ihre Zahlung bestätigt, wird Ihre Website automatisch aktiviert. Die gewählte Website-Adresse ist ab Beginn Ihrer Anmeldung 24 Stunden lang reserviert.
+
+${completedCheckoutText} Benötigen Sie Hilfe? Schreiben Sie an ${input.supportEmail}.
+
+ProNeurs bietet einen unabhängigen Website-Service an und garantiert weder Besucherzahlen noch Empfehlungen, Teilnahmen oder Einnahmen.`;
+
+  const html = `
+    <div lang="de" style="margin:0;background:#080b14;padding:32px 16px;color:#f5f7ff;font-family:Arial,sans-serif">
+      <div style="max-width:620px;margin:0 auto;border:1px solid #242b41;border-radius:18px;background:#101522;overflow:hidden">
+        <div style="padding:28px 32px;background:linear-gradient(135deg,#121b30,#0c2530)">
+          <p style="margin:0 0 10px;color:#2ee7f2;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase">Persönliche CBP-Websites von ProNeurs</p>
+          <h1 style="margin:0;color:#fff;font-size:28px;line-height:1.2">Ihre Website ist fast bereit.</h1>
+        </div>
+        <div style="padding:30px 32px;color:#cbd2e7;font-size:16px;line-height:1.65">
+          <p style="margin-top:0">Guten Tag ${escapeHtml(input.name)},</p>
+          <p>Ihre Website-Adresse <strong style="color:#fff">${escapeHtml(input.siteAddress)}</strong> ist reserviert, aber Ihre Zahlung ist noch nicht abgeschlossen.</p>
+          <p style="margin:26px 0"><a href="${escapeHtml(input.checkoutUrl)}" style="display:inline-block;border-radius:9px;background:#2ee7f2;padding:13px 20px;color:#071015;font-weight:700;text-decoration:none">Sichere Zahlung abschließen</a></p>
+          <p>Sobald Stripe Ihre Zahlung bestätigt, wird Ihre Website automatisch aktiviert. Die gewählte Website-Adresse ist ab Beginn Ihrer Anmeldung 24 Stunden lang reserviert.</p>
+          ${completedCheckoutHtml}
+          <p>Benötigen Sie Hilfe? <a href="mailto:${escapeHtml(input.supportEmail)}" style="color:#2ee7f2">Schreiben Sie an ${escapeHtml(input.supportEmail)}</a>.</p>
+          <p style="margin:28px 0 0;padding-top:20px;border-top:1px solid #29324b;color:#818ba8;font-size:12px">ProNeurs bietet einen unabhängigen Website-Service an und garantiert weder Besucherzahlen noch Empfehlungen, Teilnahmen oder Einnahmen.</p>
         </div>
       </div>
     </div>`;

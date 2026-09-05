@@ -1,33 +1,28 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { policyAlternates, type PolicyPagePath } from "@/lib/policy-metadata";
 
 export function frenchLegalMetadata({
   path,
-  englishPath,
   title,
   description,
 }: {
-  path: string;
-  englishPath: string;
+  path: PolicyPagePath;
   title: string;
   description: string;
 }): Metadata {
-  const canonical = `/fr/${path}`;
   return {
     title,
     description,
     robots: { index: true, follow: true },
-    alternates: {
-      canonical,
-      languages: { "en-US": englishPath, "fr-FR": canonical },
-    },
+    alternates: policyAlternates("fr", path),
     openGraph: {
       title,
       description,
       type: "website",
       locale: "fr_FR",
-      alternateLocale: ["en_US"],
+      alternateLocale: path === "faq" ? ["de_DE"] : ["en_US", "de_DE"],
       images: [{ url: "/og-fr.png", width: 1536, height: 1024 }],
     },
     twitter: {

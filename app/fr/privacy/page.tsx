@@ -2,7 +2,6 @@ import FrenchLegalPage, { frenchLegalMetadata, FrenchSupportContact } from "../l
 
 export const metadata = frenchLegalMetadata({
   path: "privacy",
-  englishPath: "/privacy",
   title: "Politique de confidentialité",
   description: "Informations sur les données utilisées pour fournir et protéger les sites CBP personnels.",
 });

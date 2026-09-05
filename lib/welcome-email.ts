@@ -1,3 +1,5 @@
+import type { SiteLocale } from "./i18n.ts";
+
 export type WelcomeEmailContent = {
   subject: string;
   text: string;
@@ -9,11 +11,12 @@ type WelcomeEmailInput = {
   publicUrl: string;
   manageUrl: string;
   supportEmail: string;
-  locale?: "en" | "fr";
+  locale?: SiteLocale;
 };
 
 export function buildWelcomeEmail(input: WelcomeEmailInput): WelcomeEmailContent {
   if (input.locale === "fr") return buildFrenchWelcomeEmail(input);
+  if (input.locale === "de") return buildGermanWelcomeEmail(input);
 
   const subject = "Your ProNeurs Personal CBP Site is ready";
   const text = `Hi ${input.name},
@@ -115,6 +118,60 @@ ProNeurs fournit un service de site web indépendant et ne garantit ni trafic, n
           <p><strong style="color:#fff">Aucun mot de passe n’est nécessaire.</strong> Revenez sur <a href="${escapeHtml(input.manageUrl)}" style="color:#2ee7f2">votre espace de gestion</a> lorsque vous avez besoin d’un nouveau lien de connexion.</p>
           <p>Besoin d’aide ? <a href="mailto:${escapeHtml(input.supportEmail)}" style="color:#2ee7f2">Écrivez-nous à ${escapeHtml(input.supportEmail)}</a>.</p>
           <p style="margin:28px 0 0;padding-top:20px;border-top:1px solid #29324b;color:#818ba8;font-size:12px">ProNeurs fournit un service de site web indépendant et ne garantit ni trafic, ni parrainages, ni participation, ni revenus.</p>
+        </div>
+      </div>
+    </div>`;
+
+  return { subject, text, html };
+}
+
+function buildGermanWelcomeEmail(input: WelcomeEmailInput): WelcomeEmailContent {
+  const subject = "Ihre persönliche CBP-Website von ProNeurs ist bereit";
+  const text = `Guten Tag ${input.name},
+
+Ihre persönliche Website zum Teilen von ClickBaitPays ist online:
+${input.publicUrl}
+
+SO BEARBEITEN SIE IHRE WEBSITE
+1. Öffnen Sie Ihren Verwaltungsbereich: ${input.manageUrl}
+2. Geben Sie die E-Mail-Adresse ein, die Sie beim Kauf verwendet haben.
+3. Öffnen Sie den sicheren, einmalig verwendbaren Anmeldelink, den wir Ihnen per E-Mail senden. Er ist 15 Minuten gültig.
+4. Ändern Sie Ihren Anzeigenamen, Ihre öffentliche E-Mail-Adresse, Ihre Telefonnummer, Ihren Empfehlungslink, Ihren Vorstellungstext oder die Sichtbarkeit Ihrer Kontaktdaten.
+5. Wählen Sie Änderungen speichern und anschließend Öffentliche Seite ansehen, um Ihre Änderungen zu prüfen.
+
+Im Verwaltungsbereich können Sie außerdem Ihre Website-Adresse kopieren und teilen, grundlegende Besucherstatistiken ansehen und Ihre Abrechnung über Stripe verwalten.
+
+Bewahren Sie diese E-Mail auf. Wenn Sie ${input.manageUrl} erneut aufrufen, können Sie einen neuen sicheren Anmeldelink anfordern. Sie müssen sich kein Passwort merken.
+
+Benötigen Sie Hilfe? Schreiben Sie an ${input.supportEmail}.
+
+ProNeurs bietet einen unabhängigen Website-Service an und garantiert weder Besucherzahlen noch Empfehlungen, Teilnahmen oder Einnahmen.`;
+
+  const html = `
+    <div lang="de" style="margin:0;background:#080b14;padding:32px 16px;color:#f5f7ff;font-family:Arial,sans-serif">
+      <div style="max-width:620px;margin:0 auto;border:1px solid #242b41;border-radius:18px;background:#101522;overflow:hidden">
+        <div style="padding:28px 32px;background:linear-gradient(135deg,#121b30,#0c2530)">
+          <p style="margin:0 0 10px;color:#2ee7f2;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase">Persönliche CBP-Websites von ProNeurs</p>
+          <h1 style="margin:0;color:#fff;font-size:28px;line-height:1.2">Ihre persönliche Website ist bereit.</h1>
+        </div>
+        <div style="padding:30px 32px;color:#cbd2e7;font-size:16px;line-height:1.65">
+          <p style="margin-top:0">Guten Tag ${escapeHtml(input.name)},</p>
+          <p>Ihre persönliche Website zum Teilen von ClickBaitPays ist jetzt online.</p>
+          <p style="margin:26px 0"><a href="${escapeHtml(input.publicUrl)}" style="display:inline-block;border-radius:9px;background:#2ee7f2;padding:13px 20px;color:#071015;font-weight:700;text-decoration:none">Ihre Website ansehen</a></p>
+          <div style="margin:28px 0;padding:22px;border:1px solid #29324b;border-radius:12px;background:#0b101c">
+            <h2 style="margin:0 0 16px;color:#fff;font-size:20px">So bearbeiten Sie Ihre Angaben</h2>
+            <ol style="margin:0;padding-left:22px">
+              <li style="margin-bottom:10px"><a href="${escapeHtml(input.manageUrl)}" style="color:#2ee7f2;font-weight:700">Öffnen Sie Ihren Verwaltungsbereich</a>.</li>
+              <li style="margin-bottom:10px">Geben Sie die E-Mail-Adresse ein, die Sie beim Kauf verwendet haben.</li>
+              <li style="margin-bottom:10px">Öffnen Sie den sicheren, einmalig verwendbaren Anmeldelink, den wir Ihnen per E-Mail senden. Er ist 15 Minuten gültig.</li>
+              <li style="margin-bottom:10px">Ändern Sie Ihre Kontaktdaten, Ihren Empfehlungslink, Ihren Vorstellungstext oder die Sichtbarkeit Ihrer Angaben.</li>
+              <li>Wählen Sie <strong style="color:#fff">Änderungen speichern</strong> und prüfen Sie das Ergebnis auf Ihrer öffentlichen Seite.</li>
+            </ol>
+          </div>
+          <p>In Ihrem Verwaltungsbereich können Sie außerdem Ihre Website-Adresse teilen, grundlegende Besucherstatistiken ansehen und Ihre Abrechnung über Stripe verwalten.</p>
+          <p><strong style="color:#fff">Sie brauchen kein Passwort.</strong> Rufen Sie <a href="${escapeHtml(input.manageUrl)}" style="color:#2ee7f2">Ihren Verwaltungsbereich</a> auf, wenn Sie einen neuen Anmeldelink benötigen.</p>
+          <p>Benötigen Sie Hilfe? <a href="mailto:${escapeHtml(input.supportEmail)}" style="color:#2ee7f2">Schreiben Sie an ${escapeHtml(input.supportEmail)}</a>.</p>
+          <p style="margin:28px 0 0;padding-top:20px;border-top:1px solid #29324b;color:#818ba8;font-size:12px">ProNeurs bietet einen unabhängigen Website-Service an und garantiert weder Besucherzahlen noch Empfehlungen, Teilnahmen oder Einnahmen.</p>
         </div>
       </div>
     </div>`;

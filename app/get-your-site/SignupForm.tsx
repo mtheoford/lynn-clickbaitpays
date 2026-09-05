@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import type { SiteLocale } from "@/lib/i18n";
+import { localizedPath, type SiteLocale } from "@/lib/i18n";
 
 const signupCopy = {
   en: {
@@ -100,6 +100,33 @@ const signupCopy = {
     continueMonthly: "Continuer avec 9 $ US par mois",
     safeNote: "Paiement sécurisé par Stripe. Aucun mot de passe ClickBaitPays ni renseignement de portefeuille n’est collecté.",
   },
+  de: {
+    checking: "Verfügbarkeit wird geprüft…",
+    availabilityError: "Die Verfügbarkeit konnte nicht geprüft werden.",
+    available: "Diese Website-Adresse ist verfügbar.",
+    unavailable: "Diese Website-Adresse ist bereits vergeben.",
+    verifyAtCheckout: "Die Verfügbarkeit wird beim Bezahlen erneut geprüft.",
+    checkoutStartError: "Der Zahlungsvorgang konnte nicht gestartet werden.",
+    personalize: "Gestalten Sie Ihre Website",
+    firstName: "Vorname", firstNamePlaceholder: "Ihr Vorname",
+    lastName: "Nachname", lastNamePlaceholder: "Ihr Nachname",
+    companyName: "Firmenname", optional: "Optional", companyPlaceholder: "Unternehmen oder Firmenname",
+    companyHint: "Lassen Sie das Feld leer, wenn Ihr persönlicher Name angezeigt werden soll.",
+    displayChoice: "Welcher Name soll auf Ihrer persönlichen Website erscheinen?",
+    personal: "Privatperson", personalFallback: "Ihr persönlicher Name", business: "Unternehmen",
+    email: "E-Mail-Adresse", phone: "Mobiltelefon", phonePlaceholder: "+49 151 12345678",
+    username: "ClickBaitPays-Benutzername", usernamePlaceholder: "Ihr ClickBaitPays-Benutzername",
+    usernameTitle: "Verwenden Sie Buchstaben, Zahlen, Punkte, Unterstriche oder Bindestriche.",
+    referralHint: "Wir erstellen Ihren ClickBaitPays-Empfehlungslink automatisch.",
+    companyPage: "Ihre ClickBaitPays-Seite", newSite: "Ihre neue persönliche Website",
+    copyAddress: "Adresse Ihrer neuen Website kopieren", copyTitle: "Website-Adresse kopieren",
+    copied: "Kopiert!", copyError: "Kopieren nicht möglich. Wählen Sie die Adresse oben aus, um sie zu kopieren.",
+    chooseBilling: "Abrechnung wählen", monthly: "Monatlich", perMonth: "pro Monat", annual: "Jährlich", save: "27 % sparen",
+    consentPrefix: "Ich akzeptiere die", subscriptionTerms: "Abonnementbedingungen", privacy: "Datenschutzerklärung", cancellation: "Kündigungs- und Erstattungsbedingungen",
+    consentSuffix: "Mir ist bewusst, dass dies ein unabhängiger Website-Service ist, keine ClickBaitPays-Mitgliedschaft und keine Einkommensgarantie.",
+    opening: "Sichere Zahlung wird geöffnet…", continueAnnual: "Weiter mit 79 US$ pro Jahr", continueMonthly: "Weiter mit 9 US$ pro Monat",
+    safeNote: "Sichere Abrechnung über Stripe in US-Dollar. Es werden weder Ihr ClickBaitPays-Passwort noch Wallet-Daten erfasst.",
+  },
 } as const;
 
 function slugify(value: string) {
@@ -167,10 +194,10 @@ export default function SignupForm({
           signal: controller.signal,
         });
         const result = (await response.json()) as { available?: boolean; message?: string };
-        if (!response.ok) throw new Error(locale === "fr" ? t.availabilityError : result.message ?? t.availabilityError);
+        if (!response.ok) throw new Error(locale !== "en" ? t.availabilityError : result.message ?? t.availabilityError);
         setAvailability({
           state: result.available ? "available" : "unavailable",
-          message: locale === "fr"
+          message: locale !== "en"
             ? (result.available ? t.available : t.unavailable)
             : result.message ?? (result.available ? t.available : t.unavailable),
         });
@@ -178,7 +205,7 @@ export default function SignupForm({
         if (controller.signal.aborted) return;
         setAvailability({
           state: "error",
-          message: locale === "fr"
+          message: locale !== "en"
             ? t.verifyAtCheckout
             : error instanceof Error ? error.message : t.verifyAtCheckout,
         });
@@ -241,7 +268,15 @@ export default function SignupForm({
               : result.code === "checkout_processing"
                 ? "Votre paiement précédent est encore en cours de traitement. Veuillez patienter un instant."
                 : t.checkoutStartError;
-        const checkoutError = locale === "fr" ? frenchError : result.error ?? t.checkoutStartError;
+        const germanError =
+          result.code === "site_unavailable"
+            ? "Diese Website-Adresse ist nicht mehr verfügbar. Bitte wählen Sie einen anderen Namen."
+            : result.code === "email_has_site"
+              ? "Mit dieser E-Mail-Adresse wird bereits eine Website verwaltet. Melden Sie sich an, um sie zu aktualisieren."
+              : result.code === "checkout_processing"
+                ? "Ihre vorherige Zahlung wird noch verarbeitet. Bitte warten Sie einen Moment."
+                : t.checkoutStartError;
+        const checkoutError = locale === "fr" ? frenchError : locale === "de" ? germanError : result.error ?? t.checkoutStartError;
         if (response.status === 409 && result.code === "site_unavailable") {
           setAvailability({
             state: "unavailable",
@@ -253,7 +288,9 @@ export default function SignupForm({
       window.location.assign(result.checkoutUrl);
     } catch (error) {
       setStatus("error");
-      setMessage(error instanceof Error ? error.message : t.checkoutStartError);
+      setMessage(locale === "de" && (error instanceof TypeError || error instanceof SyntaxError)
+        ? t.checkoutStartError
+        : error instanceof Error ? error.message : t.checkoutStartError);
     }
   }
 
@@ -383,7 +420,7 @@ export default function SignupForm({
               setEmail(event.currentTarget.value);
               setAvailability({ state: "idle", message: "" });
             }}
-            placeholder={locale === "fr" ? "vous@exemple.fr" : "you@example.com"}
+            placeholder={locale === "fr" ? "vous@exemple.fr" : locale === "de" ? "sie@beispiel.de" : "you@example.com"}
             required
           />
         </label>
@@ -455,7 +492,7 @@ export default function SignupForm({
           onClick={() => setPlan("monthly")}
         >
           <span className="signup-plan-name">{t.monthly}</span>
-          <span className="signup-plan-price"><strong>{locale === "fr" ? "9 $ US" : "$9"}</strong><small>{t.perMonth}</small></span>
+          <span className="signup-plan-price"><strong>{locale === "fr" ? "9 $ US" : locale === "de" ? "9 US$" : "$9"}</strong><small>{t.perMonth}</small></span>
         </button>
         <button
           type="button"
@@ -463,14 +500,14 @@ export default function SignupForm({
           onClick={() => setPlan("annual")}
         >
           <span className="signup-plan-name">{t.annual}</span>
-          <span className="signup-plan-price"><strong>{locale === "fr" ? "79 $ US" : "$79"}</strong><small className="signup-plan-savings">{t.save}</small></span>
+          <span className="signup-plan-price"><strong>{locale === "fr" ? "79 $ US" : locale === "de" ? "79 US$" : "$79"}</strong><small className="signup-plan-savings">{t.save}</small></span>
         </button>
       </fieldset>
 
       <label className="signup-consent">
         <input name="acceptedTerms" type="checkbox" required />
         <span>
-          {t.consentPrefix} <a href={locale === "fr" ? "/fr/terms" : "/terms"} target="_blank">{t.subscriptionTerms}</a>, <a href={locale === "fr" ? "/fr/privacy" : "/privacy"} target="_blank">{t.privacy}</a>, {locale === "fr" ? "ainsi que les " : "and "}<a href={locale === "fr" ? "/fr/refund-policy" : "/refund-policy"} target="_blank">{t.cancellation}</a>. {t.consentSuffix}
+          {t.consentPrefix} <a href={localizedPath(locale, "/terms")} target="_blank">{t.subscriptionTerms}</a>, <a href={localizedPath(locale, "/privacy")} target="_blank">{t.privacy}</a>, {locale === "fr" ? "ainsi que les " : locale === "de" ? "sowie die " : "and "}<a href={localizedPath(locale, "/refund-policy")} target="_blank">{t.cancellation}</a>. {t.consentSuffix}
         </span>
       </label>
 

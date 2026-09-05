@@ -51,3 +51,25 @@ test("French welcome email uses French copy and localized site-management links"
   assert.match(content.html, /Voir votre site en ligne/);
   assert.match(content.html, /Enregistrer les modifications/);
 });
+
+test("German welcome email includes localized links, all setup instructions, and escaped personal data", () => {
+  const content = buildWelcomeEmail({
+    name: 'Max <Muster> & Partner',
+    publicUrl: "https://cbp.proneurs.org/de/s/max-muster",
+    manageUrl: "https://cbp.proneurs.org/de/manage",
+    supportEmail: "support@proneurs.org",
+    locale: "de",
+  });
+  assert.equal(content.subject, "Ihre persönliche CBP-Website von ProNeurs ist bereit");
+  assert.match(content.text, /https:\/\/cbp\.proneurs\.org\/de\/s\/max-muster/);
+  assert.match(content.text, /https:\/\/cbp\.proneurs\.org\/de\/manage/);
+  assert.match(content.text, /beim Kauf verwendet/);
+  assert.match(content.text, /einmalig verwendbaren Anmeldelink/);
+  assert.match(content.text, /15 Minuten/);
+  assert.match(content.text, /Änderungen speichern/);
+  assert.match(content.text, /keine?s? Passwort/);
+  assert.match(content.html, /lang="de"/);
+  assert.match(content.html, /Max &lt;Muster&gt; &amp; Partner/);
+  assert.match(content.html, /Ihre Website ansehen/);
+  assert.match(content.html, /garantiert weder Besucherzahlen noch Empfehlungen, Teilnahmen oder Einnahmen/);
+});

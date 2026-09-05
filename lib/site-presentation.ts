@@ -1,20 +1,25 @@
-export type SitePresentationLocale = "en" | "fr";
+export type SitePresentationLocale = "en" | "fr" | "de";
 
 const demoSponsorBios: Record<SitePresentationLocale, string> = {
   en: "Your introduction will appear here, giving visitors a clear and welcoming way to learn about ClickBaitPays with you.",
   fr: "Votre présentation apparaîtra ici afin d’offrir aux visiteurs un accueil clair et convivial pour découvrir ClickBaitPays avec vous.",
+  de: "Hier erscheint Ihre Vorstellung, damit Besucher ClickBaitPays gemeinsam mit Ihnen kennenlernen können.",
 };
 
 const generatedSponsorBioPatterns = [
   /^Questions before joining\? .+ is here to help you understand the information and take your next step with confidence\.$/,
   /^Questions before joining\? .+ is here to help you find the facts and take the next step with confidence\.$/,
   /^Des questions avant de vous inscrire(?:\u00a0|\u202f| )?\? .+ est à votre disposition pour vous aider à comprendre les informations et à avancer en toute confiance\.$/,
+  /^Fragen vor der Anmeldung\? .+ hilft Ihnen dabei, die Informationen zu verstehen und gut informiert den nächsten Schritt zu gehen\.$/,
 ];
 
 export function generatedSponsorBio(
   locale: SitePresentationLocale,
   displayName: string,
 ): string {
+  if (locale === "de") {
+    return `Fragen vor der Anmeldung? ${displayName} hilft Ihnen dabei, die Informationen zu verstehen und gut informiert den nächsten Schritt zu gehen.`;
+  }
   if (locale === "fr") {
     return `Des questions avant de vous inscrire ? ${displayName} est à votre disposition pour vous aider à comprendre les informations et à avancer en toute confiance.`;
   }
@@ -31,7 +36,7 @@ export function localizeSponsorBio(
   displayName: string,
   locale: SitePresentationLocale,
 ): string {
-  if (bio === demoSponsorBios.en || bio === demoSponsorBios.fr) {
+  if (Object.values(demoSponsorBios).includes(bio)) {
     return demoSponsorBios[locale];
   }
   if (generatedSponsorBioPatterns.some((pattern) => pattern.test(bio))) {
@@ -45,6 +50,10 @@ export function formatPhoneForDisplay(
   locale: SitePresentationLocale = "en",
 ): string {
   const digits = value.replace(/\D/g, "");
+
+  // German numbers have variable-length area codes. Keep the sponsor's chosen
+  // spacing instead of applying the fixed North American grouping.
+  if (locale === "de") return value;
 
   if (locale === "fr") {
     if (digits.length === 10 && digits.startsWith("0")) {

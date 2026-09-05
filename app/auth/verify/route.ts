@@ -10,10 +10,11 @@ import {
   customerAuthLocale,
   customerManagePath,
   inspectCustomerMagicLink,
+  type CustomerAuthLocale,
 } from "@/lib/magic-link-flow";
 import { isSameOriginMutation } from "@/lib/request-security";
 
-function invalidLinkRedirect(origin: string, locale: "en" | "fr" = "en") {
+function invalidLinkRedirect(origin: string, locale: CustomerAuthLocale = "en") {
   const destination = new URL(customerManagePath(locale, "sign-in"), origin);
   destination.searchParams.set("error", "invalid-link");
   return NextResponse.redirect(

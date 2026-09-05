@@ -342,9 +342,130 @@ const calculatorCopy = {
     officialRules: "règles officielles en vigueur",
     close: "Fermer le calculateur",
   },
+  de: {
+    startingCampaignMeta: {
+      1: { kicker: "Niedrigster Startbetrag", description: "Beginnen Sie mit einer Kampagne und reinvestieren Sie das freigegebene Guthaben bis zur vollen Kampagnenkapazität.", icon: "start" },
+      2: { kicker: "Schnelleres Wachstum im Modell", description: "Starten Sie sofort mit zwei Kampagnen, damit bei der ersten Freigabe mehr Guthaben gleichzeitig verfügbar wird.", icon: "continuity" },
+      3: { kicker: "Schnellstes Wachstum im Modell", description: "Nutzen Sie heute alle drei Kampagnenplätze für den schnellsten modellierten Start auf dieser Stufe.", icon: "growth" },
+    } satisfies Record<(typeof startingCampaignOptions)[number], StrategyMeta>,
+    continuationLabels: {
+      "wait-for-release": "Auf freigegebenes Guthaben warten",
+      "keep-spots-moving": "Die gewählten Kampagnenplätze aktiv halten",
+    } satisfies Record<ContinuationMode, string>,
+    launch: "Ihr Kampagnenpotenzial berechnen",
+    closeAria: "Kampagnenrechner schließen",
+    eyebrow: "Kampagnenrechner",
+    title: "Vergleichen Sie den Start mit einer, zwei oder drei Kampagnen.",
+    introduction: "Wählen Sie eine Kampagnenstufe und vergleichen Sie die möglichen Ergebnisse der Startbeträge. Entscheiden Sie dann, ob Sie auf freigegebenes Guthaben warten oder Ihre gewählten Kampagnenplätze aktiv halten möchten.",
+    availabilityTitle: "Wann Kampagneneinnahmen verfügbar werden",
+    availabilityIntro: "Tägliche Einnahmen werden angezeigt, bevor sie verwendet werden können.",
+    campaignDays: "Kampagnentage 1–12",
+    earningsAppear: "Einnahmen werden täglich angezeigt",
+    earningsAppearDetail: "Sie sammeln sich während der absolvierten Kampagnentage im „Earned Wallet“, können aber noch nicht erneut eingesetzt werden.",
+    nextSevenDays: "Die folgenden 7 Tage",
+    earningsHeld: "Einnahmen bleiben gesperrt",
+    earningsHeldDetail: "Die siebentägige Sperrfrist beginnt erst, nachdem alle 12 Kampagnentage abgeschlossen sind.",
+    afterHold: "Nach der Sperrfrist",
+    fundsAvailable: "Guthaben wird verfügbar",
+    fundsAvailableDetail: "Es wird dem „Available Balance“ gutgeschrieben und kann dann erneut eingesetzt oder ausgezahlt werden.",
+    availabilityNote: "„Etwa an Tag 19“ setzt voraus, dass täglich ein Kampagnentag abgeschlossen wird. Ausgelassene Kampagnentage verschieben die Termine nach hinten.",
+    fastest: "Schnellstes Ergebnis bei diesen Einstellungen",
+    moneyNeededToday: "Heute benötigter Betrag",
+    firstEstimatedWithdrawal: "Erste geschätzte Nettoauszahlung",
+    firstBatchRoi: "Rendite der ersten Kampagnenrunde",
+    estimatedTime: "Geschätzte Zeit bis zu 3 Kampagnen auf Stufe 7",
+    averageNetAfterGoal: "Durchschnittlicher Nettogewinn pro Monat nach dem Ziel",
+    yourCampaigns: "Ihre Kampagnen",
+    referralCommissions: "Empfehlungsprovisionen",
+    combined: "Gesamt",
+    longTermExcess: "Langfristiger Nettoüberschuss:",
+    averageAfterGoal: "durchschnittlich pro Monat in den ersten 12 Monaten nach Erreichen von drei Kampagnen auf Stufe 7.",
+    goalTimingFollows: "Die Zeit bis zum Ziel richtet sich nach",
+    estimatedTimeToReach: "Geschätzte Zeit bis zu 3 Kampagnen auf Stufe 7",
+    goalActiveToday: "Ziel heute erreicht",
+    realNumbers: "Ihr Plan in Zahlen",
+    campaignsOnly: "nur Kampagnen",
+    takeFirstRelease: "Wenn Sie das erste freigegebene Guthaben auszahlen lassen",
+    requestFirstWithdrawal: "Die erste Auszahlung beantragen",
+    estimatedAround: "geschätzte Kampagnenauszahlung etwa an Tag",
+    netGain: "Nettogewinn",
+    roiInAbout: "Rendite in etwa",
+    days: "Tagen",
+    referralNetAddon: "Zusätzlicher Nettoertrag aus Empfehlungen",
+    combinedFirstWithdrawal: "Erste Gesamtauszahlung",
+    campaignRoiExcludes: "Die Kampagnenrendite berücksichtigt nicht",
+    separateDay12Reserve: "die gesonderte Reserve für Tag 12",
+    and: "und",
+    referralIncome: "Einnahmen aus Empfehlungen",
+    keepCompounding: "Wenn Sie weiter reinvestieren",
+    buildCapacity: "Die volle Kampagnenkapazität erreichen",
+    outsideMoneyToGoal: "Bis zum Ziel eingesetzte zusätzliche Mittel",
+    reachGoal: "3 Kampagnen auf Stufe 7 erreichen",
+    netSurplus: "Nettoüberschuss pro abgeschlossener Runde",
+    campaignRoi: "Kampagnenrendite",
+    perCompletedSet: "pro abgeschlossener Runde",
+    cadenceWithBridge: "neue Runden können alle 12 Tage starten; ihr Guthaben wird jeweils nach etwa 19 Tagen freigegeben",
+    cadenceWithoutBridge: "das Guthaben jeder Runde wird nach etwa 19 Tagen freigegeben",
+    ongoingPlan: "Ihr fortlaufender Plan bei voller Kampagnenkapazität",
+    keep: "Halten Sie",
+    workingWithdraw: "im Einsatz. Lassen Sie die Nettogewinne auszahlen.",
+    averageCampaignNetGain: "Durchschnittlicher Kampagnen-Nettogewinn pro Monat",
+    averageCombinedNetGain: "Durchschnittlicher Gesamtnettogewinn pro Monat",
+    campaigns: "Kampagnen",
+    referrals: "Empfehlungen",
+    monthlyAverageNote: "12-Monats-Gesamtbetrag geteilt durch 12",
+    twelveMonthCampaignNetGain: "Kampagnen-Nettogewinn über 12 Monate",
+    twelveMonthCombinedNetGain: "Gesamtnettogewinn über 12 Monate",
+    afterWithdrawalFee: "Nach der modellierten Auszahlungsgebühr",
+    twelveMonthCampaignRoi: "Auszahlungsrendite der Kampagnen über 12 Monate",
+    gainDividedByCapital: "Kampagnengewinn ÷ insgesamt eingesetztes Kapital",
+    totalsAssumption: "Die 12-Monats-Gesamtbeträge umfassen die modellierten Freigaben in den 365 Tagen nach Erreichen des Ziels; der Monatsbetrag ist der Gesamtbetrag geteilt durch 12.",
+    referralAssumptionStart: "Die Empfehlungsschätzungen setzen voraus, dass die geworbenen Personen ihre Kampagnen alle",
+    referralAssumptionEnd: "Tage wiederholen und selbst finanzieren.",
+    chooseModel: "Wählen Sie Ihr Szenario",
+    chooseModelDetail: "Wählen Sie Ihre Stufe und ergänzen Sie bei Bedarf ein Empfehlungsbeispiel.",
+    yourLevel: "Ihre Kampagnenstufe",
+    level: "Stufe",
+    directReferrals: "Direkt geworbene Personen (0 für keine)",
+    theirLevel: "Deren Kampagnenstufe",
+    campaignsPerPerson: "Kampagnen pro Person",
+    referralExample: "Empfehlungsbeispiel",
+    person: "Person",
+    people: "Personen",
+    each: "pro Person",
+    referralsPay: "Sie bezahlen ihre Kampagnen selbst. Der Rechner berücksichtigt nur Ihre Empfehlungsprovisionen und nimmt an, dass diese nach etwa 19 Tagen verfügbar sind.",
+    incomeShownSeparately: "Ihre Kampagneneinnahmen, Empfehlungsprovisionen und der Gesamtbetrag werden unten getrennt angezeigt.",
+    chooseCampaignCount: "Wie viele Kampagnen möchten Sie heute starten?",
+    campaignCountDetailStart: "Wenn die Mittel heute verfügbar sind, ergibt ihr sofortiger Einsatz den schnellsten modellierten Start. Vergleichen Sie Kosten und Ergebnis auf Stufe",
+    chooseAfterTwelve: "Was soll nach 12 abgeschlossenen Tagen geschehen?",
+    chooseAfterTwelveDetail: "Diese optionale Einstellung verändert die Reserve und den Zeitplan, aber nicht die Anzahl der heute gestarteten Kampagnen.",
+    afterDayTwelveChoice: "Entscheidung für die Zeit nach Tag 12",
+    noAdditionalReserve: "Keine zusätzliche Reserve",
+    waitForFunds: "Auf freigegebenes Guthaben warten",
+    waitForFundsDetail: "Setzen Sie an Tag 12 keine zusätzlichen Mittel ein. Starten Sie die nächsten Kampagnen, sobald das Guthaben etwa an Tag 19 verfügbar wird.",
+    dayTwelveReserve: "Reserve für Tag 12",
+    optionalOutsideMoney: "Optionale zusätzliche Mittel",
+    keepSpotsMoving: "Die gewählten Kampagnenplätze aktiv halten",
+    keepSpotsMovingDetail: "Legen Sie eine einmalige Überbrückungsreserve zurück, um Ihre gewählten Kampagnen nach 12 abgeschlossenen Tagen zu ersetzen. Das freigegebene Guthaben folgt anschließend dem modellierten Reinvestitionsplan.",
+    initialDayTwelveReserve: "Anfängliche Reserve für Tag 12",
+    selected: "Sie haben gewählt:",
+    selectedNoteEnd: "Die Zeit bis zum Ziel und die langfristigen Schätzungen auf allen drei Karten richten sich nach dieser Auswahl.",
+    assumptionsSummary: "Annahmen ansehen",
+    assumptionAvailability: "Kampagneneinnahmen erscheinen täglich im „Earned Wallet“, bleiben jedoch bis zum Ende aller 12 Kampagnentage und der anschließenden siebentägigen Sperrfrist nicht verfügbar.",
+    assumptionCards: "Die drei Startkarten vergleichen eine, zwei oder drei gemeinsam erworbene Kampagnen auf der ausgewählten Stufe. Der heute benötigte Betrag enthält auf jeder Karte eine einmalige Aktivierungsgebühr.",
+    assumptionContinuation: "„Auf freigegebenes Guthaben warten“ setzt an Tag 12 keine zusätzlichen Ersatzmittel ein. „Die gewählten Kampagnenplätze aktiv halten“ setzt nach 12 abgeschlossenen Tagen separate Mittel in Höhe der gewählten Kampagnenanzahl multipliziert mit dem Kampagnenpreis ein. Dies ist eine einmalige Überbrückung im Wachstumsmodell; spätere Käufe nutzen freigegebenes Guthaben.",
+    assumptionGoal: "Das angezeigte Ziel entspricht dem schnellsten Verlauf, den die automatische Kaufregel des Rechners findet. Es garantiert nicht den kürzesten Zeitplan für jede mögliche Kaufentscheidung.",
+    assumptionReferrals: "Die Empfehlungsschätzung modelliert die oben eingegebene Anzahl direkt geworbener Personen mit der ausgewählten Stufe und Kampagnenanzahl, wobei diese Kampagnen gemeinsam starten. Die geworbenen Personen tragen ihre Kampagnenkosten selbst; diese sind weder in Ihrem Startbetrag noch in Ihrer Reserve für Tag 12 enthalten.",
+    assumptionReferralTiming: "Annahme zum Zeitpunkt der Empfehlungsprovision: Das Modell behandelt die gesamte direkte Provision als verfügbar, sobald die geworbene Kampagne ihre 12 Tage und die siebentägige Sperrfrist abgeschlossen hat – etwa an Tag 19. Eine separate Freigaberegel für das Empfehlungsguthaben wurde nicht unabhängig überprüft.",
+    assumptionWithdrawal: "Bei interner Reinvestition wird keine Auszahlungsgebühr angesetzt. Nettobeträge und 12-Monats-Schätzungen berücksichtigen die modellierte Auszahlungsgebühr von 10 %.",
+    disclaimerStart: "Dieses Strategiebeispiel dient nur der Veranschaulichung und ist weder eine Einnahmengarantie noch eine Finanzberatung oder Anlageprognose. Kampagnenverfügbarkeit, Mitgliederaktivität, Programmregeln, Gebühren und Zeiträume können sich ändern. Herkunft der Mittel und Finanzierungskosten werden nicht modelliert. Lesen Sie die",
+    officialRules: "aktuellen offiziellen Regeln",
+    close: "Rechner schließen",
+  },
 } as const;
 
 const moneyFormatters: Record<SiteLocale, Intl.NumberFormat> = {
+  de: new Intl.NumberFormat("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
   en: new Intl.NumberFormat("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -356,6 +477,7 @@ const moneyFormatters: Record<SiteLocale, Intl.NumberFormat> = {
 };
 
 const percentFormatters: Record<SiteLocale, Intl.NumberFormat> = {
+  de: new Intl.NumberFormat("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
   en: new Intl.NumberFormat("en-US", {
     minimumFractionDigits: 1,
     maximumFractionDigits: 1,
@@ -367,6 +489,7 @@ const percentFormatters: Record<SiteLocale, Intl.NumberFormat> = {
 };
 
 const integerFormatters: Record<SiteLocale, Intl.NumberFormat> = {
+  de: new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 }),
   en: new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }),
   fr: new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }),
 };
@@ -438,7 +561,7 @@ function formatMoney(value: number, locale: SiteLocale) {
 
 function percent(value: number, locale: SiteLocale) {
   const rounded = Math.round(value * 10) / 10;
-  const space = locale === "fr" ? " " : "";
+  const space = locale === "en" ? "" : " ";
   return `${rounded > 0 ? "+" : ""}${percentFormatters[locale].format(rounded)}${space}%`;
 }
 
@@ -448,12 +571,14 @@ function signedMoney(value: number, locale: SiteLocale) {
 }
 
 function exactDayLabel(day: number, locale: SiteLocale) {
+  if (locale === "de") return day < 0 ? "Nicht erreicht" : day === 0 ? "Ausgangspunkt" : `Tag ${day}`;
   if (day < 0) return locale === "fr" ? "Non atteint" : "Not reached";
   if (day === 0) return locale === "fr" ? "Point de départ" : "Starting point";
   return locale === "fr" ? `Jour ${day}` : `Day ${day}`;
 }
 
 function campaignLabel(count: number, locale: SiteLocale) {
+  if (locale === "de") return `Kampagne${count === 1 ? "" : "n"}`;
   if (locale === "fr") return `campagne${count === 1 ? "" : "s"}`;
   return `campaign${count === 1 ? "" : "s"}`;
 }
@@ -463,6 +588,9 @@ function startingCampaignLabel(
   level: number,
   locale: SiteLocale,
 ) {
+  if (locale === "de") {
+    return `Heute ${count} ${campaignLabel(count, locale)} auf Stufe ${level} starten`;
+  }
   if (locale === "fr") {
     return `Lancez ${count} ${campaignLabel(count, locale)} de niveau ${level} aujourd’hui`;
   }
@@ -602,6 +730,8 @@ function StartingCampaignCard({
       <span className="strategy-card__cadence">
         {locale === "fr" ? (
           <>{t.goalTimingFollows} « {t.continuationLabels[continuationMode]} ».</>
+        ) : locale === "de" ? (
+          <>{t.goalTimingFollows} „{t.continuationLabels[continuationMode]}“.</>
         ) : (
           <>{t.goalTimingFollows} “{t.continuationLabels[continuationMode]}.”</>
         )}
@@ -659,7 +789,9 @@ function SelectedStrategyDetail({
       <p className="sr-only" aria-live="polite">
         {locale === "fr"
           ? `${planLabel}, ${continuationLabel} : ${exactDayLabel(path.goalDay, locale)} pour atteindre trois campagnes de niveau 7.`
-          : `${planLabel}, ${continuationLabel}: ${exactDayLabel(path.goalDay, locale)} to three Level 7 campaigns.`}
+          : locale === "de"
+            ? `${planLabel}, ${continuationLabel}: ${exactDayLabel(path.goalDay, locale)} bis zu drei Kampagnen auf Stufe 7.`
+            : `${planLabel}, ${continuationLabel}: ${exactDayLabel(path.goalDay, locale)} to three Level 7 campaigns.`}
       </p>
       <header className="selected-strategy-hero">
         <h3>{planLabel}</h3>
@@ -688,11 +820,15 @@ function SelectedStrategyDetail({
               </>
             ) : (
               <>
-                {path.funding.startingCampaigns} Level {startingLevel}{" "}
+                {locale === "de" ? <>
+                  {path.funding.startingCampaigns} {campaignLabel(path.funding.startingCampaigns, locale)} auf Stufe {startingLevel} heute gestartet · {continuationLabel} · {includeReferrals
+                    ? `${referralPeople} direkt geworbene ${referralPeople === 1 ? "Person" : "Personen"} mit je ${referralCampaigns} ${campaignLabel(referralCampaigns, locale)} auf Stufe ${referralLevel}`
+                    : t.campaignsOnly}
+                </> : <>{path.funding.startingCampaigns} Level {startingLevel}{" "}
                 {campaignLabel(path.funding.startingCampaigns, locale)} started today ·{" "}
                 {continuationLabel} · {includeReferrals
                   ? `${referralPeople} direct referral${referralPeople === 1 ? "" : "s"} with ${referralCampaigns} Level ${referralLevel} ${campaignLabel(referralCampaigns, locale)} each`
-                  : t.campaignsOnly}
+                  : t.campaignsOnly}</>}
               </>
             )}
           </p>
@@ -1153,7 +1289,7 @@ function ActiveReferralSimulator({
                           {referralPeople} {referralPeople === 1 ? t.person : t.people}
                           {" × "}
                           {referralCampaigns} {locale === "en" ? `${t.level} ${referralLevel} ` : ""}
-                          {campaignLabel(referralCampaigns, locale)}{locale === "fr" ? ` de niveau ${referralLevel}` : ""}{" "}
+                          {campaignLabel(referralCampaigns, locale)}{locale === "fr" ? ` de niveau ${referralLevel}` : locale === "de" ? ` auf Stufe ${referralLevel}` : ""}{" "}
                           {t.each}
                         </strong>
                       </div>
@@ -1263,9 +1399,11 @@ function ActiveReferralSimulator({
                   </>
                 ) : (
                   <>
-                    {t.selected} {startingCampaigns} Level {startingLevel}{" "}
+                    {locale === "de" ? <>
+                      {t.selected} heute {startingCampaigns} {campaignLabel(startingCampaigns, locale)} auf Stufe {startingLevel} und „{t.continuationLabels[continuationMode]}“. {t.selectedNoteEnd}
+                    </> : <>{t.selected} {startingCampaigns} Level {startingLevel}{" "}
                     {campaignLabel(startingCampaigns, locale)} today and “
-                    {t.continuationLabels[continuationMode]}.” {t.selectedNoteEnd}
+                    {t.continuationLabels[continuationMode]}.” {t.selectedNoteEnd}</>}
                   </>
                 )}
               </p>
@@ -1303,7 +1441,9 @@ function ActiveReferralSimulator({
                 href={
                   locale === "fr"
                     ? "/fr/faq"
-                    : "https://clickbaitpays.me/questions.php"
+                    : locale === "de"
+                      ? "/de/faq"
+                      : "https://clickbaitpays.me/questions.php"
                 }
                 {...(locale === "en"
                   ? { target: "_blank", rel: "noopener noreferrer" }

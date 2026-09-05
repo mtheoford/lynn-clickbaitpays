@@ -7,6 +7,7 @@ import { getRuntimeEnv, runtimeValue } from "@/lib/runtime";
 import { siteUrl } from "@/lib/site-config";
 import { getStripe } from "@/lib/stripe";
 import { buildWelcomeEmail } from "@/lib/welcome-email";
+import { billingLocale, localizedPublicUrl } from "@/lib/checkout-localization";
 
 const CHECKOUT_REMINDER_ACTION = "site.checkout_reminder.sent";
 export const CHECKOUT_REMINDER_DELAY_SECONDS = 30 * 60;
@@ -19,17 +20,8 @@ type EmailInput = {
   idempotencyKey: string;
 };
 
-function emailLocale(value: unknown): SiteLocale {
-  return value === "fr" ? "fr" : "en";
-}
-
 function localizedPublicSiteUrl(slug: string, locale: SiteLocale): string {
-  const publicUrl = siteUrl(slug);
-  if (locale === "en") return publicUrl;
-
-  const localizedUrl = new URL(publicUrl);
-  localizedUrl.pathname = localizedPath(locale, localizedUrl.pathname);
-  return localizedUrl.toString();
+  return localizedPublicUrl(siteUrl(slug), locale);
 }
 
 function localizedMarketingUrl(
@@ -44,13 +36,13 @@ async function resolveWelcomeLocale(
   locale: SiteLocale | undefined,
   checkoutSessionId: string | null,
 ): Promise<SiteLocale> {
-  if (locale === "en" || locale === "fr") return locale;
+  if (locale && billingLocale(locale) === locale) return locale;
   if (!checkoutSessionId) return "en";
 
   try {
     const stripe = await getStripe();
     const session = await stripe.checkout.sessions.retrieve(checkoutSessionId);
-    return emailLocale(session.metadata?.locale);
+    return billingLocale(session.metadata?.locale);
   } catch {
     // Legacy queue messages did not include a locale. Email delivery should
     // remain available even if the old Checkout session can no longer be read.
@@ -217,9 +209,9 @@ export async function deliverCheckoutReminderForSite(
   );
   if (session.status !== "open" || !session.url) return "skipped";
   const effectiveLocale =
-    locale === "en" || locale === "fr"
+    locale && billingLocale(locale) === locale
       ? locale
-      : emailLocale(session.metadata?.locale);
+      : billingLocale(session.metadata?.locale);
 
   const [configuredSupportEmail, configuredMarketingUrl] = await Promise.all([
     runtimeValue("NEXT_PUBLIC_SUPPORT_EMAIL"),

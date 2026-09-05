@@ -2,7 +2,6 @@ import FrenchLegalPage, { frenchLegalMetadata, FrenchSupportContact } from "../l
 
 export const metadata = frenchLegalMetadata({
   path: "acceptable-use",
-  englishPath: "/acceptable-use",
   title: "Politique d’utilisation acceptable",
   description: "Règles applicables au contenu et à l’utilisation des sites CBP personnels.",
 });

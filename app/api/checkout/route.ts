@@ -22,6 +22,9 @@ import {
 import { purgeExpiredCheckoutReservations } from "@/lib/checkout-cleanup";
 import { resolveSiteIdentity } from "@/lib/site-identity";
 import { enqueueCheckoutReminder } from "@/lib/email";
+import { billingLocale, checkoutLocalization, checkoutToResume } from "@/lib/checkout-localization";
+import { localizedCustomerError } from "@/lib/customer-messages";
+import type { SiteLocale } from "@/lib/i18n";
 
 type CheckoutInput = {
   firstName?: string;
@@ -42,11 +45,11 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type CheckoutErrorCode = "email_has_site" | "site_unavailable" | "checkout_processing";
 
-function error(message: string, status = 400, code?: CheckoutErrorCode) {
-  return NextResponse.json({ error: message, ...(code ? { code } : {}) }, { status });
-}
-
 export async function POST(request: Request) {
+  let locale: SiteLocale = "en";
+  function error(message: string, status = 400, code?: CheckoutErrorCode) {
+    return NextResponse.json({ error: localizedCustomerError(message, locale), ...(code ? { code } : {}) }, { status });
+  }
   if (!isSameOriginMutation(request)) return error("Request origin could not be verified.", 403);
   if (!(await isBillingConfigured())) {
     return error(
@@ -62,6 +65,7 @@ export async function POST(request: Request) {
     return error("The signup details could not be read.");
   }
 
+  locale = billingLocale(input.locale);
   const identityResult = resolveSiteIdentity(input);
   if (!identityResult.identity) return error(identityResult.error);
   const identity = identityResult.identity;
@@ -71,7 +75,6 @@ export async function POST(request: Request) {
   const referralUrl = input.referralUrl?.trim() ?? "";
   const sourceSlug = normalizeSiteSlug(input.source ?? "");
   const plan: BillingPlan = input.plan === "annual" ? "annual" : "monthly";
-  const locale = input.locale === "fr" ? "fr" : "en";
 
   if (!EMAIL_PATTERN.test(email)) return error("Enter a valid email address.");
   if (phone.replace(/\D/g, "").length < 10) return error("Enter a valid phone number.");
@@ -196,7 +199,8 @@ export async function POST(request: Request) {
   };
 
   const stripe = await getStripe();
-  if (renamingOwnedReservation && reservationSite?.stripeCheckoutSessionId) {
+  let resumedCheckout: { url: string; locale: SiteLocale } | null = null;
+  if ((renamingOwnedReservation || reservationDecision === "reuse") && reservationSite?.stripeCheckoutSessionId) {
     const previousSession = await stripe.checkout.sessions.retrieve(
       reservationSite.stripeCheckoutSessionId,
     );
@@ -207,8 +211,13 @@ export async function POST(request: Request) {
         "checkout_processing",
       );
     }
-    if (previousSession.status === "open") {
+    if (previousSession.status === "open" && renamingOwnedReservation) {
       await stripe.checkout.sessions.expire(previousSession.id);
+    }
+    if (!renamingOwnedReservation) {
+      resumedCheckout = checkoutToResume(previousSession, {
+        locale, siteId, userId, plan, sourceSlug,
+      });
     }
   }
 
@@ -273,12 +282,19 @@ export async function POST(request: Request) {
     }
   }
 
+  if (resumedCheckout) {
+    return NextResponse.json({
+      checkoutUrl: resumedCheckout.url,
+      checkoutLocale: resumedCheckout.locale,
+      checkoutResumed: true,
+    });
+  }
+
   const origin = new URL(request.url).origin;
-  const checkoutBasePath = locale === "fr" ? "/fr/get-your-site" : "/get-your-site";
   const session = await stripe.checkout.sessions.create(
     {
       mode: "subscription",
-      locale: locale === "fr" ? "fr" : "auto",
+      ...checkoutLocalization({ origin, locale, slug, siteId, userId, plan, sourceSlug }),
       ...(existingUser?.stripeCustomerId
         ? { customer: existingUser.stripeCustomerId }
         : { customer_email: email }),
@@ -286,10 +302,6 @@ export async function POST(request: Request) {
       line_items: [{ price: await priceForPlan(plan), quantity: 1 }],
       allow_promotion_codes: true,
       expires_at: Math.floor(reservationExpiresAt.getTime() / 1000),
-      success_url: `${origin}${checkoutBasePath}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}${checkoutBasePath}?checkout=canceled&site=${encodeURIComponent(slug)}`,
-      metadata: { siteId, userId, plan, sourceSlug, locale },
-      subscription_data: { metadata: { siteId, userId, plan, sourceSlug, locale } },
     },
     {
       idempotencyKey: `site-checkout-${siteId}-${plan}-${reservationExpiresAt.getTime()}`,
