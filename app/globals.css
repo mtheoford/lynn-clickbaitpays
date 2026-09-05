@@ -9152,3 +9152,101 @@ main[lang="de"] .cbp-offer-copy h1 em { box-decoration-break: clone; -webkit-box
   }
 
 }
+
+/* The player is not mounted until the visitor explicitly selects its cover. */
+.site-video {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 16 / 9;
+  background: #02030a;
+}
+
+.site-video iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.site-video__cover {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: inherit;
+  background: #02030a;
+  cursor: pointer;
+  font: inherit;
+  color: #fff;
+}
+
+.site-video__poster {
+  object-fit: contain;
+}
+
+.site-video__play {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.site-video__play-icon {
+  display: grid;
+  place-items: center;
+  width: 68px;
+  height: 68px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 50%;
+  background: #18d9e7;
+  color: #071126;
+  box-shadow: 0 0 0 8px rgba(10, 15, 39, 0.55), 0 6px 28px rgba(0, 0, 0, 0.5);
+  transition: background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.site-video__play-label {
+  padding: 7px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(8, 12, 31, 0.94);
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.2;
+}
+
+.site-video__cover:hover .site-video__play-icon,
+.site-video__cover:focus-visible .site-video__play-icon {
+  background: #71f5ff;
+  box-shadow: 0 0 0 8px rgba(10, 15, 39, 0.7), 0 0 30px rgba(24, 217, 231, 0.45);
+}
+
+.site-video__cover:focus-visible {
+  outline: 3px solid #71f5ff;
+  outline-offset: -5px;
+}
+
+@media (max-width: 600px) {
+  .site-video__play-icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .site-video__play-label {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-video__play-icon {
+    transition: none;
+  }
+}

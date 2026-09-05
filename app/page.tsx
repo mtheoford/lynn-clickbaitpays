@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import ReferralSimulator from "./ReferralSimulator";
 import { SiteViewTracker, TrackedLink } from "./SiteAnalytics";
 import TestimonialGallery from "./TestimonialGallery";
+import SiteVideo from "./SiteVideo";
 import cbpMark from "../public/cbp-mark.png";
 import {
   formatPhoneForDisplay,
@@ -567,11 +568,12 @@ export async function SponsorSitePage({
             {copy.welcomeVideo.callout}
           </div>
           <div className="hero-video">
-            <iframe
+            <SiteVideo
               src={videoUrl("PhTIPCzqMjw", locale)}
               title={copy.welcomeVideo.title}
-              allow="autoplay; fullscreen; picture-in-picture"
-              allowFullScreen
+              poster={`/video-posters/welcome-${locale}.jpg`}
+              locale={locale}
+              priority
             />
           </div>
           <div className="video-caption">
@@ -612,11 +614,11 @@ export async function SponsorSitePage({
                   {copy.strategy.videoLabel}
                 </div>
                 <div className="strategy-video">
-                  <iframe
+                  <SiteVideo
                     src={videoUrl("YFbW5RSLOQM", locale)}
                     title={copy.strategy.videoTitle}
-                    allow="autoplay; fullscreen; picture-in-picture"
-                    allowFullScreen
+                    poster={`/video-posters/strategy-${locale}.jpg`}
+                    locale={locale}
                   />
                 </div>
                 <div className="strategy-video-footer">
@@ -656,12 +658,11 @@ export async function SponsorSitePage({
           <div className="secondary-videos single-video">
             <article>
               <div className="small-video">
-                <iframe
+                <SiteVideo
                   src={videoUrl("JQEnm6I37dI", locale)}
                   title={copy.tour.videoTitle}
-                  allow="autoplay; fullscreen; picture-in-picture"
-                  allowFullScreen
-                  loading="lazy"
+                  poster={`/video-posters/tour-${locale}.jpg`}
+                  locale={locale}
                 />
               </div>
               <div className="small-video-copy">
