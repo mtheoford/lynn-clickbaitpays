@@ -25,7 +25,7 @@
     "@opennextjs/cloudflare": "1.20.2",
     "drizzle-orm": "0.45.2",
     "jose": "6.2.8",
-    "next": "16.2.12",
+    "next": "16.3.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "stripe": "^22.4.0"
@@ -37,13 +37,15 @@
     "@types/react-dom": "19.2.3",
     "drizzle-kit": "0.31.10",
     "eslint": "9.39.4",
-    "eslint-config-next": "16.2.12",
+    "eslint-config-next": "16.3.4",
     "tailwindcss": "4.2.1",
     "typescript": "5.9.3",
     "wrangler": "4.118.0"
   },
   "overrides": {
     "@aws-sdk/credential-provider-sso": "3.973.9",
+    "js-yaml": "4.3.2",
+    "sharp": "0.35.4",
     "undici": "7.29.0"
   },
   "type": "module"

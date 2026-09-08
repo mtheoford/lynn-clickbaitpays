@@ -150,3 +150,32 @@ test("the public page routes all three approved videos through the shared locali
     assert.ok(attribute("title"), "Every iframe and cover must retain a descriptive localized title");
   }
 });
+
+test("video covers cannot expand the responsive hero grid beyond the viewport", () => {
+  const css = readFileSync(new URL("app/globals.css", root), "utf8");
+
+  assert.match(
+    css,
+    /grid-template-columns:\s*minmax\(0,\s*0\.7fr\)\s+minmax\(0,\s*1\.3fr\)/,
+    "Desktop hero tracks must be allowed to shrink below video intrinsic width",
+  );
+  assert.ok(
+    (css.match(/grid-template-columns:\s*minmax\(0,\s*1fr\)/g) ?? []).length >= 2,
+    "Both single-column hero breakpoints must use a zero minimum track size",
+  );
+  assert.match(
+    css,
+    /\.hero-copy,\s*\.welcome-feature\s*\{[^}]*min-width:\s*0;[^}]*max-width:\s*100%;[^}]*\}/,
+    "Hero grid items must not impose their intrinsic minimum width",
+  );
+  assert.match(
+    css,
+    /\.hero-video,\s*\.strategy-video,\s*\.small-video\s*\{[^}]*width:\s*100%;[^}]*min-width:\s*0;[^}]*max-width:\s*100%;[^}]*\}/,
+    "Every video slot must remain constrained to its parent",
+  );
+  assert.match(
+    css,
+    /\.site-video\s*\{[^}]*min-width:\s*0;[^}]*max-width:\s*100%;[^}]*height:\s*auto;[^}]*aspect-ratio:\s*16\s*\/\s*9;[^}]*overflow:\s*hidden;[^}]*\}/,
+    "The click-to-play facade must derive height from its constrained width",
+  );
+});
