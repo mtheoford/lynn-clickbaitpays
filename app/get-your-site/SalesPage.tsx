@@ -49,8 +49,8 @@ export default async function SalesPage({ searchParams, locale = "en" }: { searc
             <TrackedDemoLink className="cbp-offer-demo-link" href={exampleSiteUrl} placement="hero" source={params.source} target="_blank" rel="noopener noreferrer"><span>{t.demo}</span><span className="cbp-offer-demo-icon" aria-hidden="true">↗</span></TrackedDemoLink>
           </div>
           <div className="cbp-offer-pricing" aria-label={t.pricing}>
-            <div className="cbp-price-option"><span>{t.monthly}</span><strong>{t.monthlyPrice}<small>{t.perMonth}</small></strong><p>{t.billedMonthly}</p></div>
-            <div className="cbp-price-option cbp-price-option-annual"><b>{t.bestValue}</b><span>{t.annual}</span><strong>{t.annualPrice}<small>{t.perYear}</small></strong><p>{t.savings}</p></div>
+            <SignupDialog {...signupProps} dialogId={`hero-monthly-signup${suffix}`} triggerLabel={`${t.monthly} ${t.monthlyPrice}${t.perMonth}`} triggerClassName="cbp-price-option" initialPlan="monthly" analyticsPlacement="hero"><span>{t.monthly}</span><strong>{t.monthlyPrice}<small>{t.perMonth}</small></strong><span className="cbp-price-note">{t.billedMonthly}</span></SignupDialog>
+            <SignupDialog {...signupProps} dialogId={`hero-annual-signup${suffix}`} triggerLabel={`${t.annual} ${t.annualPrice}${t.perYear}`} triggerClassName="cbp-price-option cbp-price-option-annual" initialPlan="annual" analyticsPlacement="hero"><b>{t.bestValue}</b><span>{t.annual}</span><strong>{t.annualPrice}<small>{t.perYear}</small></strong><span className="cbp-price-note">{t.savings}</span></SignupDialog>
           </div>
           <p className="cbp-secure-checkout">{t.secure}</p>
         </div>
@@ -71,8 +71,8 @@ export default async function SalesPage({ searchParams, locale = "en" }: { searc
         <div><p>{t.closingEyebrow}</p><h2 id="cbp-close-title">{t.closingTitle}</h2></div>
         <div className="cbp-close-action">
           <div className="cbp-close-pricing" aria-label={t.pricing}>
-            <div className="cbp-close-price-option"><span>{t.monthly}</span><strong>{t.monthlyPrice}<small>{t.perMonth}</small></strong><p>{t.billedMonthly}</p></div>
-            <div className="cbp-close-price-option cbp-close-price-annual"><b>{t.bestValue}</b><span>{t.annual}</span><strong>{t.annualPrice}<small>{t.perYear}</small></strong><p>{t.savings}</p></div>
+            <SignupDialog {...signupProps} dialogId={`closing-monthly-signup${suffix}`} triggerLabel={`${t.monthly} ${t.monthlyPrice}${t.perMonth}`} triggerClassName="cbp-close-price-option" initialPlan="monthly" analyticsPlacement="closing"><span>{t.monthly}</span><strong>{t.monthlyPrice}<small>{t.perMonth}</small></strong><span className="cbp-price-note">{t.billedMonthly}</span></SignupDialog>
+            <SignupDialog {...signupProps} dialogId={`closing-annual-signup${suffix}`} triggerLabel={`${t.annual} ${t.annualPrice}${t.perYear}`} triggerClassName="cbp-close-price-option cbp-close-price-annual" initialPlan="annual" analyticsPlacement="closing"><b>{t.bestValue}</b><span>{t.annual}</span><strong>{t.annualPrice}<small>{t.perYear}</small></strong><span className="cbp-price-note">{t.savings}</span></SignupDialog>
           </div>
           <SignupDialog {...signupProps} dialogId={`closing-signup${suffix}`} triggerLabel={t.signup} analyticsPlacement="closing" />
         </div>

@@ -11,7 +11,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       NEXT_PUBLIC_SITE_URL: https://cbp-staging.proneurs.org
       NEXT_PUBLIC_MARKETING_URL: https://cbp-staging.proneurs.org
@@ -36,3 +36,17 @@ jobs:
         run: npm test
       - name: Build Cloudflare Worker
         run: npm run build:worker
+      - name: Install checkout test browsers
+        run: npx playwright install --with-deps chromium webkit
+      - name: Verify desktop and mobile purchase flows
+        run: npm run test:e2e
+      - name: Save failed browser test evidence
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: purchase-browser-failure
+          path: |
+            outputs/playwright-results
+            outputs/playwright-report
+          if-no-files-found: ignore
+          retention-days: 14

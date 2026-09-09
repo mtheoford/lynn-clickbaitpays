@@ -150,11 +150,15 @@ export default function SignupForm({
   addressPrefix = "https://",
   addressSuffix = ".cbp.proneurs.org",
   locale = "en",
+  plan,
+  onPlanChange,
 }: {
   source?: string;
   addressPrefix?: string;
   addressSuffix?: string;
   locale?: SiteLocale;
+  plan: "monthly" | "annual";
+  onPlanChange: (plan: "monthly" | "annual") => void;
 }) {
   const t = signupCopy[locale];
   const [firstName, setFirstName] = useState("");
@@ -163,7 +167,6 @@ export default function SignupForm({
   const [displayNameType, setDisplayNameType] = useState<"" | "personal" | "business">("");
   const [email, setEmail] = useState("");
   const [referralUsername, setReferralUsername] = useState("");
-  const [plan, setPlan] = useState<"monthly" | "annual">("monthly");
   const [status, setStatus] = useState<"idle" | "submitting" | "error">("idle");
   const [message, setMessage] = useState("");
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">("idle");
@@ -489,7 +492,8 @@ export default function SignupForm({
         <button
           type="button"
           className={plan === "monthly" ? "is-selected" : ""}
-          onClick={() => setPlan("monthly")}
+          aria-pressed={plan === "monthly"}
+          onClick={() => onPlanChange("monthly")}
         >
           <span className="signup-plan-name">{t.monthly}</span>
           <span className="signup-plan-price"><strong>{locale === "fr" ? "9 $ US" : locale === "de" ? "9 US$" : "$9"}</strong><small>{t.perMonth}</small></span>
@@ -497,7 +501,8 @@ export default function SignupForm({
         <button
           type="button"
           className={plan === "annual" ? "is-selected" : ""}
-          onClick={() => setPlan("annual")}
+          aria-pressed={plan === "annual"}
+          onClick={() => onPlanChange("annual")}
         >
           <span className="signup-plan-name">{t.annual}</span>
           <span className="signup-plan-price"><strong>{locale === "fr" ? "79 $ US" : locale === "de" ? "79 US$" : "$79"}</strong><small className="signup-plan-savings">{t.save}</small></span>
