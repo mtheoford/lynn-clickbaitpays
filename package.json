@@ -11,15 +11,18 @@
     "build:worker": "opennextjs-cloudflare build",
     "start": "next start",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy:staging": "opennextjs-cloudflare build && opennextjs-cloudflare deploy -- --env staging --keep-vars",
-    "deploy:production": "opennextjs-cloudflare build && opennextjs-cloudflare deploy -- --env production --keep-vars",
+    "deploy:staging": "npm run verify:release && opennextjs-cloudflare deploy -- --env staging --keep-vars && BASE_URL=https://proneurs-personal-cbp-sites-staging.mtheoford.workers.dev npm run test:e2e:smoke",
+    "deploy:production": "npm run verify:release && opennextjs-cloudflare deploy -- --env production --keep-vars && BASE_URL=https://cbp.proneurs.org npm run test:e2e:smoke",
     "test": "node --test tests/calculator-math.test.ts tests/site-config.test.ts tests/site-identity.test.ts tests/billing-lifecycle.test.ts tests/customer-auth.test.ts tests/checkout-reservation.test.ts tests/checkout-session-cleanup.test.ts tests/magic-link-submission.test.ts tests/welcome-email.test.ts tests/checkout-reminder-email.test.ts tests/signup-page-analytics.test.ts tests/i18n.test.ts tests/media-preservation.test.ts tests/video-facade.test.ts",
     "test:calculator": "node --test tests/calculator-math.test.ts",
     "audit:security": "node scripts/security-audit.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next --ignore-pattern .open-next --ignore-pattern cloudflare-env.d.ts",
     "typecheck": "next typegen && tsc --noEmit",
     "db:generate": "drizzle-kit generate",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:smoke": "playwright test --grep @smoke",
+    "verify:release": "npm run audit:security && npm run lint && npm run typecheck && npm test && npm run build:worker && npm run test:e2e"
   },
   "dependencies": {
     "@opennextjs/cloudflare": "1.20.2",
@@ -31,6 +34,7 @@
     "stripe": "^22.4.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "@tailwindcss/postcss": "4.2.1",
     "@types/node": "22.19.19",
     "@types/react": "19.2.14",

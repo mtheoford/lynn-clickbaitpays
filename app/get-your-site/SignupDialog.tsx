@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import SignupForm from "./SignupForm";
 import { recordSignupPageEvent } from "./SignupPageAnalytics";
 import type { SiteLocale } from "@/lib/i18n";
@@ -12,6 +12,9 @@ export default function SignupDialog({
   checkoutCanceled,
   dialogId,
   triggerLabel,
+  triggerClassName = "sales-button",
+  children,
+  initialPlan = "monthly",
   analyticsPlacement,
   locale = "en",
 }: {
@@ -21,14 +24,19 @@ export default function SignupDialog({
   checkoutCanceled: boolean;
   dialogId: string;
   triggerLabel: string;
+  triggerClassName?: string;
+  children?: ReactNode;
+  initialPlan?: "monthly" | "annual";
   analyticsPlacement: "hero" | "closing";
   locale?: SiteLocale;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const [plan, setPlan] = useState(initialPlan);
 
   function openDialog() {
     const dialog = dialogRef.current;
     if (!dialog || dialog.open) return;
+    setPlan(initialPlan);
     dialog.showModal();
     recordSignupPageEvent("signup_click", analyticsPlacement, source);
   }
@@ -39,8 +47,8 @@ export default function SignupDialog({
 
   return (
     <>
-      <button className="sales-button" type="button" onClick={openDialog}>
-        {triggerLabel} <span aria-hidden="true">→</span>
+      <button className={triggerClassName} type="button" onClick={openDialog} aria-label={children ? triggerLabel : undefined} aria-haspopup="dialog" aria-controls={dialogId}>
+        {children ?? <>{triggerLabel} <span aria-hidden="true">→</span></>}
       </button>
 
       <dialog
@@ -68,6 +76,8 @@ export default function SignupDialog({
             addressPrefix={addressPrefix}
             addressSuffix={addressSuffix}
             locale={locale}
+            plan={plan}
+            onPlanChange={setPlan}
           />
         </div>
       </dialog>

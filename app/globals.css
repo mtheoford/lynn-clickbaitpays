@@ -7026,13 +7026,30 @@ main[lang="de"] .cbp-offer-copy h1 em { box-decoration-break: clone; -webkit-box
   background: rgba(255, 255, 255, .48);
 }
 
+.cbp-price-option,
+.cbp-close-price-option {
+  width: 100%;
+  min-width: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.cbp-price-option:hover,
+.cbp-price-option:focus-visible { border-color: var(--offer-blue); }
+.cbp-close-price-option:hover,
+.cbp-close-price-option:focus-visible { border-color: #a9f1ed; }
+.cbp-price-option:focus-visible,
+.cbp-close-price-option:focus-visible { outline: 3px solid var(--offer-blue); outline-offset: 4px; }
+
 .cbp-price-option > span { color: #6b6e77; font-size: 9px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
 .cbp-price-option strong { margin-top: 5px; color: var(--offer-ink); font-family: var(--font-manrope), sans-serif; font-size: 28px; line-height: 1; }
 .cbp-price-option strong small { margin-left: 3px; color: #737680; font-family: var(--font-geist-sans), sans-serif; font-size: 9px; font-weight: 750; }
-.cbp-price-option p { margin: 7px 0 0; color: #777a83; font-size: 9px; font-weight: 700; }
+.cbp-price-option > .cbp-price-note { margin: 7px 0 0; color: #777a83; font-size: 9px; font-weight: 700; letter-spacing: normal; text-transform: none; }
 .cbp-price-option-annual { border-color: rgba(82, 71, 239, .42); background: rgba(82, 71, 239, .075); box-shadow: inset 0 0 0 1px rgba(82, 71, 239, .08); }
 .cbp-price-option-annual > b { padding: 5px 8px; position: absolute; top: -11px; right: 10px; border-radius: 999px; color: #fff; background: var(--offer-blue); font-size: 8px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; }
-.cbp-price-option-annual p { color: var(--offer-blue); font-weight: 850; }
+.cbp-price-option-annual > .cbp-price-note { color: var(--offer-blue); font-weight: 850; }
 .cbp-secure-checkout { margin: 9px 0 0; color: #777a83; font-size: 9px; font-weight: 750; text-align: center; }
 
 .cbp-offer-product {
@@ -7154,7 +7171,7 @@ main[lang="de"] .cbp-offer-copy h1 em { box-decoration-break: clone; -webkit-box
 }
 
 .cbp-benefits-heading h2,
-.cbp-offer-close h2 {
+.cbp-offer-close > div:first-child > h2 {
   max-width: 500px;
   margin: 0;
   font-family: var(--font-manrope), sans-serif;
@@ -7197,7 +7214,7 @@ main[lang="de"] .cbp-offer-copy h1 em { box-decoration-break: clone; -webkit-box
 }
 
 .cbp-offer-close > div:first-child > p { color: #78e7df; }
-.cbp-offer-close h2 { color: #fff; }
+.cbp-offer-close > div:first-child > h2 { color: #fff; }
 .cbp-close-action { display: grid; justify-items: stretch; }
 .cbp-close-pricing { margin-bottom: 19px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .cbp-close-price-option {
@@ -7213,10 +7230,10 @@ main[lang="de"] .cbp-offer-copy h1 em { box-decoration-break: clone; -webkit-box
 .cbp-close-price-option > span { color: #aeb4c7; font-size: 8px; font-weight: 850; letter-spacing: .09em; text-transform: uppercase; }
 .cbp-close-price-option strong { margin-top: 5px; color: #fff; font-family: var(--font-manrope), sans-serif; font-size: 27px; line-height: 1; }
 .cbp-close-price-option strong small { margin-left: 3px; color: #9da4ba; font-family: var(--font-geist-sans), sans-serif; font-size: 8px; font-weight: 750; }
-.cbp-close-price-option p { margin: 7px 0 0; color: #8f97ae; font-size: 8px; font-weight: 700; }
+.cbp-close-price-option > .cbp-price-note { margin: 7px 0 0; color: #8f97ae; font-size: 8px; font-weight: 700; letter-spacing: normal; text-transform: none; }
 .cbp-close-price-annual { border-color: rgba(138, 122, 255, .7); background: rgba(102, 88, 241, .19); box-shadow: inset 0 0 0 1px rgba(138, 122, 255, .12); }
 .cbp-close-price-annual > b { padding: 5px 8px; position: absolute; top: -10px; right: 8px; border-radius: 999px; color: #121522; background: #a9f1ed; font-size: 7px; font-weight: 950; letter-spacing: .04em; text-transform: uppercase; }
-.cbp-close-price-annual p { color: #a9f1ed; font-weight: 850; }
+.cbp-close-price-annual > .cbp-price-note { color: #a9f1ed; font-weight: 850; }
 .cbp-offer-close .sales-button { width: 100%; color: #10131a; background: #a9f1ed; box-shadow: 6px 6px 0 #6658f1; }
 .cbp-offer-close .sales-button:hover { color: #fff; background: #6658f1; box-shadow: 3px 3px 0 #a9f1ed; }
 
@@ -7286,7 +7303,7 @@ main[lang="de"] .cbp-offer-copy h1 em { box-decoration-break: clone; -webkit-box
   .cbp-benefit-grid h3 { margin: 2px 0 8px; font-size: 18px; }
   .cbp-benefit-grid p { max-width: 440px; font-size: 12px; }
   .cbp-offer-close { min-height: 0; padding: 37px 23px; grid-template-columns: 1fr; gap: 34px; border-radius: 18px; }
-  .cbp-offer-close h2 { font-size: 39px; }
+  .cbp-offer-close > div:first-child > h2 { font-size: 39px; }
   .cbp-offer-footer { min-height: 130px; padding: 26px 0 35px; align-items: flex-start; flex-direction: column; gap: 19px; }
 }
 
