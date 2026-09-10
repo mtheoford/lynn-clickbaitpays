@@ -75,7 +75,7 @@ export default function LanguageSelector() {
     event.preventDefault();
     router.push(hrefFor(target, window.location.hash), { scroll: false });
   };
-  const preferredOption = saved && saved !== locale && (pathname === "/" || pathname === "/get-your-site")
+  const preferredOption = saved && saved !== locale && pathname === "/"
     ? languageOptions.find((option) => option.locale === saved)
     : null;
 
