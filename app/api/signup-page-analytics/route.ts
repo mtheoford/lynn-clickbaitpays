@@ -4,7 +4,11 @@ import { normalizeSiteSlug } from "@/lib/site-routing";
 import {
   hashAnalyticsVisitorToken,
   isAnalyticsVisitorToken,
-  isSignupPageEventType,
+  isBrowserSignupEventType,
+  hashSignupAnalyticsContext,
+  isSignupAnalyticsErrorCode,
+  isSignupAnalyticsField,
+  isSignupAnalyticsPlan,
   isSignupPagePlacement,
 } from "@/lib/signup-page-analytics";
 import { isSameOriginMutation } from "@/lib/request-security";
@@ -15,6 +19,12 @@ type AnalyticsPayload = {
   source?: string;
   visitorToken?: string;
   referrer?: string;
+  journeyToken?: string;
+  locale?: string;
+  deviceType?: string;
+  plan?: string;
+  errorCode?: string;
+  field?: string;
 };
 
 function referrerHost(value: string | undefined): string | null {
@@ -41,11 +51,12 @@ export async function POST(request: Request) {
     return new Response(null, { status: 204 });
   }
 
+  if (!input || typeof input !== "object") return new Response(null, { status: 204 });
   const eventType = input.eventType ?? "";
   const placement = input.placement ?? "";
   const visitorToken = input.visitorToken ?? "";
   if (
-    !isSignupPageEventType(eventType) ||
+    !isBrowserSignupEventType(eventType) ||
     !isSignupPagePlacement(eventType, placement) ||
     !isAnalyticsVisitorToken(visitorToken)
   ) {
@@ -53,12 +64,19 @@ export async function POST(request: Request) {
   }
 
   try {
+    const context = await hashSignupAnalyticsContext(input);
     const db = await getDb();
     await db.insert(signupPageEvents).values({
       id: crypto.randomUUID(),
       eventType,
       placement,
       visitorHash: await hashAnalyticsVisitorToken(visitorToken),
+      journeyHash: context.journeyHash,
+      locale: context.locale,
+      deviceType: context.deviceType,
+      plan: isSignupAnalyticsPlan(input.plan) ? input.plan : null,
+      errorCode: isSignupAnalyticsErrorCode(input.errorCode) ? input.errorCode : null,
+      field: isSignupAnalyticsField(input.field) ? input.field : null,
       source: normalizeSiteSlug(input.source ?? "") || null,
       referrerHost: referrerHost(input.referrer),
       createdAt: new Date(),

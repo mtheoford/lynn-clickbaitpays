@@ -38,7 +38,7 @@ export default function SignupDialog({
     if (!dialog || dialog.open) return;
     setPlan(initialPlan);
     dialog.showModal();
-    recordSignupPageEvent("signup_click", analyticsPlacement, source);
+    recordSignupPageEvent("signup_click", analyticsPlacement, source, { locale });
   }
 
   function closeDialog() {

@@ -1,7 +1,9 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { localizedPath, type SiteLocale } from "@/lib/i18n";
+import { isSignupAnalyticsErrorCode, isSignupAnalyticsField, type SignupAnalyticsErrorCode } from "@/lib/signup-page-analytics";
+import { getSignupAnalyticsContext, recordSignupFormStart, recordSignupPageEvent } from "./SignupPageAnalytics";
 
 const signupCopy = {
   en: {
@@ -170,6 +172,8 @@ export default function SignupForm({
   const [status, setStatus] = useState<"idle" | "submitting" | "error">("idle");
   const [message, setMessage] = useState("");
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">("idle");
+  const invalidFields = useRef(new Set<string>());
+  const lastUnavailableAddress = useRef("");
   const [availability, setAvailability] = useState<{
     state: "idle" | "checking" | "available" | "unavailable" | "error";
     message: string;
@@ -198,6 +202,14 @@ export default function SignupForm({
         });
         const result = (await response.json()) as { available?: boolean; message?: string };
         if (!response.ok) throw new Error(locale !== "en" ? t.availabilityError : result.message ?? t.availabilityError);
+        if (!result.available && lastUnavailableAddress.current !== effectiveSlug) {
+          lastUnavailableAddress.current = effectiveSlug;
+          recordSignupPageEvent("validation_error", "form", source, {
+            locale, field: "siteAddress", errorCode: "site_unavailable",
+          });
+        } else if (result.available) {
+          lastUnavailableAddress.current = "";
+        }
         setAvailability({
           state: result.available ? "available" : "unavailable",
           message: locale !== "en"
@@ -219,7 +231,30 @@ export default function SignupForm({
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [effectiveSlug, email, locale, t]);
+  }, [effectiveSlug, email, locale, source, t]);
+
+  function recordNativeInvalid(event: FormEvent<HTMLFormElement>) {
+    try {
+      const input = event.target;
+      if (!(input instanceof HTMLInputElement) || !isSignupAnalyticsField(input.name)) return;
+      // Native validation fires once per invalid control before onSubmit. Radio
+      // groups can repeat a field; retain one field/category per validation burst.
+      if (invalidFields.current.has(input.name)) return;
+      if (invalidFields.current.size === 0) {
+        window.setTimeout(() => invalidFields.current.clear(), 0);
+      }
+      invalidFields.current.add(input.name);
+      const validity = input.validity;
+      const errorCode: SignupAnalyticsErrorCode = validity.valueMissing
+        ? input.name === "acceptedTerms" ? "terms_required" : "required"
+        : validity.typeMismatch && input.name === "email" ? "invalid_email"
+        : validity.patternMismatch ? input.name === "referralUsername" ? "invalid_referral" : "pattern_mismatch"
+        : validity.tooLong ? "too_long" : "validation_error";
+      recordSignupPageEvent("validation_error", "form", source, { locale, field: input.name, errorCode });
+    } catch {
+      // Reporting invalid fields must not change the browser's validation UX.
+    }
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -238,6 +273,9 @@ export default function SignupForm({
     const submittedReferralUsername = String(form.get("referralUsername") ?? "");
     const submittedReferralUrl = referralUrlFor(submittedReferralUsername);
 
+    let checkoutErrorCode: SignupAnalyticsErrorCode = "network_error";
+    let checkoutErrorRecorded = false;
+    recordSignupPageEvent("form_submit", "form", source, { locale });
     try {
       const response = await fetch("/api/checkout", {
         method: "POST",
@@ -255,14 +293,26 @@ export default function SignupForm({
           plan,
           acceptedTerms: form.get("acceptedTerms") === "on",
           locale,
+          analytics: getSignupAnalyticsContext(locale),
         }),
       });
+      checkoutErrorCode = "invalid_response";
       const result = (await response.json()) as {
         checkoutUrl?: string;
         error?: string;
         code?: string;
+        field?: unknown;
       };
-      if (!response.ok || !result.checkoutUrl) {
+      if (!response.ok || typeof result.checkoutUrl !== "string" || !result.checkoutUrl) {
+        checkoutErrorCode = isSignupAnalyticsErrorCode(result.code) ? result.code
+          : response.ok ? "invalid_response"
+          : response.status === 400 ? "validation_error"
+          : response.status === 503 ? "checkout_unavailable" : "server_error";
+        recordSignupPageEvent("checkout_error", "checkout", source, {
+          locale, errorCode: checkoutErrorCode,
+          field: isSignupAnalyticsField(result.field) ? result.field : undefined,
+        });
+        checkoutErrorRecorded = true;
         const frenchError =
           result.code === "site_unavailable"
             ? "Cette adresse de site n’est plus disponible. Veuillez choisir un autre nom."
@@ -288,8 +338,12 @@ export default function SignupForm({
         }
         throw new Error(checkoutError);
       }
+      recordSignupPageEvent("checkout_redirect", "checkout", source, { locale });
       window.location.assign(result.checkoutUrl);
     } catch (error) {
+      if (!checkoutErrorRecorded) {
+        recordSignupPageEvent("checkout_error", "checkout", source, { locale, errorCode: checkoutErrorCode });
+      }
       setStatus("error");
       setMessage(locale === "de" && (error instanceof TypeError || error instanceof SyntaxError)
         ? t.checkoutStartError
@@ -307,7 +361,13 @@ export default function SignupForm({
   }
 
   return (
-    <form className="site-signup-form" onSubmit={submit}>
+    <form
+      className="site-signup-form"
+      onSubmit={submit}
+      onInvalidCapture={recordNativeInvalid}
+      onInputCapture={() => recordSignupFormStart(source, locale)}
+      onChangeCapture={() => recordSignupFormStart(source, locale)}
+    >
       <div className="signup-form-heading">
         <span>{t.personalize}</span>
       </div>
@@ -493,7 +553,10 @@ export default function SignupForm({
           type="button"
           className={plan === "monthly" ? "is-selected" : ""}
           aria-pressed={plan === "monthly"}
-          onClick={() => onPlanChange("monthly")}
+          onClick={() => {
+            if (plan !== "monthly") recordSignupFormStart(source, locale);
+            onPlanChange("monthly");
+          }}
         >
           <span className="signup-plan-name">{t.monthly}</span>
           <span className="signup-plan-price"><strong>{locale === "fr" ? "9 $ US" : locale === "de" ? "9 US$" : "$9"}</strong><small>{t.perMonth}</small></span>
@@ -502,7 +565,10 @@ export default function SignupForm({
           type="button"
           className={plan === "annual" ? "is-selected" : ""}
           aria-pressed={plan === "annual"}
-          onClick={() => onPlanChange("annual")}
+          onClick={() => {
+            if (plan !== "annual") recordSignupFormStart(source, locale);
+            onPlanChange("annual");
+          }}
         >
           <span className="signup-plan-name">{t.annual}</span>
           <span className="signup-plan-price"><strong>{locale === "fr" ? "79 $ US" : locale === "de" ? "79 US$" : "$79"}</strong><small className="signup-plan-savings">{t.save}</small></span>

@@ -1,18 +1,21 @@
-import { and, count, countDistinct, desc, eq, gte, like, lt, or } from "drizzle-orm";
+import { and, desc, eq, like, or } from "drizzle-orm";
 import Link from "next/link";
 import { chatGPTSignInPath, chatGPTSignOutPath } from "@/app/chatgpt-auth";
 import { getDb } from "@/db";
-import { signupPageEvents, sites, subscriptions, users } from "@/db/schema";
+import { sites, subscriptions, users } from "@/db/schema";
 import { adminSignOutPath, requireAdmin } from "@/lib/admin-auth";
 import { siteUrl } from "@/lib/site-config";
 import {
   SIGNUP_ANALYTICS_RANGE_OPTIONS,
   SIGNUP_ANALYTICS_TIME_ZONE,
   parseSignupAnalyticsRange,
-  signupAnalyticsWindow,
   type SignupAnalyticsRange,
 } from "@/lib/signup-page-analytics";
+import { SIGNUP_METRICS, type SignupAnalyticsReport } from "@/lib/signup-analytics-report";
+import { loadSignupAnalyticsReport } from "@/lib/signup-analytics-query";
 import SiteStatusActions from "./SiteStatusActions";
+import SignupTrends from "./SignupTrends";
+import "./signup-trends.css";
 
 export const dynamic = "force-dynamic";
 
@@ -77,7 +80,6 @@ export default async function AdminPage({
   const params = await searchParams;
   const query = params.q?.trim().slice(0, 100) ?? "";
   const analyticsRange = parseSignupAnalyticsRange(params.range);
-  const analyticsWindow = signupAnalyticsWindow(analyticsRange);
   const analyticsRangeLabel =
     SIGNUP_ANALYTICS_RANGE_OPTIONS.find((option) => option.value === analyticsRange)
       ?.label ?? "Last 7 Days";
@@ -119,37 +121,16 @@ export default async function AdminPage({
     databaseMessage = "The account database will appear here after the first hosted migration is applied.";
   }
 
-  let signupMetrics = { visitors: 0, signupClicks: 0, demoClicks: 0 };
+  let signupReport: SignupAnalyticsReport | null = null;
   let signupAnalyticsMessage = "";
   try {
-    const db = await getDb();
-    const dateFilter =
-      analyticsWindow.start && analyticsWindow.end
-        ? and(
-            gte(signupPageEvents.createdAt, analyticsWindow.start),
-            lt(signupPageEvents.createdAt, analyticsWindow.end),
-          )
-        : undefined;
-    const metricRows = await db
-      .select({
-        eventType: signupPageEvents.eventType,
-        total: count(),
-        uniqueVisitors: countDistinct(signupPageEvents.visitorHash),
-      })
-      .from(signupPageEvents)
-      .where(dateFilter)
-      .groupBy(signupPageEvents.eventType);
-    const metric = (eventType: "page_view" | "signup_click" | "demo_click") =>
-      metricRows.find((row) => row.eventType === eventType);
-    signupMetrics = {
-      visitors: metric("page_view")?.uniqueVisitors ?? 0,
-      signupClicks: metric("signup_click")?.total ?? 0,
-      demoClicks: metric("demo_click")?.total ?? 0,
-    };
+    signupReport = await loadSignupAnalyticsReport(analyticsRange);
   } catch {
     signupAnalyticsMessage =
-      "Signup-page activity will appear after the analytics migration is applied.";
+      "Signup analytics could not be loaded. Refresh to try again; unavailable data is not shown as zero.";
   }
+
+  const displayDate = (timestamp: number) => new Intl.DateTimeFormat("en-US", { timeZone: SIGNUP_ANALYTICS_TIME_ZONE, month: "short", day: "numeric", year: "numeric" }).format(new Date(timestamp));
 
   const counts = rows.reduce(
     (totals, row) => {
@@ -180,7 +161,7 @@ export default async function AdminPage({
         <div className="admin-funnel-heading">
           <div>
             <p className="eyebrow">Signup funnel</p>
-            <h2 id="admin-funnel-title">Get Your Site page activity</h2>
+            <h2 id="admin-funnel-title">Signup activity and sales</h2>
             <p>{analyticsRangeLabel} · Calendar ranges use {SIGNUP_ANALYTICS_TIME_ZONE.replace("America/", "")} time.</p>
           </div>
           <nav className="admin-range-filters" aria-label="Signup analytics date range">
@@ -196,23 +177,41 @@ export default async function AdminPage({
             ))}
           </nav>
         </div>
-        <div className="admin-funnel-stat-grid">
-          <article>
-            <span>Site visitors</span>
-            <strong>{signupMetrics.visitors}</strong>
-            <small>Unique browsers</small>
-          </article>
-          <article>
-            <span>Get my replicated site</span>
-            <strong>{signupMetrics.signupClicks}</strong>
-            <small>Signup-form opens</small>
-          </article>
-          <article>
-            <span>See a replicated site</span>
-            <strong>{signupMetrics.demoClicks}</strong>
-            <small>Live-demo clicks</small>
-          </article>
-        </div>
+        <nav className="admin-chart-periods admin-range-filters" aria-label="Chart period">
+          {([{ value: "last-7-days", label: "Week" }, { value: "last-30-days", label: "Month" }, { value: "all-time", label: "Lifetime" }] as const).map((option) => (
+            <Link key={option.value} href={adminPageHref(option.value, query)} className={option.value === analyticsRange ? "active" : undefined} aria-current={option.value === analyticsRange ? "page" : undefined}>{option.label}</Link>
+          ))}
+          <span>Week = last 7 days · Month = last 30 days · Includes today so far</span>
+        </nav>
+        {signupReport ? <>
+          <div className="admin-funnel-stat-grid">
+            {SIGNUP_METRICS.filter((metric) => ["visitors", "formOpens", "demoClicks", "formSubmissions", "checkouts", "payments"].includes(metric.key)).map((metric) => (
+              <article key={metric.key}><span>{metric.label}</span><strong>{signupReport.totals[metric.key]?.toLocaleString("en-US") ?? "—"}</strong><small>{metric.description}</small></article>
+            ))}
+          </div>
+          <div className="admin-analytics-notes">
+            <p>{signupReport.coverage.conversionStartedAt ? <>Detailed form, checkout and activation tracking began {displayDate(signupReport.coverage.conversionStartedAt)}. Earlier unrecorded steps appear as gaps.</> : "Detailed tracking has not started yet."} Paid signups include retained Stripe history and exclude renewals.</p>
+            <p>Visitors are unique browsers. Forms started and issue counts use browsing sessions. Browsers can return on multiple days; period totals are deduplicated independently and may differ from the sum of chart points. Events in a date range are not necessarily the same customer cohort.</p>
+          </div>
+          <SignupTrends points={signupReport.points} interval={signupReport.interval} />
+          <div className="admin-analytics-breakdowns">
+            <section aria-labelledby="signup-issues-title">
+              <h3 id="signup-issues-title">Signup issues</h3>
+              <p>Recorded error categories only; entered form values are never included.</p>
+              {signupReport.issues.length ? <div className="admin-table-scroll"><table><thead><tr><th>Issue</th><th>Field</th><th>Events</th></tr></thead><tbody>{signupReport.issues.map((issue) => <tr key={`${issue.eventType}-${issue.errorCode}-${issue.field}`}><td>{(issue.errorCode ?? issue.eventType).replaceAll("_", " ")}</td><td>{issue.field?.replace(/([A-Z])/g, " $1").toLowerCase() ?? "—"}</td><td>{issue.total}</td></tr>)}</tbody></table></div> : <p>No issues recorded in this period. Earlier untracked activity is unknown.</p>}
+            </section>
+            <section aria-labelledby="signup-sources-title">
+              <h3 id="signup-sources-title">Traffic sources</h3>
+              <p>Referral site or referring host; missing referrers appear as direct / unknown.</p>
+              {signupReport.sources.length ? <div className="admin-table-scroll"><table><thead><tr><th>Source</th><th>Browsers</th><th>Forms started</th></tr></thead><tbody>{signupReport.sources.map((source) => <tr key={source.source}><td>{source.source}</td><td>{source.visitors}</td><td>{signupReport.totals.formStarts === null ? "—" : source.formStarts}</td></tr>)}</tbody></table></div> : <p>No source activity recorded in this period.</p>}
+            </section>
+            <section aria-labelledby="signup-devices-title">
+              <h3 id="signup-devices-title">Devices and languages</h3>
+              <p>Device and language details are available from the tracking upgrade onward.</p>
+              {signupReport.devices.length ? <div className="admin-table-scroll"><table><thead><tr><th>Device</th><th>Language</th><th>Browsers</th><th>Submissions</th></tr></thead><tbody>{signupReport.devices.map((device) => <tr key={`${device.device}-${device.locale}`}><td>{device.device}</td><td>{device.locale === "en" ? "English" : device.locale === "fr" ? "French" : device.locale === "de" ? "German" : "Unknown"}</td><td>{device.visitors}</td><td>{signupReport.totals.formSubmissions === null ? "—" : device.formSubmissions}</td></tr>)}</tbody></table></div> : <p>No device activity recorded in this period.</p>}
+            </section>
+          </div>
+        </> : null}
         {signupAnalyticsMessage ? <p className="admin-funnel-message">{signupAnalyticsMessage}</p> : null}
       </section>
 

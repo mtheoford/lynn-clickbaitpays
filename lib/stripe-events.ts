@@ -26,6 +26,8 @@ import { getRuntimeEnv, type BillingQueueMessage } from "@/lib/runtime";
 import { getStripe, type BillingPlan } from "@/lib/stripe";
 import { purgeExpiredCheckoutReservations } from "@/lib/checkout-cleanup";
 import { billingLocale } from "@/lib/checkout-localization";
+import { signupAnalyticsContextFromMetadata, signupLifecycleAnalyticsEvent, isSignupAnalyticsPlan } from "@/lib/signup-page-analytics";
+import { recordSignupServerEvent } from "@/lib/signup-analytics-server";
 
 function stripeId(value: string | { id: string } | null | undefined): string | null {
   if (!value) return null;
@@ -154,6 +156,7 @@ export async function processStripeEvent(eventId: string): Promise<void> {
 }
 
 async function applyStripeEvent(event: Stripe.Event): Promise<void> {
+  await trackStripeSignupLifecycle(event);
   if (event.type === "checkout.session.completed") {
     await applyCompletedCheckout(event.data.object);
     return;
@@ -275,6 +278,11 @@ async function applyCompletedCheckout(session: Stripe.Checkout.Session): Promise
   }
 
   if (siteStatus === "active") {
+    const analyticsContext = signupAnalyticsContextFromMetadata(session.metadata);
+    if (analyticsContext) await recordSignupServerEvent({
+      eventType: "site_activated", dedupeKey: siteId, context: analyticsContext,
+      plan, source: session.metadata?.sourceSlug || null, createdAt: now,
+    });
     await enqueueWelcomeEmail(siteId, `welcome-${siteId}`, locale);
   }
 }
@@ -300,6 +308,7 @@ async function applySubscription(
   const [local] = await db
     .select({
       siteId: subscriptions.siteId,
+      siteStatus: sites.status,
       graceEndsAt: subscriptions.graceEndsAt,
       publicationOverride: sites.publicationOverride,
     })
@@ -339,6 +348,14 @@ async function applySubscription(
       updatedAt: now,
     })
     .where(eq(sites.id, local.siteId));
+  if (siteStatus === "active" && local.siteStatus !== "active") {
+    const analyticsContext = signupAnalyticsContextFromMetadata(subscription.metadata);
+    if (analyticsContext) await recordSignupServerEvent({
+      eventType: "site_activated", dedupeKey: local.siteId, context: analyticsContext,
+      plan: isSignupAnalyticsPlan(subscription.metadata.plan) ? subscription.metadata.plan : null,
+      source: subscription.metadata.sourceSlug || null, createdAt: now,
+    });
+  }
 }
 
 export async function enforceScheduledBillingState(now = new Date()): Promise<void> {
@@ -455,5 +472,16 @@ export async function purgeScheduledAccountData(now = new Date()): Promise<void>
     if (!remainingSite) {
       await db.delete(users).where(eq(users.id, item.userId));
     }
+  }
+}
+
+
+/** Analytics observes payment facts independently of provisioning/retry success. */
+async function trackStripeSignupLifecycle(event: Stripe.Event): Promise<void> {
+  try {
+    const analyticsEvent = signupLifecycleAnalyticsEvent(event);
+    if (analyticsEvent) await recordSignupServerEvent(analyticsEvent);
+  } catch {
+    console.error(JSON.stringify({ message: "signup lifecycle analytics unavailable", eventType: event.type }));
   }
 }

@@ -1,3 +1,4 @@
+import type { SignupPageEventType, SignupPagePlacement, SignupAnalyticsDeviceType, SignupAnalyticsErrorCode, SignupAnalyticsField } from "../lib/signup-page-analytics";
 import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 export const users = sqliteTable(
@@ -161,18 +162,21 @@ export const signupPageEvents = sqliteTable(
   "signup_page_events",
   {
     id: text("id").primaryKey(),
-    eventType: text("event_type", {
-      enum: ["page_view", "signup_click", "demo_click"],
-    }).notNull(),
-    placement: text("placement", {
-      enum: ["page", "header", "hero", "product_preview", "closing"],
-    }).notNull(),
+    eventType: text("event_type").$type<SignupPageEventType>().notNull(),
+    placement: text("placement").$type<SignupPagePlacement>().notNull(),
     visitorHash: text("visitor_hash").notNull(),
+    journeyHash: text("journey_hash"),
+    locale: text("locale", { enum: ["en", "fr", "de"] }),
+    deviceType: text("device_type").$type<SignupAnalyticsDeviceType>(),
+    plan: text("plan", { enum: ["monthly", "annual"] }),
+    errorCode: text("error_code").$type<SignupAnalyticsErrorCode>(),
+    field: text("field").$type<SignupAnalyticsField>(),
     source: text("source"),
     referrerHost: text("referrer_host"),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
   },
   (table) => [
+    index("idx_signup_page_events_journey_created").on(table.journeyHash, table.createdAt),
     index("idx_signup_page_events_created").on(table.createdAt),
     index("idx_signup_page_events_type_created").on(
       table.eventType,
@@ -184,6 +188,11 @@ export const signupPageEvents = sqliteTable(
     ),
   ],
 );
+
+export const signupAnalyticsVersions = sqliteTable("signup_analytics_versions", {
+  id: text("id").primaryKey(),
+  startedAt: integer("started_at", { mode: "timestamp_ms" }).notNull(),
+});
 
 export const stripeEvents = sqliteTable("stripe_events", {
   id: text("id").primaryKey(),

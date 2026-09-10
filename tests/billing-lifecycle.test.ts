@@ -58,6 +58,29 @@ test("a language switch resumes the exact existing payable session without chang
   assert.deepEqual(session.metadata, metadata);
 });
 
+test("direct checkouts resume when Stripe omits the empty sponsor metadata, despite changed analytics", () => {
+  // Stripe removes keys supplied as empty values. The stored metadata therefore
+  // lacks sourceSlug for a direct visit, including sessions created before v2.
+  const currentRequest = {
+    siteId: "site-1", userId: "user-1", plan: "monthly" as const, sourceSlug: "", locale: "de" as const,
+    analytics: { visitorToken: "current-browser", journeyToken: "new-tab", deviceType: "mobile" },
+  };
+  const storedAnalytics: Array<Record<string, string>> = [
+    {},
+    { signup_tracking_version: "2", signup_journey_hash: "older-journey", signup_device_type: "desktop" },
+  ];
+  for (const analyticsMetadata of storedAnalytics) {
+    const session = {
+      status: "open", url: "https://checkout.stripe.com/c/pay/cs_direct_original",
+      metadata: { siteId: "site-1", userId: "user-1", plan: "monthly", locale: "fr", ...analyticsMetadata },
+    };
+    const before = structuredClone(session);
+    assert.deepEqual(checkoutToResume(session, currentRequest), { url: session.url, locale: "fr" });
+    assert.deepEqual(session, before, "resuming must not change existing Stripe parameters or metadata");
+    assert.equal(checkoutToResume(session, { ...currentRequest, sourceSlug: "another-sponsor" }), null);
+  }
+});
+
 test("checkout resume never crosses accounts, plans, sponsors, or completed/expired payments", () => {
   const expected = { siteId: "site-1", userId: "user-1", plan: "annual" as const, sourceSlug: "sponsor-1", locale: "de" as const };
   const session = {
