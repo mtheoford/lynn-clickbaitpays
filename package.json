@@ -13,7 +13,7 @@
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy:staging": "npm run verify:release && opennextjs-cloudflare deploy -- --env staging --keep-vars && BASE_URL=https://proneurs-personal-cbp-sites-staging.mtheoford.workers.dev npm run test:e2e:smoke",
     "deploy:production": "npm run verify:release && opennextjs-cloudflare deploy -- --env production --keep-vars && BASE_URL=https://cbp.proneurs.org npm run test:e2e:smoke",
-    "test": "node --test tests/calculator-math.test.ts tests/site-config.test.ts tests/site-identity.test.ts tests/billing-lifecycle.test.ts tests/customer-auth.test.ts tests/checkout-reservation.test.ts tests/checkout-session-cleanup.test.ts tests/magic-link-submission.test.ts tests/welcome-email.test.ts tests/checkout-reminder-email.test.ts tests/signup-page-analytics.test.ts tests/signup-analytics-report.test.ts tests/i18n.test.ts tests/media-preservation.test.ts tests/video-facade.test.ts",
+    "test": "node --test tests/calculator-math.test.ts tests/site-config.test.ts tests/site-identity.test.ts tests/billing-lifecycle.test.ts tests/customer-auth.test.ts tests/checkout-reservation.test.ts tests/checkout-session-cleanup.test.ts tests/magic-link-submission.test.ts tests/welcome-email.test.ts tests/checkout-reminder-email.test.ts tests/signup-page-analytics.test.ts tests/signup-analytics-report.test.ts tests/signup-analytics-d1.test.ts tests/i18n.test.ts tests/media-preservation.test.ts tests/video-facade.test.ts",
     "test:calculator": "node --test tests/calculator-math.test.ts",
     "audit:security": "node scripts/security-audit.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next --ignore-pattern .open-next --ignore-pattern cloudflare-env.d.ts",
@@ -42,6 +42,7 @@
     "drizzle-kit": "0.31.10",
     "eslint": "9.39.4",
     "eslint-config-next": "16.3.4",
+    "miniflare": "5.20260730.0-alpha",
     "tailwindcss": "4.2.1",
     "typescript": "5.9.3",
     "wrangler": "4.118.0"

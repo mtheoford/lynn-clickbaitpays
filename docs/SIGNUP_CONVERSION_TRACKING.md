@@ -23,3 +23,5 @@ Random browser and tab-session identifiers are hashed before durable storage. An
 Use the GitHub Deploy Cloudflare Worker workflow, which applies additive D1 migration `0007_conversion_funnel.sql` before deploying the Worker. The migration adds optional event dimensions and the `conversion_v2` start timestamp; it preserves previous rows and billing state. Verify the exact reviewed main revision through staging before production.
 
 Release checks cover security policy, lint, TypeScript, unit tests, SQLite migration/history/date handling, Worker build, and desktop Chromium/mobile WebKit purchase and tracking flows. Browser tests use local mocked checkout endpoints. Native beacon delivery is checked with a local receiver. Chart fixtures have no public route or admin bypass. Deployed smoke checks open purchase dialogs without submitting purchases.
+
+Chart queries are also tested against a local Cloudflare D1 binding through Miniflare. Date buckets use a `VALUES` relation: one `UNION ALL SELECT` per day exceeds D1's five-term compound-query limit even though desktop SQLite accepts it. Runtime tests cover the weekly, monthly, and lifetime query shapes.
