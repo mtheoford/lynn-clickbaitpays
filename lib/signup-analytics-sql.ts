@@ -1,3 +1,11 @@
+import type { SignupTrendBucket } from "./signup-analytics-report.ts";
+
+/** D1 limits compound SELECTs to five terms. VALUES supports every chart range. */
+export function signupTrendBucketSql(buckets: SignupTrendBucket[], end: number): string {
+  const rows = buckets.map((bucket) => `('${bucket.key.replaceAll("'", "''")}', ${bucket.start}, ${Math.min(bucket.end, end)})`).join(", ");
+  return `buckets(bucket, start_at, end_at) AS (VALUES ${rows})`;
+}
+
 // Paid signups use signed Stripe events retained before this tracking upgrade.
 // The subscription ID matches the lifecycle writer, so retries and initial
 // invoice/Checkout events cannot count a subscription twice. No PII is returned.

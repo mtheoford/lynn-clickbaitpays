@@ -1,4 +1,4 @@
-import { SIGNUP_EVENTS_CTE } from "./signup-analytics-sql.ts";
+import { SIGNUP_EVENTS_CTE, signupTrendBucketSql } from "./signup-analytics-sql.ts";
 import { getRuntimeEnv } from "@/lib/runtime";
 import { signupAnalyticsWindow, type SignupAnalyticsRange } from "@/lib/signup-page-analytics";
 import { applySignupCoverage, buildSignupTrendBuckets, buildSignupTrendPoints, signupMetricValues, type SignupAnalyticsReport, type SignupMetricAggregate } from "@/lib/signup-analytics-report";
@@ -19,10 +19,10 @@ export async function loadSignupAnalyticsReport(range: SignupAnalyticsRange, now
   const start = window.start?.getTime() ?? 0;
   // Exclude future-dated rows even for a partial current calendar day.
   const end = Math.min(window.end?.getTime() ?? now.getTime() + 1, now.getTime() + 1);
-  const bucketSql = buckets.map((bucket) => `SELECT '${bucket.key}' AS bucket, ${bucket.start} AS start_at, ${Math.min(bucket.end, end)} AS end_at`).join(" UNION ALL ");
+  const bucketSql = signupTrendBucketSql(buckets, end);
   const aggregate = `COUNT(*) AS total, COUNT(DISTINCT visitor_hash) AS visitors, COUNT(DISTINCT COALESCE(journey_hash, visitor_hash, id)) AS journeys`;
   const queries = [
-    DB.prepare(`${SIGNUP_EVENTS_CTE}, buckets AS (${bucketSql}) SELECT buckets.bucket, events.event_type AS eventType, ${aggregate}
+    DB.prepare(`${SIGNUP_EVENTS_CTE}, ${bucketSql} SELECT buckets.bucket, events.event_type AS eventType, ${aggregate}
       FROM buckets JOIN events ON events.created_at >= buckets.start_at AND events.created_at < buckets.end_at
       GROUP BY buckets.bucket, events.event_type`),
     DB.prepare(`${SIGNUP_EVENTS_CTE} SELECT '' AS bucket, event_type AS eventType, ${aggregate}
