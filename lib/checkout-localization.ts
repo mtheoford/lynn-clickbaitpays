@@ -59,7 +59,8 @@ export function checkoutToResume(
     session.metadata.siteId !== expected.siteId ||
     session.metadata.userId !== expected.userId ||
     session.metadata.plan !== expected.plan ||
-    session.metadata.sourceSlug !== expected.sourceSlug
+    // Stripe omits metadata keys whose values were empty at creation.
+    (session.metadata.sourceSlug ?? "") !== expected.sourceSlug
   ) return null;
 
   // Resume the matching payment instead of creating another payable session
