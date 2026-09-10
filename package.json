@@ -35,17 +35,17 @@
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
-    "@tailwindcss/postcss": "4.2.1",
+    "@tailwindcss/postcss": "4.3.3",
     "@types/node": "22.19.19",
-    "@types/react": "19.2.14",
-    "@types/react-dom": "19.2.3",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
     "drizzle-kit": "0.31.10",
     "eslint": "9.39.4",
     "eslint-config-next": "16.3.4",
     "miniflare": "5.20260730.0-alpha",
-    "tailwindcss": "4.2.1",
+    "tailwindcss": "4.3.3",
     "typescript": "5.9.3",
-    "wrangler": "4.118.0"
+    "wrangler": "4.129.1"
   },
   "overrides": {
     "@aws-sdk/credential-provider-sso": "3.973.9",
