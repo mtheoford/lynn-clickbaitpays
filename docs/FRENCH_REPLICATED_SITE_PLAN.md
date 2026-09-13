@@ -4,6 +4,10 @@ Status: implementation complete; production release candidate validated
 Started: 2026-09-04  
 Primary audience: French-speaking visitors, initially using general French (`fr`) with France-style number formatting (`fr-FR`)
 
+> Video update (2026-09-13): YouTube-specific items below are retained as
+> historical rollout context. The current production media setup is documented
+> in [`VIDEO_MEDIA_ROLLOUT.md`](./VIDEO_MEDIA_ROLLOUT.md).
+
 ## Objective
 
 Add a polished French version of every public replicated sponsor site while keeping the existing English URLs, tenant data, visual design, calculator behavior, analytics, and referral attribution intact.
@@ -103,9 +107,9 @@ A visible EN / FR language switcher will preserve the current sponsor. French in
 7. Trigger the protected production deployment for the same green revision.
 8. Verify the live French and English experiences in Chrome.
 
-## Implemented media decision
+## Implemented media decision (superseded 2026-09-13)
 
-The existing videos remain embedded so the page keeps the same pacing and visual design. French embeds request French YouTube captions when available, and the surrounding French copy identifies that spoken audio may remain English and supplies a French summary. Producing dubbed replacements is a later enhancement rather than a launch dependency.
+This was the original French-rollout decision. The production site now uses the three project-hosted native MP4 players documented in [`VIDEO_MEDIA_ROLLOUT.md`](./VIDEO_MEDIA_ROLLOUT.md); the surrounding localized summaries remain in place. Producing dubbed replacements remains a later enhancement rather than a launch dependency.
 
 ## Implemented payment decision
 

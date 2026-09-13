@@ -213,7 +213,7 @@ const siteCopy = {
       title: "Bienvenue sur ClickBaitPays (vidéo pouvant être en anglais)",
       heading: "Voir la présentation",
       summary:
-        "Un aperçu rapide de l’opportunité. L’audio peut être en anglais; les sous-titres français sont demandés lorsqu’ils sont disponibles.",
+        "Un aperçu rapide de l’opportunité. Cette vidéo est présentée en anglais.",
     },
     momentum: {
       label: "Ce que vous allez découvrir",
@@ -231,7 +231,7 @@ const siteCopy = {
       topics: ["Campagnes", "Échelonnement", "Parrainages directs"],
       watch: "Voir la vidéo",
       summary:
-        "Cette présentation explique l’approche à trois campagnes, leur démarrage échelonné, les commissions de parrainage direct et les choix possibles lorsque la valeur d’une campagne devient disponible. L’audio peut être en anglais; les sous-titres français sont demandés lorsqu’ils sont disponibles.",
+        "Cette présentation explique l’approche à trois campagnes, leur démarrage échelonné, les commissions de parrainage direct et les choix possibles lorsque la valeur d’une campagne devient disponible. Cette vidéo est présentée en anglais.",
     },
     transition: {
       next: "Étape suivante",
@@ -244,7 +244,7 @@ const siteCopy = {
       label: "Visite de l’espace membre",
       title: "Découverte du tableau de bord",
       summary:
-        "Repérez vos campagnes, clics, soldes, parrainages, dépôts et retraits. L’audio peut être en anglais; les sous-titres français sont demandés lorsqu’ils sont disponibles.",
+        "Repérez vos campagnes, clics, soldes, parrainages, dépôts et retraits. Cette vidéo est présentée en anglais.",
     },
     testimonialsHeading: "Ce qu’en disent les membres.",
     resourcesHeading: "Ressources utiles",
@@ -342,7 +342,7 @@ const siteCopy = {
       callout: "Hier beginnen · Willkommen bei ClickBaitPays",
       title: "Willkommen bei ClickBaitPays (englischer Originalton)",
       heading: "Überblick ansehen",
-      summary: "Ein schneller Überblick über die Möglichkeiten. Das Video verwendet den englischen Originalton; deutsche Untertitel werden angefordert, sofern verfügbar.",
+      summary: "Ein schneller Überblick über die Möglichkeiten. Das Video verwendet den englischen Originalton.",
     },
     momentum: {
       label: "Das erwartet Sie",
@@ -355,7 +355,7 @@ const siteCopy = {
       videoTitle: "ClickBaitPays-Einnahmenstrategien (englischer Originalton)",
       topics: ["Kampagnen", "Zeitversetzter Start", "Direkte Empfehlungen"],
       watch: "Jetzt ansehen",
-      summary: "Diese Einführung erklärt den Ansatz mit drei Kampagnen, den zeitversetzten Start, Provisionen für direkte Empfehlungen und die Möglichkeiten, sobald Kampagnenguthaben verfügbar wird. Das Video verwendet den englischen Originalton; deutsche Untertitel werden angefordert, sofern verfügbar.",
+      summary: "Diese Einführung erklärt den Ansatz mit drei Kampagnen, den zeitversetzten Start, Provisionen für direkte Empfehlungen und die Möglichkeiten, sobald Kampagnenguthaben verfügbar wird. Das Video verwendet den englischen Originalton.",
     },
     transition: { next: "Als Nächstes", label: "Den Mitgliederbereich kennenlernen" },
     tour: {
@@ -364,7 +364,7 @@ const siteCopy = {
       videoTitle: "Rundgang durch den ClickBaitPays-Mitgliederbereich (englischer Originalton)",
       label: "Rundgang für Mitglieder",
       title: "Einblick in den Mitgliederbereich",
-      summary: "Lernen Sie Kampagnen, Klicks, Guthaben, Empfehlungen, Einzahlungen und Auszahlungen kennen. Das Video verwendet den englischen Originalton; deutsche Untertitel werden angefordert, sofern verfügbar.",
+      summary: "Lernen Sie Kampagnen, Klicks, Guthaben, Empfehlungen, Einzahlungen und Auszahlungen kennen. Das Video verwendet den englischen Originalton.",
     },
     testimonialsHeading: "Das sagen Mitglieder.",
     resourcesHeading: "Hilfreiche Informationen",
@@ -400,10 +400,11 @@ const siteCopy = {
   },
 } satisfies Record<SiteLocale, object>;
 
-function videoUrl(videoId: string, locale: SiteLocale): string {
-  if (locale === "en") return `https://www.youtube.com/embed/${videoId}`;
-  return `https://www.youtube.com/embed/${videoId}?cc_load_policy=1&cc_lang_pref=${locale}&hl=${locale}`;
-}
+const siteVideoSources = {
+  welcome: "https://cbp-media.proneurs.org/videos/clickbaitpays-overview-2026-09-10.mp4",
+  strategy: "https://cbp-media.proneurs.org/videos/clickbaitpays-income-strategy-2026-09-10.mp4",
+  tour: "https://cbp-media.proneurs.org/videos/clickbaitpays-back-office-2026-09-10.mp4",
+} as const;
 
 function JoinButton({
   href,
@@ -569,11 +570,8 @@ export async function SponsorSitePage({
           </div>
           <div className="hero-video">
             <SiteVideo
-              src={videoUrl("PhTIPCzqMjw", locale)}
+              src={siteVideoSources.welcome}
               title={copy.welcomeVideo.title}
-              poster={`/video-posters/welcome-${locale}.jpg`}
-              locale={locale}
-              priority
             />
           </div>
           <div className="video-caption">
@@ -615,10 +613,8 @@ export async function SponsorSitePage({
                 </div>
                 <div className="strategy-video">
                   <SiteVideo
-                    src={videoUrl("YFbW5RSLOQM", locale)}
+                    src={siteVideoSources.strategy}
                     title={copy.strategy.videoTitle}
-                    poster={`/video-posters/strategy-${locale}.jpg`}
-                    locale={locale}
                   />
                 </div>
                 <div className="strategy-video-footer">
@@ -659,10 +655,8 @@ export async function SponsorSitePage({
             <article>
               <div className="small-video">
                 <SiteVideo
-                  src={videoUrl("JQEnm6I37dI", locale)}
+                  src={siteVideoSources.tour}
                   title={copy.tour.videoTitle}
-                  poster={`/video-posters/tour-${locale}.jpg`}
-                  locale={locale}
                 />
               </div>
               <div className="small-video-copy">

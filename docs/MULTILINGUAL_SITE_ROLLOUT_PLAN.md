@@ -6,6 +6,11 @@ Status: implementation complete; local validation passed; release through existi
 
 Baseline: production commit `99c945181c183916cbd812162c58ae501255c253`
 
+> Video update (2026-09-13): the YouTube-specific decisions below document the
+> original multilingual rollout and are no longer the production media setup.
+> All locales now use the three project-hosted MP4 players documented in
+> [`VIDEO_MEDIA_ROLLOUT.md`](./VIDEO_MEDIA_ROLLOUT.md).
+
 ## Goal and approved experience
 
 One ProNeurs application, domain, customer account, sponsor identity, and design serves multiple languages. Visitors can start at the same shared site address and select their language. Existing English and French links continue to work. German is the next complete language; future languages use the same registry and template structure.
@@ -31,7 +36,7 @@ Keep these paths within the same deployment. Publish correct page language and r
 
 Start from the latest production source; do not copy older site versions. Preserve existing English/French copy, media, sponsor profile data, authored biographies, referral links, billing prices, calculator assumptions/math, analytics events, and authentication behavior.
 
-The exact current YouTube sources are frozen for this rollout:
+The exact YouTube sources at the time were frozen for this historical rollout:
 
 | Placement | Current video ID | Source |
 | --- | --- | --- |
@@ -39,7 +44,7 @@ The exact current YouTube sources are frozen for this rollout:
 | Income strategy | `YFbW5RSLOQM` | https://www.youtube.com/watch?v=YFbW5RSLOQM |
 | Back-office tour | `JQEnm6I37dI` | https://www.youtube.com/watch?v=JQEnm6I37dI |
 
-Retain YouTube embeds, not earlier Vimeo players. Preserve English and French raster artwork; create sibling German assets. Test source IDs in rendered output and in the regression suite. Captions and player interface language may vary by locale, but these source videos remain unchanged until a separate, reviewed dubbing release.
+This was the rollout baseline, not the current production configuration. It was superseded by the reviewed project-hosted MP4 release on 2026-09-13. Preserve English and French raster artwork and sibling German assets that are unrelated to the retired video covers.
 
 ## German delivery scope
 
@@ -54,7 +59,7 @@ Retain YouTube embeds, not earlier Vimeo players. Preserve English and French ra
 
 ## Video localization recommendation
 
-Preferred publishing setup: keep each existing YouTube video ID and attach French/German audio tracks, captions, and translated titles/descriptions through the source channel's YouTube Studio. This retains embedded links and video history. YouTube can auto-dub English into French and German on eligible videos; actual availability must be checked in that channel. Preview translations, brand pronunciation, figures, and timing before publication.
+Historical recommendation: keep each existing YouTube video ID and attach French/German audio tracks, captions, and translated titles/descriptions through the source channel's YouTube Studio. This recommendation was superseded by the project-hosted MP4 release; it remains here only as context for the earlier localization decision.
 
 HeyGen is a useful production tool for a controlled dub, especially a presenter-led overview. Test one short segment before translating whole videos. Use audio-only translation for slides/dashboard walkthroughs; lip sync adds value where a face is visible. Preserve the current source, visuals, figures, and music settings. HeyGen does not automatically translate text baked into the image. Its translated video can also be a separate language upload when a changed visual track is required; that would need a deliberate locale-to-video mapping in a later release. Do not replace any live source during this website rollout.
 
@@ -70,12 +75,12 @@ Sources checked 2026-09-05:
 ## Validation and release
 
 - Verify all three languages, same-page switches, sponsor/source retention, safe token handling, saved preference behavior, keyboard focus and the mobile dropdown.
-- Compare the current video IDs and calculator outcomes with the baseline. Ensure English/French assets remain byte-for-byte unchanged.
+- Compare the approved project-hosted MP4 URLs and calculator outcomes with their respective baselines. Ensure unrelated English/French assets remain byte-for-byte unchanged.
 - Check German content for complete keys, natural wording, long-label wrapping, umlauts, ß, number formatting, and USD labels.
 - Render and inspect every German PDF page; validate guide links and image loading.
 - Exercise signup validation and account return/error paths without charging a live card or changing customer records.
 - Run repository lint, typecheck, tests, dependency policy, and Cloudflare Worker build. Use green GitHub CI, staging, then the existing approved production deployment workflow.
-- Verify production language headers, routes, image/PDF content, mobile layouts, and video embeds. The implementation commit's GitHub Actions CI and deployment runs are the release audit trail; dubbing remains a separate follow-up.
+- Verify production language headers, routes, image/PDF content, mobile layouts, and native video players. The implementation commit's GitHub Actions CI and deployment runs are the release audit trail; dubbing remains a separate follow-up.
 
 ### Completed implementation checks (2026-09-05)
 
