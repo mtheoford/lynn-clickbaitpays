@@ -1,9 +1,18 @@
 import { expect, test, type Locator } from "@playwright/test";
 
-const approvedSources = [
-  "https://cbp-media.proneurs.org/videos/clickbaitpays-overview-2026-09-10.mp4",
-  "https://cbp-media.proneurs.org/videos/clickbaitpays-income-strategy-2026-09-10.mp4",
-  "https://cbp-media.proneurs.org/videos/clickbaitpays-back-office-2026-09-10.mp4",
+const approvedVideos = [
+  {
+    poster: "/video-posters/welcome.jpg",
+    source: "https://cbp-media.proneurs.org/videos/clickbaitpays-overview-2026-09-10.mp4",
+  },
+  {
+    poster: "/video-posters/income-strategy.jpg",
+    source: "https://cbp-media.proneurs.org/videos/clickbaitpays-income-strategy-2026-09-10.mp4",
+  },
+  {
+    poster: "/video-posters/back-office.jpg",
+    source: "https://cbp-media.proneurs.org/videos/clickbaitpays-back-office-2026-09-10.mp4",
+  },
 ] as const;
 const haveMetadataReadyState = 1;
 
@@ -69,10 +78,10 @@ test("personal site serves the three approved native videos responsively @smoke"
   expect(response?.ok()).toBe(true);
 
   const players = page.locator(".site-video > video");
-  await expect(players).toHaveCount(approvedSources.length);
+  await expect(players).toHaveCount(approvedVideos.length);
   await expect(page.locator("iframe")).toHaveCount(0);
-  await expect(page.locator(".site-video__cover, .site-video__poster, video[poster]")).toHaveCount(0);
-  await expect(page.locator('img[src*="/video-posters/"]')).toHaveCount(0);
+  await expect(page.locator("video[poster]")).toHaveCount(approvedVideos.length);
+  await expect(page.locator(".site-video__cover, .site-video__poster, .site-video img, .site-video button")).toHaveCount(0);
 
   const layout = await page.evaluate(() => ({
     documentWidth: document.documentElement.scrollWidth,
@@ -91,13 +100,14 @@ test("personal site serves the three approved native videos responsively @smoke"
     expect(video.width / video.height).toBeCloseTo(16 / 9, 1);
   }
 
-  for (const [index, source] of approvedSources.entries()) {
+  for (const [index, { poster, source }] of approvedVideos.entries()) {
     const player = players.nth(index);
     const configuration = await player.evaluate((element) => {
       const video = element as HTMLVideoElement;
       const sourceElement = video.querySelector("source");
       return {
         controls: video.controls,
+        poster: video.getAttribute("poster"),
         playsInline: video.playsInline,
         preload: video.preload,
         source: sourceElement?.getAttribute("src"),
@@ -106,11 +116,20 @@ test("personal site serves the three approved native videos responsively @smoke"
     });
     expect(configuration).toEqual({
       controls: true,
+      poster,
       playsInline: true,
       preload: "metadata",
       source,
       sourceType: "video/mp4",
     });
+
+    const posterDimensions = await player.evaluate(async (_element, posterPath) => {
+      const image = new Image();
+      image.src = posterPath;
+      await image.decode();
+      return { height: image.naturalHeight, width: image.naturalWidth };
+    }, poster);
+    expect(posterDimensions).toEqual({ height: 720, width: 1280 });
 
     // Muted programmatic playback is read-only. The shorter deployed check
     // limits transfer while still proving that the hosted media can start.

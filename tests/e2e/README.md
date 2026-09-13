@@ -12,8 +12,9 @@ npm run test:e2e
 The suite starts the production Next build on port 3100 and runs on desktop
 Chromium and mobile WebKit. It covers the monthly and annual purchase cards in
 English, French, and German, plus the three native videos on the personal site.
-Video checks cover approved source order, native controls, metadata and brief
-muted playback, removal of the old poster facade, and viewport containment.
+Video checks cover approved source and title-frame poster order, native controls,
+metadata and brief muted playback, removal of the old custom facade, and
+viewport containment.
 Every API response is mocked; no Stripe sessions, customer records, reminder
 emails, or analytics writes are created.
 

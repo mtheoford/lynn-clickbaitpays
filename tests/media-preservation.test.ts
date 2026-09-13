@@ -10,6 +10,11 @@ const currentVideos = {
   strategy: "https://cbp-media.proneurs.org/videos/clickbaitpays-income-strategy-2026-09-10.mp4",
   tour: "https://cbp-media.proneurs.org/videos/clickbaitpays-back-office-2026-09-10.mp4",
 };
+const currentPosters = {
+  welcome: "/video-posters/welcome.jpg",
+  strategy: "/video-posters/income-strategy.jpg",
+  tour: "/video-posters/back-office.jpg",
+};
 
 function source(file: string) {
   return ts.createSourceFile(
@@ -61,6 +66,18 @@ test("all public languages retain the three approved project videos", () => {
   assert.deepEqual(videos, currentVideos, "The welcome, strategy and tour videos must retain their approved project sources.");
 });
 
+test("all public languages retain the three approved title-frame posters", () => {
+  const page = source("app/page.tsx");
+  const value = initializer(page, "siteVideoPosters");
+  assert.ok(ts.isObjectLiteralExpression(value));
+  const posters = Object.fromEntries(value.properties.map((property) => {
+    assert.ok(ts.isPropertyAssignment(property));
+    assert.ok(ts.isStringLiteral(property.initializer));
+    return [property.name.getText(page), property.initializer.text];
+  }));
+  assert.deepEqual(posters, currentPosters, "Each video must retain the matching title-frame poster from its approved recording.");
+});
+
 test("approved videos use the dedicated CBP media domain and MP4 format", () => {
   for (const sourceUrl of Object.values(currentVideos)) {
     const url = new URL(sourceUrl);
@@ -69,6 +86,18 @@ test("approved videos use the dedicated CBP media domain and MP4 format", () => 
     assert.match(url.pathname, /^\/videos\/[a-z0-9-]+\.mp4$/);
     assert.equal(url.search, "");
     assert.equal(url.hash, "");
+  }
+});
+
+test("approved title-frame poster files are preserved byte for byte", () => {
+  const baselines = {
+    welcome: "01bb0706fde7f13c44a1413d2feaecdf0dca0e2f7a33f76deee7987d342a71a5",
+    strategy: "420b5c421dab88e27ee9b5173dc408dbf43ab6bbf4a5f52d45f7a65bffa9ffc8",
+    tour: "6d8ca98c883a93fe1537a527e7e2294accaf1809e058145b5f0ee3bbfb398699",
+  };
+  for (const [slot, poster] of Object.entries(currentPosters)) {
+    const bytes = readFileSync(new URL(`public${poster}`, root));
+    assert.equal(createHash("sha256").update(bytes).digest("hex"), baselines[slot as keyof typeof baselines]);
   }
 });
 
