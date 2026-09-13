@@ -2,11 +2,14 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { runInNewContext } from "node:vm";
 import ts from "typescript";
 
 const root = new URL("../", import.meta.url);
-const currentVideoIds = ["PhTIPCzqMjw", "YFbW5RSLOQM", "JQEnm6I37dI"];
+const currentVideos = {
+  welcome: "https://cbp-media.proneurs.org/videos/clickbaitpays-overview-2026-09-10.mp4",
+  strategy: "https://cbp-media.proneurs.org/videos/clickbaitpays-income-strategy-2026-09-10.mp4",
+  tour: "https://cbp-media.proneurs.org/videos/clickbaitpays-back-office-2026-09-10.mp4",
+};
 
 function source(file: string) {
   return ts.createSourceFile(
@@ -46,37 +49,26 @@ function contentDigest(file: string, name: string, locale?: string) {
   return createHash("sha256").update(canonical).digest("hex");
 }
 
-test("all public languages retain the three current videos in their existing order", () => {
+test("all public languages retain the three approved project videos", () => {
   const page = source("app/page.tsx");
-  const ids: string[] = [];
-  function visit(node: ts.Node) {
-    if (ts.isCallExpression(node) && node.expression.getText(page) === "videoUrl") {
-      const videoId = node.arguments[0];
-      assert.ok(videoId && ts.isStringLiteral(videoId));
-      ids.push(videoId.text);
-    }
-    ts.forEachChild(node, visit);
-  }
-  visit(page);
-  assert.deepEqual(ids, currentVideoIds, "A language rollout must not replace the currently approved welcome, strategy or tour video.");
+  const value = initializer(page, "siteVideoSources");
+  assert.ok(ts.isObjectLiteralExpression(value));
+  const videos = Object.fromEntries(value.properties.map((property) => {
+    assert.ok(ts.isPropertyAssignment(property));
+    assert.ok(ts.isStringLiteral(property.initializer));
+    return [property.name.getText(page), property.initializer.text];
+  }));
+  assert.deepEqual(videos, currentVideos, "The welcome, strategy and tour videos must retain their approved project sources.");
 });
 
-test("French and German request captions on the same original videos", () => {
-  const page = source("app/page.tsx");
-  const videoFunction = page.statements.find((node) => ts.isFunctionDeclaration(node) && node.name?.text === "videoUrl");
-  assert.ok(videoFunction);
-  const javascript = ts.transpileModule(videoFunction.getText(page), { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
-  const videoUrl = runInNewContext(`${javascript}\nvideoUrl`) as (id: string, locale: string) => string;
-  for (const id of currentVideoIds) {
-    assert.equal(videoUrl(id, "en"), `https://www.youtube.com/embed/${id}`);
-    for (const locale of ["fr", "de"]) {
-      const url = new URL(videoUrl(id, locale));
-      assert.equal(url.origin, "https://www.youtube.com");
-      assert.equal(url.pathname, `/embed/${id}`);
-      assert.equal(url.searchParams.get("cc_load_policy"), "1");
-      assert.equal(url.searchParams.get("cc_lang_pref"), locale);
-      assert.equal(url.searchParams.get("hl"), locale);
-    }
+test("approved videos use the dedicated CBP media domain and MP4 format", () => {
+  for (const sourceUrl of Object.values(currentVideos)) {
+    const url = new URL(sourceUrl);
+    assert.equal(url.protocol, "https:");
+    assert.equal(url.hostname, "cbp-media.proneurs.org");
+    assert.match(url.pathname, /^\/videos\/[a-z0-9-]+\.mp4$/);
+    assert.equal(url.search, "");
+    assert.equal(url.hash, "");
   }
 });
 
@@ -86,7 +78,7 @@ test("French and German request captions on the same original videos", () => {
 test("English and French public copy and calculator instructions remain intact", () => {
   const baselines = [
     ["app/page.tsx", "siteCopy", "en", "61506063d5798e758a946360d57fe5b9b81e5054d82e8446c81d66b49df1621e"],
-    ["app/page.tsx", "siteCopy", "fr", "7e859f6e9e237318bb2aabd15d7a90605ea0f3f98377bf37f56330150a414a75"],
+    ["app/page.tsx", "siteCopy", "fr", "787e46226d02188f07aaafe28f1575c40f4a591cf68cd18e155c8ec14da4ac02"],
     ["app/ReferralSimulator.tsx", "calculatorCopy", "en", "f432d62e0fd6353866a978460e963193a0015711039f82fd037d55d5d3da41d5"],
     ["app/ReferralSimulator.tsx", "calculatorCopy", "fr", "0812de8ad28509103e1380072e5bcf54fda97f1cb9e7f2209af48196b669680b"],
     ["app/TestimonialGallery.tsx", "testimonialUi", "en", "473451d09bd310ccdf32ac95762b1e6e7194b9f1cbd26a9f128f47d36cccf2d7"],
