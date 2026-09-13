@@ -12,19 +12,23 @@ const require = createRequire(import.meta.url);
 const videos = [
   {
     slot: "welcome",
+    poster: "/video-posters/welcome.jpg",
     src: "https://cbp-media.proneurs.org/videos/clickbaitpays-overview-2026-09-10.mp4",
   },
   {
     slot: "strategy",
+    poster: "/video-posters/income-strategy.jpg",
     src: "https://cbp-media.proneurs.org/videos/clickbaitpays-income-strategy-2026-09-10.mp4",
   },
   {
     slot: "tour",
+    poster: "/video-posters/back-office.jpg",
     src: "https://cbp-media.proneurs.org/videos/clickbaitpays-back-office-2026-09-10.mp4",
   },
 ] as const;
 
 type VideoProps = {
+  poster: string;
   src: string;
   title: string;
 };
@@ -52,20 +56,20 @@ function loadSiteVideo(): ComponentType<VideoProps> {
 
 const SiteVideo = loadSiteVideo();
 
-for (const { slot, src } of videos) {
-  test(`${slot} renders a native project-hosted MP4 player without a cover or iframe`, () => {
+for (const { poster, slot, src } of videos) {
+  test(`${slot} renders its approved native poster and project-hosted MP4 without a custom facade`, () => {
     const title = `${slot} overview`;
-    const html = renderToStaticMarkup(createElement(SiteVideo, { src, title }));
+    const html = renderToStaticMarkup(createElement(SiteVideo, { poster, src, title }));
 
     assert.equal((html.match(/<video\b/g) ?? []).length, 1);
     assert.match(html, /<video\b[^>]*controls=""/);
     assert.match(html, /<video\b[^>]*playsinline=""/i);
     assert.match(html, /<video\b[^>]*preload="metadata"/);
+    assert.ok(html.includes(`poster="${poster}"`));
     assert.ok(html.includes(`aria-label="${title}"`));
     assert.ok(html.includes(`<source src="${src}" type="video/mp4"/>`));
     assert.doesNotMatch(html, /<(?:iframe|button|img)\b/i);
-    assert.doesNotMatch(html, /\bposter=/i);
-    assert.doesNotMatch(html, /youtube|video-posters/i);
+    assert.doesNotMatch(html, /youtube/i);
   });
 }
 
@@ -87,18 +91,25 @@ test("the public page routes all three approved sources through the shared nativ
     const attributes = element.attributes.properties.filter(ts.isJsxAttribute);
     const attribute = (name: string) => attributes.find((item) => item.name.getText(page) === name)?.initializer;
     assert.equal(attribute("src")?.getText(page), `{siteVideoSources.${videos[index].slot}}`);
+    assert.equal(attribute("poster")?.getText(page), `{siteVideoPosters.${videos[index].slot}}`);
     assert.ok(attribute("title"), "Every video must retain its descriptive localized title");
-    assert.equal(attribute("poster"), undefined);
     assert.equal(attribute("locale"), undefined);
     assert.equal(attribute("priority"), undefined);
   }
 
   const source = page.getFullText();
-  assert.doesNotMatch(source, /youtube\.com|videoUrl\(|video-posters/i);
+  assert.doesNotMatch(source, /youtube\.com|videoUrl\(/i);
 });
 
-test("obsolete YouTube cover assets and playback helper are removed", () => {
-  assert.equal(existsSync(new URL("public/video-posters", root)), false);
+test("new-video title posters replace the obsolete localized YouTube covers", () => {
+  for (const { poster } of videos) {
+    assert.ok(readFileSync(new URL(`public${poster}`, root)).byteLength > 0, `Missing poster: ${poster}`);
+  }
+  for (const slot of ["welcome", "strategy", "tour"]) {
+    for (const locale of ["en", "fr", "de"]) {
+      assert.equal(existsSync(new URL(`public/video-posters/${slot}-${locale}.jpg`, root)), false);
+    }
+  }
   assert.equal(existsSync(new URL("lib/video-playback.ts", root)), false);
 });
 
