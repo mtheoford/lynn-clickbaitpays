@@ -66,11 +66,13 @@ test("all public languages retain the three approved project videos", () => {
   assert.deepEqual(videos, currentVideos, "The welcome, strategy and tour videos must retain their approved project sources.");
 });
 
-test("all public languages retain the three approved title-frame posters", () => {
-  const page = source("app/page.tsx");
+test("English retains the three approved title-frame posters", () => {
+  const page = source("lib/video-posters.ts");
   const value = initializer(page, "siteVideoPosters");
   assert.ok(ts.isObjectLiteralExpression(value));
-  const posters = Object.fromEntries(value.properties.map((property) => {
+  const english = value.properties.find((property) => property.name?.getText(page) === "en");
+  assert.ok(english && ts.isPropertyAssignment(english) && ts.isObjectLiteralExpression(english.initializer));
+  const posters = Object.fromEntries(english.initializer.properties.map((property) => {
     assert.ok(ts.isPropertyAssignment(property));
     assert.ok(ts.isStringLiteral(property.initializer));
     return [property.name.getText(page), property.initializer.text];

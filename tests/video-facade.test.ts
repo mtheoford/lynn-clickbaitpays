@@ -6,6 +6,7 @@ import { runInNewContext } from "node:vm";
 import { createElement, type ComponentType } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import ts from "typescript";
+import { siteVideoPosters } from "../lib/video-posters.ts";
 
 const root = new URL("../", import.meta.url);
 const require = createRequire(import.meta.url);
@@ -56,8 +57,11 @@ function loadSiteVideo(): ComponentType<VideoProps> {
 
 const SiteVideo = loadSiteVideo();
 
-for (const { poster, slot, src } of videos) {
-  test(`${slot} renders its approved native poster and project-hosted MP4 without a custom facade`, () => {
+for (const locale of ["en", "fr", "de"] as const) {
+ for (const { poster: englishPoster, slot, src } of videos) {
+  test(`${locale} ${slot} renders its localized native poster and unchanged project-hosted MP4`, () => {
+    const poster = siteVideoPosters[locale][slot];
+    assert.equal(poster, locale === "en" ? englishPoster : `/video-posters/${slot}-${locale}.jpg`);
     const title = `${slot} overview`;
     const html = renderToStaticMarkup(createElement(SiteVideo, { poster, src, title }));
 
@@ -71,6 +75,7 @@ for (const { poster, slot, src } of videos) {
     assert.doesNotMatch(html, /<(?:iframe|button|img)\b/i);
     assert.doesNotMatch(html, /youtube/i);
   });
+ }
 }
 
 test("the public page routes all three approved sources through the shared native player", () => {
@@ -91,7 +96,7 @@ test("the public page routes all three approved sources through the shared nativ
     const attributes = element.attributes.properties.filter(ts.isJsxAttribute);
     const attribute = (name: string) => attributes.find((item) => item.name.getText(page) === name)?.initializer;
     assert.equal(attribute("src")?.getText(page), `{siteVideoSources.${videos[index].slot}}`);
-    assert.equal(attribute("poster")?.getText(page), `{siteVideoPosters.${videos[index].slot}}`);
+    assert.equal(attribute("poster")?.getText(page), `{siteVideoPosters[locale].${videos[index].slot}}`);
     assert.ok(attribute("title"), "Every video must retain its descriptive localized title");
     assert.equal(attribute("locale"), undefined);
     assert.equal(attribute("priority"), undefined);
@@ -101,16 +106,18 @@ test("the public page routes all three approved sources through the shared nativ
   assert.doesNotMatch(source, /youtube\.com|videoUrl\(/i);
 });
 
-test("new-video title posters replace the obsolete localized YouTube covers", () => {
-  for (const { poster } of videos) {
-    assert.ok(readFileSync(new URL(`public${poster}`, root)).byteLength > 0, `Missing poster: ${poster}`);
-  }
-  for (const slot of ["welcome", "strategy", "tour"]) {
-    for (const locale of ["en", "fr", "de"]) {
-      assert.equal(existsSync(new URL(`public/video-posters/${slot}-${locale}.jpg`, root)), false);
+test("all nine approved native poster files exist without restoring YouTube playback", () => {
+  for (const posters of Object.values(siteVideoPosters)) {
+    for (const poster of Object.values(posters)) {
+      assert.ok(readFileSync(new URL(`public${poster}`, root)).byteLength > 0, `Missing poster: ${poster}`);
     }
   }
   assert.equal(existsSync(new URL("lib/video-playback.ts", root)), false);
+});
+
+test("a changed language cover remounts the native player", () => {
+  const component = readFileSync(new URL("app/SiteVideo.tsx", root), "utf8");
+  assert.match(component, /<video\s+key=\{poster\}/);
 });
 
 test("native videos cannot expand the responsive hero grid beyond the viewport", () => {

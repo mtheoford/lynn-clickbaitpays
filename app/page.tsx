@@ -5,6 +5,7 @@ import ReferralSimulator from "./ReferralSimulator";
 import { SiteViewTracker, TrackedLink } from "./SiteAnalytics";
 import TestimonialGallery from "./TestimonialGallery";
 import SiteVideo from "./SiteVideo";
+import { siteVideoPosters } from "@/lib/video-posters";
 import cbpMark from "../public/cbp-mark.png";
 import {
   formatPhoneForDisplay,
@@ -406,12 +407,6 @@ const siteVideoSources = {
   tour: "https://cbp-media.proneurs.org/videos/clickbaitpays-back-office-2026-09-10.mp4",
 } as const;
 
-const siteVideoPosters = {
-  welcome: "/video-posters/welcome.jpg",
-  strategy: "/video-posters/income-strategy.jpg",
-  tour: "/video-posters/back-office.jpg",
-} as const;
-
 function JoinButton({
   href,
   siteSlug,
@@ -576,7 +571,7 @@ export async function SponsorSitePage({
           </div>
           <div className="hero-video">
             <SiteVideo
-              poster={siteVideoPosters.welcome}
+              poster={siteVideoPosters[locale].welcome}
               src={siteVideoSources.welcome}
               title={copy.welcomeVideo.title}
             />
@@ -620,7 +615,7 @@ export async function SponsorSitePage({
                 </div>
                 <div className="strategy-video">
                   <SiteVideo
-                    poster={siteVideoPosters.strategy}
+                    poster={siteVideoPosters[locale].strategy}
                     src={siteVideoSources.strategy}
                     title={copy.strategy.videoTitle}
                   />
@@ -663,7 +658,7 @@ export async function SponsorSitePage({
             <article>
               <div className="small-video">
                 <SiteVideo
-                  poster={siteVideoPosters.tour}
+                  poster={siteVideoPosters[locale].tour}
                   src={siteVideoSources.tour}
                   title={copy.tour.videoTitle}
                 />
