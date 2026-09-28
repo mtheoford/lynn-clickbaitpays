@@ -19,30 +19,37 @@ const approvedVideos = [
 ] as const;
 const haveMetadataReadyState = 1;
 
-test("switching language after playback restores the translated native covers @smoke", async ({ page }) => {
+function expectedSource(locale: "en" | "fr" | "de", slot: "welcome" | "strategy" | "tour", englishSource: string) {
+  if (locale === "en") return englishSource;
+  const filename = { welcome: "overview", strategy: "income-strategy", tour: "presentation" }[slot];
+  return `https://cbp-media.proneurs.org/videos/clickbaitpays-${filename}-${locale}-2026-09-28.mp4`;
+}
+
+test("switching language after playback changes the recording and restores its translated cover @smoke", async ({ page }) => {
   await page.goto("/s/your-name");
   const player = page.locator(".site-video > video").first();
   await exerciseNativePlayback(player, 250);
   const original = await player.elementHandle();
   expect(original).not.toBeNull();
 
-  for (const locale of ["fr", "de"] as const) {
+  for (const locale of ["fr", "de", "en"] as const) {
     const dropdown = page.locator(".language-dropdown select");
     if (await dropdown.isVisible()) {
       await dropdown.selectOption(locale);
     } else {
       await page.locator(`.language-featured a[hreflang="${locale}"]`).click();
     }
-    await expect(page).toHaveURL(new RegExp(`/${locale}/s/your-name$`));
-    for (const [index, { slot, source }] of approvedVideos.entries()) {
+    await expect(page).toHaveURL(new RegExp(`${locale === "en" ? "" : `/${locale}`}/s/your-name$`));
+    for (const [index, { slot, source, poster }] of approvedVideos.entries()) {
       const localized = page.locator(".site-video > video").nth(index);
-      await expect(localized).toHaveAttribute("poster", `/video-posters/${slot}-${locale}.jpg`);
-      await expect(localized.locator("source")).toHaveAttribute("src", source);
+      await expect(localized).toHaveAttribute("poster", locale === "en" ? poster : `/video-posters/${slot}-${locale}.jpg`);
+      await expect(localized.locator("source")).toHaveAttribute("src", expectedSource(locale, slot, source));
       await expect.poll(() => localized.evaluate((element) => {
         const video = element as HTMLVideoElement;
         return { paused: video.paused, currentTime: video.currentTime };
       })).toEqual({ paused: true, currentTime: 0 });
     }
+    await exerciseNativePlayback(page.locator(".site-video > video").first(), 75);
   }
   expect(await original!.evaluate((element) => element.isConnected)).toBe(false);
   await original!.dispose();
@@ -96,6 +103,7 @@ async function exerciseNativePlayback(player: Locator, playbackMs: number) {
       duration: video.duration,
       paused: video.paused,
       readyState: video.readyState,
+      source: video.currentSrc,
       started,
     };
   }, playbackMs);
@@ -133,7 +141,8 @@ test(`${locale} personal site serves localized covers and the three current nati
     expect(video.width / video.height).toBeCloseTo(16 / 9, 1);
   }
 
-  for (const [index, { poster: englishPoster, slot, source }] of approvedVideos.entries()) {
+  for (const [index, { poster: englishPoster, slot, source: englishSource }] of approvedVideos.entries()) {
+    const source = expectedSource(locale, slot, englishSource);
     const poster = locale === "en" ? englishPoster : `/video-posters/${slot}-${locale}.jpg`;
     const player = players.nth(index);
     const configuration = await player.evaluate((element) => {
@@ -173,6 +182,7 @@ test(`${locale} personal site serves localized covers and the three current nati
     expect(Number.isFinite(playback.duration) && playback.duration > 0).toBe(true);
     expect(playback.started).toBe(true);
     expect(playback.paused).toBe(true);
+    expect(playback.source).toBe(source);
   }
   expect(pageErrors).toEqual([]);
 });

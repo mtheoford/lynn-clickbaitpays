@@ -42,4 +42,6 @@ next-env.d.ts
 /outputs/
 /work/
 /tmp/
+# Original upload-ready video masters are archived locally and hosted in R2.
+/media/videos/
 __pycache__/

@@ -6,6 +6,7 @@ import { SiteViewTracker, TrackedLink } from "./SiteAnalytics";
 import TestimonialGallery from "./TestimonialGallery";
 import SiteVideo from "./SiteVideo";
 import { siteVideoPosters } from "@/lib/video-posters";
+import { siteVideoSources } from "@/lib/video-sources";
 import cbpMark from "../public/cbp-mark.png";
 import {
   formatPhoneForDisplay,
@@ -211,10 +212,10 @@ const siteCopy = {
     },
     welcomeVideo: {
       callout: "Commencez ici · Bienvenue sur ClickBaitPays",
-      title: "Bienvenue sur ClickBaitPays (vidéo pouvant être en anglais)",
+      title: "Bienvenue sur ClickBaitPays (audio en français)",
       heading: "Voir la présentation",
       summary:
-        "Un aperçu rapide de l’opportunité. Cette vidéo est présentée en anglais.",
+        "Un aperçu rapide de l’opportunité. Cette vidéo est présentée en français.",
     },
     momentum: {
       label: "Ce que vous allez découvrir",
@@ -228,11 +229,11 @@ const siteCopy = {
       eyebrow: "01 · Explorer la stratégie",
       heading: "Découvrez comment les campagnes et les parrainages peuvent agir ensemble.",
       videoLabel: "À la une · Stratégies de revenus",
-      videoTitle: "Stratégies de revenus ClickBaitPays (vidéo pouvant être en anglais)",
+      videoTitle: "Stratégies de revenus ClickBaitPays (audio en français)",
       topics: ["Campagnes", "Échelonnement", "Parrainages directs"],
       watch: "Voir la vidéo",
       summary:
-        "Cette présentation explique l’approche à trois campagnes, leur démarrage échelonné, les commissions de parrainage direct et les choix possibles lorsque la valeur d’une campagne devient disponible. Cette vidéo est présentée en anglais.",
+        "Cette présentation explique l’approche à trois campagnes, leur démarrage échelonné, les commissions de parrainage direct et les choix possibles lorsque la valeur d’une campagne devient disponible. Cette vidéo est présentée en français.",
     },
     transition: {
       next: "Étape suivante",
@@ -241,11 +242,11 @@ const siteCopy = {
     tour: {
       eyebrow: "02 · Visiter le tableau de bord",
       heading: "Maîtrisez le tableau de bord.",
-      videoTitle: "Visite de l’espace membre ClickBaitPays (vidéo pouvant être en anglais)",
+      videoTitle: "Visite de l’espace membre ClickBaitPays (audio en français)",
       label: "Visite de l’espace membre",
       title: "Découverte du tableau de bord",
       summary:
-        "Repérez vos campagnes, clics, soldes, parrainages, dépôts et retraits. Cette vidéo est présentée en anglais.",
+        "Repérez vos campagnes, clics, soldes, parrainages, dépôts et retraits. Cette vidéo est présentée en français.",
     },
     testimonialsHeading: "Ce qu’en disent les membres.",
     resourcesHeading: "Ressources utiles",
@@ -341,9 +342,9 @@ const siteCopy = {
     },
     welcomeVideo: {
       callout: "Hier beginnen · Willkommen bei ClickBaitPays",
-      title: "Willkommen bei ClickBaitPays (englischer Originalton)",
+      title: "Willkommen bei ClickBaitPays (deutsche Tonspur)",
       heading: "Überblick ansehen",
-      summary: "Ein schneller Überblick über die Möglichkeiten. Das Video verwendet den englischen Originalton.",
+      summary: "Ein schneller Überblick über die Möglichkeiten. Das Video wird auf Deutsch präsentiert.",
     },
     momentum: {
       label: "Das erwartet Sie",
@@ -353,19 +354,19 @@ const siteCopy = {
       eyebrow: "01 · Die Strategie entdecken",
       heading: "So können Kampagnen und Empfehlungen zusammenwirken.",
       videoLabel: "Im Fokus · Einnahmenstrategien",
-      videoTitle: "ClickBaitPays-Einnahmenstrategien (englischer Originalton)",
+      videoTitle: "ClickBaitPays-Einnahmenstrategien (deutsche Tonspur)",
       topics: ["Kampagnen", "Zeitversetzter Start", "Direkte Empfehlungen"],
       watch: "Jetzt ansehen",
-      summary: "Diese Einführung erklärt den Ansatz mit drei Kampagnen, den zeitversetzten Start, Provisionen für direkte Empfehlungen und die Möglichkeiten, sobald Kampagnenguthaben verfügbar wird. Das Video verwendet den englischen Originalton.",
+      summary: "Diese Einführung erklärt den Ansatz mit drei Kampagnen, den zeitversetzten Start, Provisionen für direkte Empfehlungen und die Möglichkeiten, sobald Kampagnenguthaben verfügbar wird. Das Video wird auf Deutsch präsentiert.",
     },
     transition: { next: "Als Nächstes", label: "Den Mitgliederbereich kennenlernen" },
     tour: {
       eyebrow: "02 · Den Mitgliederbereich erkunden",
       heading: "Ihr Dashboard kennenlernen.",
-      videoTitle: "Rundgang durch den ClickBaitPays-Mitgliederbereich (englischer Originalton)",
+      videoTitle: "Rundgang durch den ClickBaitPays-Mitgliederbereich (deutsche Tonspur)",
       label: "Rundgang für Mitglieder",
       title: "Einblick in den Mitgliederbereich",
-      summary: "Lernen Sie Kampagnen, Klicks, Guthaben, Empfehlungen, Einzahlungen und Auszahlungen kennen. Das Video verwendet den englischen Originalton.",
+      summary: "Lernen Sie Kampagnen, Klicks, Guthaben, Empfehlungen, Einzahlungen und Auszahlungen kennen. Das Video wird auf Deutsch präsentiert.",
     },
     testimonialsHeading: "Das sagen Mitglieder.",
     resourcesHeading: "Hilfreiche Informationen",
@@ -400,12 +401,6 @@ const siteCopy = {
     },
   },
 } satisfies Record<SiteLocale, object>;
-
-const siteVideoSources = {
-  welcome: "https://cbp-media.proneurs.org/videos/clickbaitpays-overview-2026-09-10.mp4",
-  strategy: "https://cbp-media.proneurs.org/videos/clickbaitpays-income-strategy-2026-09-10.mp4",
-  tour: "https://cbp-media.proneurs.org/videos/clickbaitpays-back-office-2026-09-10.mp4",
-} as const;
 
 function JoinButton({
   href,
@@ -572,7 +567,7 @@ export async function SponsorSitePage({
           <div className="hero-video">
             <SiteVideo
               poster={siteVideoPosters[locale].welcome}
-              src={siteVideoSources.welcome}
+              src={siteVideoSources[locale].welcome}
               title={copy.welcomeVideo.title}
             />
           </div>
@@ -616,7 +611,7 @@ export async function SponsorSitePage({
                 <div className="strategy-video">
                   <SiteVideo
                     poster={siteVideoPosters[locale].strategy}
-                    src={siteVideoSources.strategy}
+                    src={siteVideoSources[locale].strategy}
                     title={copy.strategy.videoTitle}
                   />
                 </div>
@@ -659,7 +654,7 @@ export async function SponsorSitePage({
               <div className="small-video">
                 <SiteVideo
                   poster={siteVideoPosters[locale].tour}
-                  src={siteVideoSources.tour}
+                  src={siteVideoSources[locale].tour}
                   title={copy.tour.videoTitle}
                 />
               </div>

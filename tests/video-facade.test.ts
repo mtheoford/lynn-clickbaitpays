@@ -7,6 +7,7 @@ import { createElement, type ComponentType } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import ts from "typescript";
 import { siteVideoPosters } from "../lib/video-posters.ts";
+import { siteVideoSources } from "../lib/video-sources.ts";
 
 const root = new URL("../", import.meta.url);
 const require = createRequire(import.meta.url);
@@ -58,8 +59,9 @@ function loadSiteVideo(): ComponentType<VideoProps> {
 const SiteVideo = loadSiteVideo();
 
 for (const locale of ["en", "fr", "de"] as const) {
- for (const { poster: englishPoster, slot, src } of videos) {
-  test(`${locale} ${slot} renders its localized native poster and unchanged project-hosted MP4`, () => {
+ for (const { poster: englishPoster, slot } of videos) {
+  test(`${locale} ${slot} renders its localized native poster and matching project-hosted MP4`, () => {
+    const src = siteVideoSources[locale][slot];
     const poster = siteVideoPosters[locale][slot];
     assert.equal(poster, locale === "en" ? englishPoster : `/video-posters/${slot}-${locale}.jpg`);
     const title = `${slot} overview`;
@@ -95,7 +97,7 @@ test("the public page routes all three approved sources through the shared nativ
   for (const [index, element] of players.entries()) {
     const attributes = element.attributes.properties.filter(ts.isJsxAttribute);
     const attribute = (name: string) => attributes.find((item) => item.name.getText(page) === name)?.initializer;
-    assert.equal(attribute("src")?.getText(page), `{siteVideoSources.${videos[index].slot}}`);
+    assert.equal(attribute("src")?.getText(page), `{siteVideoSources[locale].${videos[index].slot}}`);
     assert.equal(attribute("poster")?.getText(page), `{siteVideoPosters[locale].${videos[index].slot}}`);
     assert.ok(attribute("title"), "Every video must retain its descriptive localized title");
     assert.equal(attribute("locale"), undefined);

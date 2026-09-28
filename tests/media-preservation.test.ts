@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import ts from "typescript";
+import { siteVideoSources } from "../lib/video-sources.ts";
 
 const root = new URL("../", import.meta.url);
 const currentVideos = {
@@ -54,16 +55,18 @@ function contentDigest(file: string, name: string, locale?: string) {
   return createHash("sha256").update(canonical).digest("hex");
 }
 
-test("all public languages retain the three approved project videos", () => {
-  const page = source("app/page.tsx");
-  const value = initializer(page, "siteVideoSources");
-  assert.ok(ts.isObjectLiteralExpression(value));
-  const videos = Object.fromEntries(value.properties.map((property) => {
-    assert.ok(ts.isPropertyAssignment(property));
-    assert.ok(ts.isStringLiteral(property.initializer));
-    return [property.name.getText(page), property.initializer.text];
-  }));
-  assert.deepEqual(videos, currentVideos, "The welcome, strategy and tour videos must retain their approved project sources.");
+test("English retains the three approved project videos", () => {
+  assert.deepEqual(siteVideoSources.en, currentVideos);
+});
+
+test("French and German use the six approved localized recordings", () => {
+  for (const locale of ["fr", "de"] as const) {
+    assert.deepEqual(siteVideoSources[locale], {
+      welcome: `https://cbp-media.proneurs.org/videos/clickbaitpays-overview-${locale}-2026-09-28.mp4`,
+      strategy: `https://cbp-media.proneurs.org/videos/clickbaitpays-income-strategy-${locale}-2026-09-28.mp4`,
+      tour: `https://cbp-media.proneurs.org/videos/clickbaitpays-presentation-${locale}-2026-09-28.mp4`,
+    });
+  }
 });
 
 test("English retains the three approved title-frame posters", () => {
@@ -81,7 +84,7 @@ test("English retains the three approved title-frame posters", () => {
 });
 
 test("approved videos use the dedicated CBP media domain and MP4 format", () => {
-  for (const sourceUrl of Object.values(currentVideos)) {
+  for (const sourceUrl of Object.values(siteVideoSources).flatMap(Object.values)) {
     const url = new URL(sourceUrl);
     assert.equal(url.protocol, "https:");
     assert.equal(url.hostname, "cbp-media.proneurs.org");
@@ -109,7 +112,8 @@ test("approved title-frame poster files are preserved byte for byte", () => {
 test("English and French public copy and calculator instructions remain intact", () => {
   const baselines = [
     ["app/page.tsx", "siteCopy", "en", "61506063d5798e758a946360d57fe5b9b81e5054d82e8446c81d66b49df1621e"],
-    ["app/page.tsx", "siteCopy", "fr", "787e46226d02188f07aaafe28f1575c40f4a591cf68cd18e155c8ec14da4ac02"],
+    // 2026-09-28: only the six video-language title/summary notices changed.
+    ["app/page.tsx", "siteCopy", "fr", "62edc08bfeb55c9c6798012167f3a7fc12ba76d7f9695cab9433197e6d9e276b"],
     ["app/ReferralSimulator.tsx", "calculatorCopy", "en", "f432d62e0fd6353866a978460e963193a0015711039f82fd037d55d5d3da41d5"],
     ["app/ReferralSimulator.tsx", "calculatorCopy", "fr", "0812de8ad28509103e1380072e5bcf54fda97f1cb9e7f2209af48196b669680b"],
     ["app/TestimonialGallery.tsx", "testimonialUi", "en", "473451d09bd310ccdf32ac95762b1e6e7194b9f1cbd26a9f128f47d36cccf2d7"],
