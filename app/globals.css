@@ -341,12 +341,6 @@ nav > a:not(.join-button):hover { color: white; }
   font-style: normal;
 }
 
-@media (min-width: 681px) {
-  .hero h1 { white-space: nowrap; }
-  main[lang="fr"] .hero h1,
-  main[lang="de"] .hero h1 { white-space: normal; }
-}
-
 .hero-actions { margin-top: 28px; display: flex; align-items: center; gap: 22px; }
 .hero-disclosure {
   margin-top: 22px;
