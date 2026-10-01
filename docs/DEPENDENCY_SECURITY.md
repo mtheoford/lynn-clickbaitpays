@@ -3,11 +3,9 @@
 - Last reviewed: September 4, 2026
 - Next mandatory review: October 4, 2026
 
-`npm audit` currently reports nine affected dependency entries that resolve to
-six upstream advisories. The application uses the latest compatible releases of
-Next.js, OpenNext, and Drizzle Kit. npm's forced remediation would downgrade
-those packages to incompatible releases, so the findings are handled as
-temporary, expiring exceptions rather than silently ignored.
+The October 1 release preparation updated Next.js and its ESLint configuration from 16.3.4 to 16.3.8 and refreshed compatible transitive `brace-expansion` patches. This clears the newly reported critical Next.js advisory and high brace-expansion advisories without weakening the release gate. Resolved advisory exceptions were removed.
+
+`npm audit` now reports four development dependency entries resolving to the existing Drizzle Kit/esbuild advisory. Its September 4 review and October 4 expiration remain unchanged. No exception was added or renewed during this patch update.
 
 The September 4 review confirmed the same six advisory roots and seven affected
 dependency entries, with no critical findings. The documented controls and
@@ -27,7 +25,7 @@ The machine-readable source of truth is
 - an exception reaches its expiration date; or
 - npm cannot produce a complete, mappable audit report.
 
-## Current exposure assessment
+## September 4 exposure assessment (historical)
 
 | Dependency path | Exposure | Required control |
 | --- | --- | --- |
