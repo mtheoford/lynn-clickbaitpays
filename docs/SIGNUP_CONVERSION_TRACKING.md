@@ -1,6 +1,12 @@
 # Signup conversion tracking
 
-The admin dashboard charts signup traffic, form activity, checkout outcomes, and initial sales. Week shows the last seven Denver calendar days; Month shows the last 30; Lifetime begins at the earliest retained observation. Today is partial. Histories over 90 days use monthly points; shorter histories use daily points. Existing calendar-range filters remain available.
+The admin dashboard opens with subscriber accounts ordered newest first, including pending accounts whose payment may be incomplete. The account list and billing status remain available without generating analytics.
+
+Broader signup traffic, form activity, checkout outcomes, and initial-sales analytics run only after the administrator selects **Generate report**. Changing the report period does not query D1. The generated snapshot shows its Denver timestamp and stays on the open page until another report is generated, the range changes, or the page is left. Reloading the page does not generate a report. There is no scheduled report generation or automatic polling. Failed regeneration preserves the previous snapshot and marks the failure.
+
+Last 7 Days covers the last seven Denver calendar days; Last 30 Days covers the last 30; All Time begins at the earliest retained observation. Today is partial. Histories over 90 days use monthly points; shorter histories use daily points. Existing calendar-range filters remain available. Reports retain their existing definitions and query behavior; an explicitly generated lifetime report can still scan substantial history.
+
+Report generation uses a same-origin POST with a fresh administrator authorization check and a supported-range allowlist. GET requests, page rendering and navigation/prefetch cannot generate a report. The response is private (`Cache-Control: no-store`) and reports remain in browser memory, with no persistent/shared cache or additional database writes.
 
 ## Count definitions
 

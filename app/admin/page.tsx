@@ -6,15 +6,11 @@ import { sites, subscriptions, users } from "@/db/schema";
 import { adminSignOutPath, requireAdmin } from "@/lib/admin-auth";
 import { siteUrl } from "@/lib/site-config";
 import {
-  SIGNUP_ANALYTICS_RANGE_OPTIONS,
-  SIGNUP_ANALYTICS_TIME_ZONE,
   parseSignupAnalyticsRange,
   type SignupAnalyticsRange,
 } from "@/lib/signup-page-analytics";
-import { SIGNUP_METRICS, type SignupAnalyticsReport } from "@/lib/signup-analytics-report";
-import { loadSignupAnalyticsReport } from "@/lib/signup-analytics-query";
 import SiteStatusActions from "./SiteStatusActions";
-import SignupTrends from "./SignupTrends";
+import SignupAnalyticsPanel from "./SignupAnalyticsPanel";
 import "./signup-trends.css";
 
 export const dynamic = "force-dynamic";
@@ -80,9 +76,6 @@ export default async function AdminPage({
   const params = await searchParams;
   const query = params.q?.trim().slice(0, 100) ?? "";
   const analyticsRange = parseSignupAnalyticsRange(params.range);
-  const analyticsRangeLabel =
-    SIGNUP_ANALYTICS_RANGE_OPTIONS.find((option) => option.value === analyticsRange)
-      ?.label ?? "Last 7 Days";
   let rows: AdminRow[] = [];
   let databaseMessage = "";
   try {
@@ -121,17 +114,6 @@ export default async function AdminPage({
     databaseMessage = "The account database will appear here after the first hosted migration is applied.";
   }
 
-  let signupReport: SignupAnalyticsReport | null = null;
-  let signupAnalyticsMessage = "";
-  try {
-    signupReport = await loadSignupAnalyticsReport(analyticsRange);
-  } catch {
-    signupAnalyticsMessage =
-      "Signup analytics could not be loaded. Refresh to try again; unavailable data is not shown as zero.";
-  }
-
-  const displayDate = (timestamp: number) => new Intl.DateTimeFormat("en-US", { timeZone: SIGNUP_ANALYTICS_TIME_ZONE, month: "short", day: "numeric", year: "numeric" }).format(new Date(timestamp));
-
   const counts = rows.reduce(
     (totals, row) => {
       totals.total += 1;
@@ -153,66 +135,8 @@ export default async function AdminPage({
       </header>
 
       <section className="admin-title-row">
-        <div><p className="eyebrow">Account operations</p><h1>Subscriber sites</h1><p>Manage publication and review the billing state without exposing payment details.</p></div>
-        <Link href="/get-your-site">Open signup page ↗</Link>
-      </section>
-
-      <section className="admin-funnel-panel" aria-labelledby="admin-funnel-title">
-        <div className="admin-funnel-heading">
-          <div>
-            <p className="eyebrow">Signup funnel</p>
-            <h2 id="admin-funnel-title">Signup activity and sales</h2>
-            <p>{analyticsRangeLabel} · Calendar ranges use {SIGNUP_ANALYTICS_TIME_ZONE.replace("America/", "")} time.</p>
-          </div>
-          <nav className="admin-range-filters" aria-label="Signup analytics date range">
-            {SIGNUP_ANALYTICS_RANGE_OPTIONS.map((option) => (
-              <Link
-                key={option.value}
-                href={adminPageHref(option.value, query)}
-                className={option.value === analyticsRange ? "active" : undefined}
-                aria-current={option.value === analyticsRange ? "page" : undefined}
-              >
-                {option.label}
-              </Link>
-            ))}
-          </nav>
-        </div>
-        <nav className="admin-chart-periods admin-range-filters" aria-label="Chart period">
-          {([{ value: "last-7-days", label: "Week" }, { value: "last-30-days", label: "Month" }, { value: "all-time", label: "Lifetime" }] as const).map((option) => (
-            <Link key={option.value} href={adminPageHref(option.value, query)} className={option.value === analyticsRange ? "active" : undefined} aria-current={option.value === analyticsRange ? "page" : undefined}>{option.label}</Link>
-          ))}
-          <span>Week = last 7 days · Month = last 30 days · Includes today so far</span>
-        </nav>
-        {signupReport ? <>
-          <div className="admin-funnel-stat-grid">
-            {SIGNUP_METRICS.filter((metric) => ["visitors", "formOpens", "demoClicks", "formSubmissions", "checkouts", "payments"].includes(metric.key)).map((metric) => (
-              <article key={metric.key}><span>{metric.label}</span><strong>{signupReport.totals[metric.key]?.toLocaleString("en-US") ?? "—"}</strong><small>{metric.description}</small></article>
-            ))}
-          </div>
-          <div className="admin-analytics-notes">
-            <p>{signupReport.coverage.conversionStartedAt ? <>Detailed form, checkout and activation tracking began {displayDate(signupReport.coverage.conversionStartedAt)}. Earlier unrecorded steps appear as gaps.</> : "Detailed tracking has not started yet."} Paid signups include retained Stripe history and exclude renewals.</p>
-            <p>Visitors are unique browsers. Forms started and issue counts use browsing sessions. Browsers can return on multiple days; period totals are deduplicated independently and may differ from the sum of chart points. Events in a date range are not necessarily the same customer cohort.</p>
-          </div>
-          <SignupTrends points={signupReport.points} interval={signupReport.interval} />
-          <div className="admin-analytics-breakdowns">
-            <section aria-labelledby="signup-issues-title">
-              <h3 id="signup-issues-title">Signup issues</h3>
-              <p>Recorded error categories only; entered form values are never included.</p>
-              {signupReport.issues.length ? <div className="admin-table-scroll"><table><thead><tr><th>Issue</th><th>Field</th><th>Events</th></tr></thead><tbody>{signupReport.issues.map((issue) => <tr key={`${issue.eventType}-${issue.errorCode}-${issue.field}`}><td>{(issue.errorCode ?? issue.eventType).replaceAll("_", " ")}</td><td>{issue.field?.replace(/([A-Z])/g, " $1").toLowerCase() ?? "—"}</td><td>{issue.total}</td></tr>)}</tbody></table></div> : <p>No issues recorded in this period. Earlier untracked activity is unknown.</p>}
-            </section>
-            <section aria-labelledby="signup-sources-title">
-              <h3 id="signup-sources-title">Traffic sources</h3>
-              <p>Referral site or referring host; missing referrers appear as direct / unknown.</p>
-              {signupReport.sources.length ? <div className="admin-table-scroll"><table><thead><tr><th>Source</th><th>Browsers</th><th>Forms started</th></tr></thead><tbody>{signupReport.sources.map((source) => <tr key={source.source}><td>{source.source}</td><td>{source.visitors}</td><td>{signupReport.totals.formStarts === null ? "—" : source.formStarts}</td></tr>)}</tbody></table></div> : <p>No source activity recorded in this period.</p>}
-            </section>
-            <section aria-labelledby="signup-devices-title">
-              <h3 id="signup-devices-title">Devices and languages</h3>
-              <p>Device and language details are available from the tracking upgrade onward.</p>
-              {signupReport.devices.length ? <div className="admin-table-scroll"><table><thead><tr><th>Device</th><th>Language</th><th>Browsers</th><th>Submissions</th></tr></thead><tbody>{signupReport.devices.map((device) => <tr key={`${device.device}-${device.locale}`}><td>{device.device}</td><td>{device.locale === "en" ? "English" : device.locale === "fr" ? "French" : device.locale === "de" ? "German" : "Unknown"}</td><td>{device.visitors}</td><td>{signupReport.totals.formSubmissions === null ? "—" : device.formSubmissions}</td></tr>)}</tbody></table></div> : <p>No device activity recorded in this period.</p>}
-            </section>
-          </div>
-        </> : null}
-        {signupAnalyticsMessage ? <p className="admin-funnel-message">{signupAnalyticsMessage}</p> : null}
+        <div><p className="eyebrow">Account operations</p><h1>New signups and subscriber sites</h1><p>See the newest accounts first, check their signup and billing status, and manage publication.</p></div>
+        <div className="admin-title-links"><a href="#admin-funnel-title">Optional reports ↓</a><Link href="/get-your-site">Open signup page ↗</Link></div>
       </section>
 
       <section className="admin-stat-grid" aria-label="Site account totals">
@@ -225,7 +149,7 @@ export default async function AdminPage({
 
       <section className="admin-table-panel">
         <div className="admin-panel-heading">
-          <div><h2>Customer accounts</h2><p>Search by customer, email, phone, site address, or Stripe customer ID.</p></div>
+          <div><h2>Recent signups and customer accounts</h2><p>Newest accounts appear first. Pending accounts have not necessarily completed payment. Search by customer, email, phone, site address, or Stripe customer ID.</p></div>
           <form className="admin-search-form" action="/admin" method="get">
             <input type="hidden" name="range" value={analyticsRange} />
             <label><span className="sr-only">Search customer accounts</span><input name="q" defaultValue={query} placeholder="Search accounts" /></label>
@@ -255,6 +179,8 @@ export default async function AdminPage({
           </div>
         ) : null}
       </section>
+
+      <SignupAnalyticsPanel initialRange={analyticsRange} />
     </main>
   );
 }

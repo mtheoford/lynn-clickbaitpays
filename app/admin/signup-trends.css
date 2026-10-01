@@ -88,3 +88,11 @@
   .admin-chart-periods > span { grid-column: 1 / -1; }
   .admin-analytics-breakdowns > section { padding: 16px 12px; }
 }
+.admin-report-controls { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.admin-report-controls label { display: grid; gap: 6px; font-size: 12px; color: #a9b5d1; }
+.admin-report-controls select, .admin-report-controls button { min-height: 44px; padding: 10px 14px; border: 1px solid #405071; border-radius: 9px; background: #111a30; color: #e5edff; font-size: 13px; }
+.admin-report-controls button { border-color: #6ce4ed; background: #6ce4ed; color: #071821; font-weight: 750; cursor: pointer; }
+.admin-report-controls :disabled { opacity: .6; cursor: wait; }
+.admin-report-controls :focus-visible { outline: 2px solid #6ce4ed; outline-offset: 3px; }
+.admin-report-status { padding: 16px 20px; color: #a9b5d1; font-size: 13px; line-height: 1.6; }
+.admin-title-links { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
