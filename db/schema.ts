@@ -102,6 +102,25 @@ export const subscriptions = sqliteTable(
   ],
 );
 
+export const billingRecovery = sqliteTable(
+  "billing_recovery",
+  {
+    invoiceId: text("invoice_id").primaryKey(),
+    siteId: text("site_id").notNull().references(() => sites.id, { onDelete: "cascade" }),
+    stripeSubscriptionId: text("stripe_subscription_id").notNull(),
+    locale: text("locale", { enum: ["en", "fr", "de"] }).notNull().default("en"),
+    graceEndsAt: integer("grace_ends_at", { mode: "timestamp_ms" }).notNull(),
+    reminderSentAt: integer("reminder_sent_at", { mode: "timestamp_ms" }),
+    suspensionSentAt: integer("suspension_sent_at", { mode: "timestamp_ms" }),
+    closedAt: integer("closed_at", { mode: "timestamp_ms" }),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => [
+    index("idx_billing_recovery_open").on(table.closedAt, table.graceEndsAt),
+    index("idx_billing_recovery_subscription").on(table.stripeSubscriptionId),
+  ],
+);
+
 export const magicLinkTokens = sqliteTable(
   "magic_link_tokens",
   {

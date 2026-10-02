@@ -12,6 +12,7 @@ import {
 } from "@/db/schema";
 import {
   gracePeriodEnd,
+  graceHasExpired,
   siteStatusForSubscription,
   siteStatusWithPublicationOverride,
   subscriptionPeriodEnd,
@@ -28,6 +29,8 @@ import { purgeExpiredCheckoutReservations } from "@/lib/checkout-cleanup";
 import { billingLocale } from "@/lib/checkout-localization";
 import { signupAnalyticsContextFromMetadata, signupLifecycleAnalyticsEvent, isSignupAnalyticsPlan } from "@/lib/signup-page-analytics";
 import { recordSignupServerEvent } from "@/lib/signup-analytics-server";
+import { startBillingRecovery, closeBillingRecovery, deliverDueBillingRecoveryNotices, seedMissingBillingRecovery } from "@/lib/billing-recovery";
+import { invoiceSubscriptionId } from "@/lib/billing-recovery-policy";
 
 function stripeId(value: string | { id: string } | null | undefined): string | null {
   if (!value) return null;
@@ -163,8 +166,18 @@ async function applyStripeEvent(event: Stripe.Event): Promise<void> {
   }
 
   if (event.type === "invoice.paid" || event.type === "invoice.payment_failed") {
-    const customerId = stripeId(event.data.object.customer);
-    if (customerId) await reconcileCustomer(customerId, event.type === "invoice.payment_failed");
+    const invoice = event.data.object;
+    const subscriptionId = invoiceSubscriptionId(invoice);
+    if (subscriptionId) {
+      const stripe = await getStripe();
+      const current = await stripe.subscriptions.retrieve(subscriptionId);
+      await applySubscription(current);
+      if (event.type === "invoice.payment_failed") await startBillingRecovery(invoice, current);
+    } else if (event.type === "invoice.paid") {
+      const customerId = stripeId(invoice.customer);
+      if (customerId) await reconcileCustomer(customerId);
+    }
+    if (event.type === "invoice.paid") await closeBillingRecovery(invoice.id);
     return;
   }
 
@@ -287,7 +300,7 @@ async function applyCompletedCheckout(session: Stripe.Checkout.Session): Promise
   }
 }
 
-async function reconcileCustomer(customerId: string, paymentFailed: boolean): Promise<void> {
+async function reconcileCustomer(customerId: string): Promise<void> {
   const db = await getDb();
   const linked = await db
     .select({ stripeSubscriptionId: subscriptions.stripeSubscriptionId })
@@ -296,13 +309,12 @@ async function reconcileCustomer(customerId: string, paymentFailed: boolean): Pr
   const stripe = await getStripe();
   for (const item of linked) {
     const current = await stripe.subscriptions.retrieve(item.stripeSubscriptionId);
-    await applySubscription(current, paymentFailed);
+    await applySubscription(current);
   }
 }
 
 async function applySubscription(
   subscription: Stripe.Subscription,
-  paymentFailed = false,
 ): Promise<void> {
   const db = await getDb();
   const [local] = await db
@@ -321,14 +333,11 @@ async function applySubscription(
   const now = new Date();
   const currentPeriodEnd = subscriptionPeriodEnd(subscription);
   const billingStatus = siteStatusForSubscription(subscription.status, currentPeriodEnd, now);
+  const graceEndsAt = billingStatus === "past_due" ? local.graceEndsAt ?? gracePeriodEnd(now) : null;
   const siteStatus = siteStatusWithPublicationOverride(
-    billingStatus,
+    billingStatus === "past_due" && graceHasExpired(graceEndsAt, now) ? "suspended" : billingStatus,
     local.publicationOverride,
   );
-  const graceEndsAt =
-    siteStatus === "past_due"
-      ? local.graceEndsAt ?? gracePeriodEnd(now)
-      : null;
 
   await db
     .update(subscriptions)
@@ -336,7 +345,7 @@ async function applySubscription(
       status: subscription.status,
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
       currentPeriodEnd,
-      graceEndsAt: paymentFailed ? local.graceEndsAt ?? gracePeriodEnd(now) : graceEndsAt,
+      graceEndsAt,
       updatedAt: now,
     })
     .where(eq(subscriptions.stripeSubscriptionId, subscription.id));
@@ -417,6 +426,8 @@ export async function enforceScheduledBillingState(now = new Date()): Promise<vo
       .where(eq(sites.id, item.siteId));
   }
 
+  await seedMissingBillingRecovery();
+  await deliverDueBillingRecoveryNotices(now);
   await purgeScheduledAccountData(now);
 }
 

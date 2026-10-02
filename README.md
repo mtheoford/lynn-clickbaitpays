@@ -153,6 +153,30 @@ expiration every 15 minutes. The same cron permanently purges sites whose
 administrator-scheduled 30-day deletion window has elapsed. Subscription
 cancellation is managed in Stripe; deletion is a separate administrator action.
 
+The ProNeurs Stripe live account uses one custom card retry five days after the
+initial failure, for both CBP and Shift subscriptions. Recovery emails are enabled
+for card and bank-debit failures, using Stripe's hosted payment-update page. After
+retry exhaustion, subscriptions and invoices remain past due so the CBP application
+can finish its seven-day grace period. Stripe skips automatic retries for declines
+that require a new payment method. This policy controls future failures; changing
+it does not manually charge or reschedule an existing failed invoice.
+
+For CBP, a failed subscription invoice creates a durable `billing_recovery` record
+with the original grace deadline. Stripe handles the initial failure email. The
+15-minute cron sends a localized reminder during the final 24 hours and a suspension
+notice after the site is actually suspended. Both link to the hosted invoice and
+the customer's `/manage` page for updating payment details. Before delivery, the
+application verifies the latest open invoice and current subscription with Stripe;
+paid invoices, superseded billing cycles, and administrator publication overrides
+receive no further notices. Resend idempotency and persisted delivery timestamps
+prevent duplicates, while temporary delivery failures retry on the next cron run.
+Existing overdue CBP accounts enter this process on the next cron run with their
+original deadline, after Stripe confirms their latest invoice is still unpaid.
+Payment recovery clears the grace deadline and restores publication unless an
+administrator override remains. Failed billing alone does not delete site data.
+Shift inherits Stripe's retry and failure-email settings; its eventual site lifecycle
+implementation should use the same seven-day reminder/suspension process.
+
 Creating a Stripe Checkout Session also schedules one reminder for 30 minutes
 later. Before sending it, the queue consumer verifies that the local site is
 still pending, no subscription is connected, and the current Stripe Checkout
