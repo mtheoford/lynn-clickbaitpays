@@ -34,10 +34,32 @@ function stripeId(value: string | { id: string } | null | undefined): string | n
   return typeof value === "string" ? value : value.id;
 }
 
+// The Stripe account also serves the independent Shift funnel. Only its
+// explicit namespace is excluded; legacy CBP events still run every existing
+// reservation and provisioning check when application metadata is absent.
+function isShiftFunnelEvent(event: Stripe.Event): boolean {
+  const object = event.data.object as {
+    metadata?: { app?: string } | null;
+    parent?: { subscription_details?: { metadata?: { app?: string } | null } | null } | null;
+    subscription_details?: { metadata?: { app?: string } | null } | null;
+  };
+  if (event.type.startsWith("checkout.session.") || event.type.startsWith("customer.subscription.")) {
+    return object.metadata?.app === "shift-funnel";
+  }
+  if (event.type.startsWith("invoice.")) {
+    return object.metadata?.app === "shift-funnel" ||
+      object.parent?.subscription_details?.metadata?.app === "shift-funnel" ||
+      object.subscription_details?.metadata?.app === "shift-funnel";
+  }
+  return false;
+}
+
 export async function registerStripeEvent(event: Stripe.Event): Promise<{
   duplicate: boolean;
   queued: boolean;
+  ignored?: boolean;
 }> {
+  if (isShiftFunnelEvent(event)) return { duplicate: false, queued: false, ignored: true };
   const db = await getDb();
   const [existing] = await db
     .select({ status: stripeEvents.status })
@@ -156,6 +178,8 @@ export async function processStripeEvent(eventId: string): Promise<void> {
 }
 
 async function applyStripeEvent(event: Stripe.Event): Promise<void> {
+  // Also acknowledge Shift events that were queued before the namespace filter.
+  if (isShiftFunnelEvent(event)) return;
   await trackStripeSignupLifecycle(event);
   if (event.type === "checkout.session.completed") {
     await applyCompletedCheckout(event.data.object);
@@ -163,7 +187,17 @@ async function applyStripeEvent(event: Stripe.Event): Promise<void> {
   }
 
   if (event.type === "invoice.paid" || event.type === "invoice.payment_failed") {
-    const customerId = stripeId(event.data.object.customer);
+    // Preserve the deployed CBP customer reconciliation flow, but first reject
+    // an unmarked invoice that belongs to a fetched Shift subscription.
+    const invoice = event.data.object;
+    const legacySubscription = (invoice as Stripe.Invoice & { subscription?: string | { id: string } | null }).subscription;
+    const subscriptionId = stripeId(invoice.parent?.subscription_details?.subscription ?? legacySubscription);
+    if (subscriptionId) {
+      const stripe = await getStripe();
+      const current = await stripe.subscriptions.retrieve(subscriptionId);
+      if (current.metadata?.app === "shift-funnel") return;
+    }
+    const customerId = stripeId(invoice.customer);
     if (customerId) await reconcileCustomer(customerId, event.type === "invoice.payment_failed");
     return;
   }
@@ -210,6 +244,7 @@ async function applyCompletedCheckout(session: Stripe.Checkout.Session): Promise
 
   const stripe = await getStripe();
   const remoteSubscription = await stripe.subscriptions.retrieve(subscriptionId);
+  if (remoteSubscription.metadata?.app === "shift-funnel") return;
   const currentPeriodEnd = subscriptionPeriodEnd(remoteSubscription);
   const billingStatus = siteStatusForSubscription(remoteSubscription.status, currentPeriodEnd);
   const now = new Date();
@@ -304,6 +339,7 @@ async function applySubscription(
   subscription: Stripe.Subscription,
   paymentFailed = false,
 ): Promise<void> {
+  if (subscription.metadata?.app === "shift-funnel") return;
   const db = await getDb();
   const [local] = await db
     .select({
