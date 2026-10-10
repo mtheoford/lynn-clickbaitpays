@@ -26,8 +26,8 @@ official advisories, and replace these exceptions with supported patched package
 where available. The machine-readable gate still rejects every critical finding,
 unreviewed new finding, expired exception, and incomplete report.
 
-October 10 verification: `npm run verify:release` passed (audit, lint, typecheck,
-158 unit/integration tests, OpenNext Worker build, and 71 desktop/mobile purchase
+October 10 production-isolation verification (based on the deployed October 1 commit `1b1c63c`, without the separate pending recovery migration): `npm run verify:release` passed (audit, lint, typecheck,
+145 unit/integration tests, OpenNext Worker build, and 71 desktop/mobile purchase
 tests; one mobile keyboard-only test is intentionally skipped). The generated
 `.open-next/server-functions/default/handler.mjs.meta.json` listed 629 inputs
 with no ESLint, fast-glob, micromatch, braces, Drizzle Kit, or esbuild-kit entries;
