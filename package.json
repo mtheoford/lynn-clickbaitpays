@@ -50,7 +50,7 @@
   "overrides": {
     "@aws-sdk/credential-provider-sso": "3.973.9",
     "js-yaml": "4.3.2",
-    "sharp": "0.35.4",
+    "sharp": "0.35.5",
     "undici": "7.29.1"
   },
   "type": "module"

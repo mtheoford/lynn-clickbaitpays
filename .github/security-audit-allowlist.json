@@ -1,11 +1,16 @@
 {
   "schemaVersion": 1,
-  "reviewedAt": "2026-09-04",
+  "reviewedAt": "2026-10-10",
   "exceptions": {
     "GHSA-67mh-4wv8-2f99": {
-      "expires": "2026-10-04",
+      "expires": "2026-10-24",
       "scope": "development-only",
-      "reason": "Legacy esbuild is reached through Drizzle Kit tooling. No esbuild development server is exposed."
+      "reason": "Re-reviewed October 10: legacy esbuild is reached only through Drizzle Kit's legacy config loader. Supported stable Drizzle Kit 0.31.11 still includes it. Migration generation uses repository-controlled files; no Drizzle Studio or esbuild development server is exposed. Verify exclusion from the production Worker and recheck upstream before October 24."
+    },
+    "GHSA-vfj7-8cjw-p6xm": {
+      "expires": "2026-10-24",
+      "scope": "development-only",
+      "reason": "Next ESLint's fast-glob/micromatch path includes braces 3.0.3; no patched braces release exists, including with current Next ESLint 16.4.0. Lint receives only repository-controlled paths and runs without production secrets. Do not pass customer input to lint or glob tooling. Verify exclusion from the production Worker and recheck upstream before October 24."
     }
   }
 }
