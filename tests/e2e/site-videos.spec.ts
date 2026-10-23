@@ -3,8 +3,8 @@ import { expect, test, type Locator } from "@playwright/test";
 const approvedVideos = [
   {
     slot: "welcome",
-    poster: "/video-posters/welcome.jpg",
-    source: "https://cbp-media.proneurs.org/videos/clickbaitpays-overview-2026-09-10.mp4",
+    poster: "/video-posters/welcome-2026-10-06.jpg",
+    source: "https://cbp-media.proneurs.org/videos/clickbaitpays-overview-2026-10-06.mp4",
   },
   {
     slot: "strategy",
@@ -123,6 +123,13 @@ test(`${locale} personal site serves localized covers and the three current nati
   await expect(page.locator("iframe")).toHaveCount(0);
   await expect(page.locator("video[poster]")).toHaveCount(approvedVideos.length);
   await expect(page.locator(".site-video__cover, .site-video__poster, .site-video img, .site-video button")).toHaveCount(0);
+
+  if (locale !== "en") {
+    await expect(players.first()).toHaveAttribute("aria-label", locale === "fr" ? /audio en français/ : /deutsche Tonspur/);
+    const caption = page.locator(".welcome-feature .video-caption");
+    await expect(caption).toContainText("10 %");
+    await expect(caption).toContainText(locale === "fr" ? /hors frais d’activation/ : /ohne Aktivierungsgebühren/);
+  }
 
   const layout = await page.evaluate(() => ({
     documentWidth: document.documentElement.scrollWidth,

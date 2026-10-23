@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Generate the French ClickBaitPays getting-started guide.
 
-The French copy is a faithful translation and layout adaptation of the ten
-English source pages extracted under tmp/pdfs/cbp_getting/page-01.txt through
-page-10.txt.
+The French copy adapts the existing English getting-started guide. Referral
+commission copy reflects the campaign-purchase rule confirmed on 2026-10-13.
 """
 
 from __future__ import annotations
@@ -368,13 +367,13 @@ def build_story():
         ["7", "2 640 USDT", "20", "13,50 USDT", "3 600,00 USDT", "3 240,00 USDT"],
     ]
     story.append(data_table(
-        ["Niveau", "Achat total", "Pubs / jour", "Gain / clic", "Fin de campagne", "Vos gains (90 %)"],
+        ["Niveau", "Achat total", "Pubs / jour", "Gain / clic", "Fin de campagne", "Vos gains"],
         campaign_rows,
         [37, 78, 54, 75, 101, 123],
         6.7,
     ))
     story.append(Spacer(1, 7))
-    story.append(para("Le montant de l’achat total inclut les frais d’activation uniques du niveau. Votre parrain reçoit 10 % de la valeur de fin de campagne. Tous les paiements sont traités dans un délai pouvant aller jusqu’à 7 jours.", SMALL))
+    story.append(para("Le montant de l’achat total inclut les frais d’activation uniques du niveau. Pour tout achat ou renouvellement à partir du 1er octobre 2026, vous recevez 10 % du prix de la campagne achetée par votre filleul, hors frais d’activation, crédités immédiatement dans « Available Balance ». Cette commission n’est pas calculée sur ses gains de clics. Les campagnes achetées avant le 1er octobre 2026 conservent l’ancien modèle de commission jusqu’à leur fin. Le délai de disponibilité des gains de votre propre campagne reste distinct.", SMALL))
     story.append(callout("Attention", "Des frais de 10 % s’appliquent à tous les retraits de gains, quel que soit le niveau de campagne.", "warning"))
     story.append(PageBreak())
 
@@ -395,7 +394,7 @@ def build_story():
         ["7", "2 400", "240", "2 400", "20", "13,50", "3 600,00", "3 240,00"],
     ]
     story.append(data_table(
-        ["Niv.", "Coût campagne", "Activation initiale", "Achat suivant", "Pubs / j", "Gain / clic", "Fin campagne", "Gains (90 %)"],
+        ["Niv.", "Coût campagne", "Activation initiale", "Achat suivant", "Pubs / j", "Gain / clic", "Fin campagne", "Vos gains"],
         subsequent_rows,
         [27, 57, 61, 61, 38, 57, 78, 89],
         6.1,
@@ -502,7 +501,7 @@ def build_story():
     story.append(qa(8, "Comment demander un retrait?", "Une demande de retrait est autorisée par semaine. Dans le menu de gauche, sous « Financial », cliquez sur « Withdraw ». Sous « Request Withdrawal », saisissez le montant en USDT; des frais de 10 % seront déduits. Choisissez la cryptomonnaie à recevoir, saisissez votre code PIN de sécurité, puis cliquez sur « Submit Withdrawal »."))
     story.append(callout(
         "Conseil de retrait",
-        "Il est vivement recommandé de retirer vers un portefeuille non dépositaire tel qu’Exodus ou MetaMask, et non directement vers un portefeuille de plateforme d’échange comme Binance ou Coinbase. Une plateforme peut refuser ou retarder les transferts entrants et, dans certains cas, les fonds envoyés vers son adresse de dépôt peuvent être perdus. Un portefeuille non dépositaire vous laisse le contrôle total de vos fonds. Les retraits sont traités manuellement par l’équipe d’administration dans les 48 heures suivant la demande.",
+        "Il est vivement recommandé de retirer vers un portefeuille non dépositaire tel qu’Exodus ou MetaMask, et non directement vers un portefeuille de plateforme d’échange comme Binance ou Coinbase. Une plateforme peut refuser ou retarder les transferts entrants et, dans certains cas, les fonds envoyés vers son adresse de dépôt peuvent être perdus. Un portefeuille non dépositaire vous laisse le contrôle total de vos fonds. Les retraits sont traités manuellement par l’équipe d’administration; les délais de traitement peuvent varier.",
         "important",
     ))
     story.append(qa(9, "Quelles cryptomonnaies sont acceptées pour les retraits?", "ClickBaitPays accepte Bitcoin (BTC), Ethereum (ETH), Litecoin (LTC), Binance Coin (BNB), Tron (TRX), Ripple (XRP), Stellar (XLM), Polygon (POL) et Solana (SOL). Après avoir choisi la cryptomonnaie, collez l’adresse du portefeuille correspondant."))
@@ -513,7 +512,7 @@ def build_story():
     ))
     story.append(callout(
         "À propos de cette édition",
-        "Ce document est une traduction et une adaptation française du guide ClickBaitPays en anglais, actualisée d’après la FAQ officielle consultée le 4 septembre 2026. Les noms de menus et de boutons sont conservés en anglais pour correspondre à l’interface. En cas d’évolution du service, consultez toujours les informations affichées dans votre compte et les conditions officielles en vigueur.",
+        "Traduction et adaptation française du guide ClickBaitPays. La commission de parrainage et le traitement des retraits ont été actualisés d’après la FAQ officielle consultée le 13 octobre 2026. Les autres chiffres et instructions sont conservés de l’édition du 4 septembre 2026. Les noms de menus et de boutons restent en anglais. Consultez les informations de votre compte et les conditions officielles en vigueur.",
         "note",
     ))
     return story

@@ -7,12 +7,12 @@ import { siteVideoSources } from "../lib/video-sources.ts";
 
 const root = new URL("../", import.meta.url);
 const currentVideos = {
-  welcome: "https://cbp-media.proneurs.org/videos/clickbaitpays-overview-2026-09-10.mp4",
+  welcome: "https://cbp-media.proneurs.org/videos/clickbaitpays-overview-2026-10-06.mp4",
   strategy: "https://cbp-media.proneurs.org/videos/clickbaitpays-income-strategy-2026-09-10.mp4",
   tour: "https://cbp-media.proneurs.org/videos/clickbaitpays-back-office-2026-09-10.mp4",
 };
 const currentPosters = {
-  welcome: "/video-posters/welcome.jpg",
+  welcome: "/video-posters/welcome-2026-10-06.jpg",
   strategy: "/video-posters/income-strategy.jpg",
   tour: "/video-posters/back-office.jpg",
 };
@@ -59,7 +59,7 @@ test("English retains the three approved project videos", () => {
   assert.deepEqual(siteVideoSources.en, currentVideos);
 });
 
-test("French and German use the six approved localized recordings", () => {
+test("French and German retain all six native localized recordings", () => {
   for (const locale of ["fr", "de"] as const) {
     assert.deepEqual(siteVideoSources[locale], {
       welcome: `https://cbp-media.proneurs.org/videos/clickbaitpays-overview-${locale}-2026-09-28.mp4`,
@@ -96,7 +96,7 @@ test("approved videos use the dedicated CBP media domain and MP4 format", () => 
 
 test("approved title-frame poster files are preserved byte for byte", () => {
   const baselines = {
-    welcome: "01bb0706fde7f13c44a1413d2feaecdf0dca0e2f7a33f76deee7987d342a71a5",
+    welcome: "f4f07a50a7e162a3486e6bcc5ca731f2dd6f516b1b299757dc3162783cbbf665",
     strategy: "420b5c421dab88e27ee9b5173dc408dbf43ab6bbf4a5f52d45f7a65bffa9ffc8",
     tour: "6d8ca98c883a93fe1537a527e7e2294accaf1809e058145b5f0ee3bbfb398699",
   };
@@ -111,11 +111,11 @@ test("approved title-frame poster files are preserved byte for byte", () => {
 // a baseline only when a deliberate content change has been reviewed.
 test("English and French public copy and calculator instructions remain intact", () => {
   const baselines = [
-    ["app/page.tsx", "siteCopy", "en", "61506063d5798e758a946360d57fe5b9b81e5054d82e8446c81d66b49df1621e"],
-    // 2026-09-28: only the six video-language title/summary notices changed.
-    ["app/page.tsx", "siteCopy", "fr", "62edc08bfeb55c9c6798012167f3a7fc12ba76d7f9695cab9433197e6d9e276b"],
-    ["app/ReferralSimulator.tsx", "calculatorCopy", "en", "f432d62e0fd6353866a978460e963193a0015711039f82fd037d55d5d3da41d5"],
-    ["app/ReferralSimulator.tsx", "calculatorCopy", "fr", "0812de8ad28509103e1380072e5bcf54fda97f1cb9e7f2209af48196b669680b"],
+    ["app/page.tsx", "siteCopy", "en", "690f040facea224e278a809a6ed529024a00a764c10423df3a6a8a51417363c3"],
+    // 2026-10-13: referral purchase rule, calculator timing labels, and overview notices updated.
+    ["app/page.tsx", "siteCopy", "fr", "a2e6b456d83f31353ed2db42d359f20d8578fac749047b9001dbfd6e34b4ce15"],
+    ["app/ReferralSimulator.tsx", "calculatorCopy", "en", "d48b77bce768f5c0ed930f5c054804eb10520046f850461bae3f94548bc9a460"],
+    ["app/ReferralSimulator.tsx", "calculatorCopy", "fr", "694169c3472e772288a337dcdec6c0cdfcbbcdcfc2559d50cf24d770a5ca8563"],
     ["app/TestimonialGallery.tsx", "testimonialUi", "en", "473451d09bd310ccdf32ac95762b1e6e7194b9f1cbd26a9f128f47d36cccf2d7"],
     ["app/TestimonialGallery.tsx", "testimonialUi", "fr", "24e6e5bc082e21460f3f871adaab39dfd12129c6af292a2007c3d5efebf24429"],
   ];

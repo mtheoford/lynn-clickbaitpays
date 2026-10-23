@@ -3,6 +3,7 @@ export type Level = {
   campaign: number;
   activation: number;
   earnings: number;
+  /** 10% of the campaign purchase price, credited when it is purchased. */
   referralCommission: number;
 };
 
@@ -96,6 +97,7 @@ export type ContinuationMode =
   | "wait-for-release"
   | "keep-spots-moving";
 
+/** How referred people fund repurchases; commissions are immediate in either mode. */
 export type ReferralCadence = "release-funded" | "reserve-backed";
 
 export type StrategyFunding = {
@@ -110,6 +112,7 @@ export type StrategyFunding = {
 export type ReferralCadenceEstimate = {
   cadence: ReferralCadence;
   intervalDays: number;
+  /** Commission per referred campaign purchase batch; retained name for callers. */
   grossPerRelease: number;
   netPerRelease: number;
   monthlyGross: number;
@@ -120,6 +123,7 @@ export type ReferralCadenceEstimates = {
   people: number;
   level: number;
   campaignsPerPerson: number;
+  /** Modeled first campaign purchase, with immediate commission. */
   firstAvailableDay: number;
   releaseFunded: ReferralCadenceEstimate;
   reserveBacked: ReferralCadenceEstimate;
@@ -145,6 +149,7 @@ export type OngoingProjection = {
   campaignLaneReleaseCount: number;
   /** Lane releases divided by three; may be fractional for a staggered goal. */
   equivalentThreeCampaignSetReleases: number;
+  /** Referred purchase batches in the window; commissions post immediately. */
   referralReleaseCount: number;
   campaignGrossSurplus: number;
   campaignNetWithdrawals: number;
@@ -165,6 +170,7 @@ export type OngoingProjectionInputs = {
   people?: number;
   referralLevel?: number;
   referralCampaigns?: number;
+  referralCadence?: ReferralCadence;
 };
 
 export type StrategyPathInputs = {
@@ -197,6 +203,7 @@ export type StrategyEventStep = {
   retiredCampaigns: number[];
   releasedCampaigns: number[];
   ownReleaseGross: number;
+  /** Instant commission on the referred campaign purchases on this day. */
   referralReleaseGross: number;
   availableBeforePurchase: number;
   purchasedCampaigns: number[];
@@ -216,6 +223,7 @@ export type StrategyPathResult = {
   neededToday: number;
   neededByDay12: number;
   totalPlanned: number;
+  /** First release of own campaign click earnings, independent of referrals. */
   firstAvailableDay: number;
   /** Net value of the campaigns started today if their first release is withdrawn. */
   firstNetWithdrawal: number;
@@ -259,13 +267,13 @@ export type StartingCampaignOptionInputs = Omit<
 export type StartingCampaignOptions = Record<1 | 2 | 3, StrategyPathResult>;
 
 export const levels: Level[] = [
-  { id: 1, campaign: 13, activation: 1, earnings: 17.17, referralCommission: 1.908 },
-  { id: 2, campaign: 77, activation: 7, earnings: 101.7, referralCommission: 11.3 },
-  { id: 3, campaign: 150, activation: 15, earnings: 194.4, referralCommission: 21.6 },
-  { id: 4, campaign: 300, activation: 30, earnings: 388.8, referralCommission: 43.2 },
-  { id: 5, campaign: 600, activation: 60, earnings: 777.6, referralCommission: 86.4 },
-  { id: 6, campaign: 1200, activation: 120, earnings: 1555.2, referralCommission: 172.8 },
-  { id: 7, campaign: 2400, activation: 240, earnings: 3240, referralCommission: 360 },
+  { id: 1, campaign: 13, activation: 1, earnings: 17.17, referralCommission: 1.3 },
+  { id: 2, campaign: 77, activation: 7, earnings: 101.7, referralCommission: 7.7 },
+  { id: 3, campaign: 150, activation: 15, earnings: 194.4, referralCommission: 15 },
+  { id: 4, campaign: 300, activation: 30, earnings: 388.8, referralCommission: 30 },
+  { id: 5, campaign: 600, activation: 60, earnings: 777.6, referralCommission: 60 },
+  { id: 6, campaign: 1200, activation: 120, earnings: 1555.2, referralCommission: 120 },
+  { id: 7, campaign: 2400, activation: 240, earnings: 3240, referralCommission: 240 },
 ];
 
 export const cycleDays = 19;
@@ -288,28 +296,29 @@ export function getLevel(level: number) {
   return levels.find((item) => item.id === level) ?? levels[0];
 }
 
+/** Legacy ledger: referral campaigns start on days 0, 7, and 14 and repeat. */
 export function referralCommissionForDay(
   day: number,
   people: number,
   level: number,
   campaignCount: number,
+  purchaseInterval = cycleDays,
 ) {
   if (people === 0) return 0;
 
   const commissionPerCampaign = getLevel(level).referralCommission;
-  let dailyCommission = 0;
+  let purchaseCommission = 0;
 
   for (let campaign = 0; campaign < campaignCount; campaign += 1) {
-    const startsOn = campaign * 7 + 1;
+    const startsOn = campaign * 7;
     if (day < startsOn) continue;
 
-    const cycleDay = (day - startsOn) % cycleDays;
-    if (cycleDay < clickDays) {
-      dailyCommission += (commissionPerCampaign / clickDays) * people;
+    if ((day - startsOn) % purchaseInterval === 0) {
+      purchaseCommission += commissionPerCampaign * people;
     }
   }
 
-  return dailyCommission;
+  return purchaseCommission;
 }
 
 export function referralCashThroughDay(
@@ -317,9 +326,10 @@ export function referralCashThroughDay(
   people: number,
   level: number,
   campaignCount: number,
+  purchaseInterval = cycleDays,
 ) {
   return (
-    referralGrossThroughDay(day, people, level, campaignCount) *
+    referralGrossThroughDay(day, people, level, campaignCount, purchaseInterval) *
     withdrawalRate
   );
 }
@@ -329,16 +339,18 @@ export function referralGrossThroughDay(
   people: number,
   level: number,
   campaignCount: number,
+  purchaseInterval = cycleDays,
 ) {
   if (people === 0) return 0;
 
   let total = 0;
-  for (let currentDay = 1; currentDay <= day; currentDay += 1) {
+  for (let currentDay = 0; currentDay <= day; currentDay += 1) {
     total += referralCommissionForDay(
       currentDay,
       people,
       level,
       campaignCount,
+      purchaseInterval,
     );
   }
   return total;
@@ -587,8 +599,9 @@ function isBetterStrategyPurchase(
 
 /**
  * Exact dynamic program for the release-funded start-small strategy. Since
- * its only new cash arrives on synchronized 19-day releases, every eligible
- * purchase is also synchronized. For each portfolio/activation-mask pair we
+ * new cash arrives on day 0 and synchronized 19-day releases, every purchase
+ * in this candidate is also synchronized. Referral-backed paths also evaluate
+ * earlier reinvestment candidates. For each portfolio/activation-mask pair we
  * retain only the greatest wallet; a smaller wallet in the same state cannot
  * produce an earlier goal. Typed arrays keep this exhaustive candidate fast
  * enough to run after the user asks for the projection.
@@ -613,7 +626,7 @@ function buildSynchronizedStartSmallPlan(
     initialPortfolioIndex * strategyMaskCount + initialMask;
   let wallets = new Float64Array(strategyStateCount);
   wallets.fill(-1);
-  wallets[initialState] = 0;
+  wallets[initialState] = referralReleaseCents;
   const parents: Int16Array[] = [];
   const maximumRounds = Math.floor(maximumDays / cycleDays);
 
@@ -697,6 +710,13 @@ function normalizedCount(value: number | undefined, fallback: number) {
 
 function normalizedReferralCampaigns(value: number | undefined) {
   return Math.min(3, Math.max(1, normalizedCount(value, 1)));
+}
+
+function selectedReferralCadence(inputs: StrategyPathInputs): ReferralCadence {
+  return inputs.referralCadence ??
+    (inputs.continuationMode === "keep-spots-moving"
+      ? "reserve-backed"
+      : "release-funded");
 }
 
 function normalizedStartingCampaigns(
@@ -810,7 +830,7 @@ export function calculateReferralCadenceEstimates({
     people: normalizedPeople,
     level: selectedLevel.id,
     campaignsPerPerson: normalizedCampaignCount,
-    firstAvailableDay: cycleDays,
+    firstAvailableDay: 0,
     releaseFunded: cadenceEstimate("release-funded", cycleDays),
     reserveBacked: cadenceEstimate("reserve-backed", clickDays),
   };
@@ -821,7 +841,7 @@ function referralReleaseOccurs(
   cadence: ReferralCadence,
 ) {
   const interval = cadence === "reserve-backed" ? clickDays : cycleDays;
-  return day >= cycleDays && (day - cycleDays) % interval === 0;
+  return day >= 0 && day % interval === 0;
 }
 
 function referralReleaseCountBetween(
@@ -860,6 +880,7 @@ export function calculateOngoingProjection({
   people = 0,
   referralLevel = 3,
   referralCampaigns = 1,
+  referralCadence: selectedReferralCadence,
 }: OngoingProjectionInputs): OngoingProjection {
   if (
     activeLevelSevenStartedOn.length !== 3 ||
@@ -880,9 +901,10 @@ export function calculateOngoingProjection({
   const campaignCadenceDays =
     continuationMode === "keep-spots-moving" ? clickDays : cycleDays;
   const referralCadence: ReferralCadence =
-    continuationMode === "keep-spots-moving"
+    selectedReferralCadence ??
+    (continuationMode === "keep-spots-moving"
       ? "reserve-backed"
-      : "release-funded";
+      : "release-funded");
   const referralCadenceDays =
     referralCadence === "reserve-backed" ? clickDays : cycleDays;
   const levelSeven = getLevel(7);
@@ -1068,10 +1090,10 @@ function strategyEventLabel({
     return "Campaign release and reinvestment";
   }
   if (referralReleaseGross > 0 && purchasedCampaigns.length > 0) {
-    return "Referral release and reinvestment";
+    return "Referral purchase commission and reinvestment";
   }
   if (releasedCampaigns.length > 0) return "Campaign value released";
-  if (referralReleaseGross > 0) return "Referral commission released";
+  if (referralReleaseGross > 0) return "Referral purchase commission credited";
   if (purchasedCampaigns.length > 0) return "Open slots funded";
   return "Campaign slots reopened";
 }
@@ -1131,6 +1153,7 @@ function completeStrategyResult({
     people: inputs.people,
     referralLevel: inputs.referralLevel,
     referralCampaigns: inputs.referralCampaigns,
+    referralCadence,
   });
   const goalCampaignValueCents = activeCampaigns.reduce(
     (total, campaign) =>
@@ -1215,8 +1238,7 @@ function simulateStrategyCandidate(
   const referralCampaigns = normalizedReferralCampaigns(
     inputs.referralCampaigns,
   );
-  const referralCadence =
-    inputs.referralCadence ?? "release-funded";
+  const referralCadence = selectedReferralCadence(inputs);
   const funding = calculateStrategyFunding(
     startingLevel.id,
     inputs.strategy,
@@ -1233,7 +1255,9 @@ function simulateStrategyCandidate(
   );
   const synchronizedPlan =
     funding.replacementCampaigns === 0 &&
-    referralCadence === "release-funded"
+    referralCadence === "release-funded" &&
+    options.allocationMode !== "eager" &&
+    !options.purchaseSchedule
       ? buildSynchronizedStartSmallPlan(
           startingLevel.id,
           funding.startingCampaigns,
@@ -1250,7 +1274,7 @@ function simulateStrategyCandidate(
     startedOn: 0,
   }));
   let activatedMask = levelMask(startingLevel.id);
-  let walletCents = 0;
+  let walletCents = referralReleaseCents;
   let firstThreeCampaignsDay =
     funding.startingCampaigns === 3 ? 0 : -1;
   let firstLevelSevenDay = startingLevel.id === 7 ? 0 : -1;
@@ -1262,12 +1286,12 @@ function simulateStrategyCandidate(
     retiredCampaigns: [],
     releasedCampaigns: [],
     ownReleaseGross: 0,
-    referralReleaseGross: 0,
-    availableBeforePurchase: funding.neededToday,
+    referralReleaseGross: fromCents(referralReleaseCents),
+    availableBeforePurchase: funding.neededToday + fromCents(referralReleaseCents),
     purchasedCampaigns: initialCampaigns,
     activationFeesPaid: [startingLevel.id],
     purchaseCost: funding.neededToday,
-    walletAfterPurchase: 0,
+    walletAfterPurchase: fromCents(walletCents),
     affordablePurchaseOptions: 0,
     purchaseDecision: "fixed",
     activeCampaigns: initialActive,
@@ -1563,8 +1587,7 @@ function simulateHeuristicStrategyPath(
   const referralCampaigns = normalizedReferralCampaigns(
     inputs.referralCampaigns,
   );
-  const referralCadence =
-    inputs.referralCadence ?? "release-funded";
+  const referralCadence = selectedReferralCadence(inputs);
   const funding = calculateStrategyFunding(
     startingLevel.id,
     inputs.strategy,
@@ -1604,12 +1627,13 @@ function simulateHeuristicStrategyPath(
   }
 
   let best = baseline;
-  if (baseline.goalDay > 0 && funding.replacementCampaigns > 0) {
+  if (baseline.goalDay > 0 && (funding.replacementCampaigns > 0 || people > 0)) {
     const eager = simulateStrategyCandidate(inputs, maximumDays, {
       allocationMode: "eager",
     });
     if (eager && eager.goalDay < best.goalDay) best = eager;
-
+  }
+  if (baseline.goalDay > 0 && funding.replacementCampaigns > 0) {
     for (const decision of decisions) {
       const alternatives: Array<StrategyPurchaseChoice | undefined> = [
         undefined,
@@ -1745,8 +1769,7 @@ export function simulateStrategyPath(
   const referralCampaigns = normalizedReferralCampaigns(
     inputs.referralCampaigns,
   );
-  const referralCadence =
-    inputs.referralCadence ?? "release-funded";
+  const referralCadence = selectedReferralCadence(inputs);
   const funding = calculateStrategyFunding(
     startingLevel.id,
     inputs.strategy,
@@ -1963,18 +1986,21 @@ export function simulateOptimizedCompoundPath(
 
   const initialCostCents =
     initialPortfolio.campaignCostCents + toCents(starting.activation);
+  const initialReferralCents = toCents(referralGrossThroughDay(
+    0, inputs.people, inputs.referralLevel, inputs.referralCampaigns,
+  ));
   const initialState: CompoundSearchState = {
     portfolio: initialPortfolio,
     activatedMask: levelMask(inputs.startingLevel),
-    walletCents: 0,
+    walletCents: initialReferralCents,
     steps: [
       {
         round: 0,
         day: 0,
         campaigns: initialCampaigns,
-        availableBeforePurchase: fromCents(initialCostCents),
+        availableBeforePurchase: fromCents(initialCostCents + initialReferralCents),
         purchaseCost: fromCents(initialCostCents),
-        walletAfterPurchase: 0,
+        walletAfterPurchase: fromCents(initialReferralCents),
       },
     ],
   };
@@ -2118,7 +2144,7 @@ export function simulateCompoundPath(
 
   campaignValueByDay[0] = campaignValue(campaigns);
 
-  for (let day = 1; day <= projectionDays; day += 1) {
+  for (let day = 0; day <= projectionDays; day += 1) {
     const referralCommission = referralCommissionForDay(
       day,
       people,
@@ -2265,13 +2291,14 @@ export function simulateCashPath(
     (starting.earnings - starting.campaign) * withdrawalRate;
   let netCashAvailable = 0;
 
-  for (let day = 1; day <= projectionDays; day += 1) {
+  for (let day = 0; day <= projectionDays; day += 1) {
     netCashAvailable +=
       referralCommissionForDay(
         day,
         people,
         referralLevel,
         referralCampaigns,
+        releaseInterval,
       ) * withdrawalRate;
 
     for (let campaign = 0; campaign < startingCampaigns; campaign += 1) {

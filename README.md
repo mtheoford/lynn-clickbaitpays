@@ -1,9 +1,41 @@
 # ProNeurs Personal CBP Sites
 
-A multi-tenant subscription application for centrally managed, personalized
-ClickBaitPays education and referral sites.
+**Deployed October 13 referral update:** the shared sponsor template uses the October 6
+overview supplied by the owner and models direct referrals as **10% of campaign
+purchase price, excluding activation fees, credited at purchase**, including
+repurchases. The new overview is used in English. French/German retain their
+native-language overview recordings with adjacent referral corrections, as
+requested by the owner. Calculator timing remains 12 click days plus a 7-day
+hold. The guides and localized FAQs use the updated rule. See the
+[release and verification record](docs/REFERRAL_PURCHASE_UPDATE_2026-10-13.md).
 
-## Planned production architecture
+**Central owner hub — October 13, 2026:** [Proneurs Admin](https://admin.proneurs.org) combines CBP and Shift website accounts, sales reports and supported publication controls. It is a separate Worker using the existing protected admin hostname under `/hub/admin`; the CBP `/admin` application remains available. See the [hub README](../proneurs-admin/README.md), [launch verification](../proneurs-admin/docs/LAUNCH_2026-10-13.md), and [new company onboarding guide](../proneurs-admin/docs/NEW_COMPANY_ONBOARDING.md).
+
+A multi-tenant subscription application for centrally managed, personalized
+ClickBaitPays education and referral sites. Each subscriber uses the same maintained
+template with their own sponsor identity, contact information, and official
+ClickBaitPays referral link. The sales page offers **US $9/month or US $79/year**.
+
+Start with the [ProNeurs project map](../PROJECT_MAP.md) for the relationship to
+Shift AI and the other folders, or the [CBP documentation index](DOCS_INDEX.md)
+for current references and historical plans.
+
+## Project status — reviewed October 11, 2026
+
+The source implements the replicated-site product, including signup and Stripe
+Checkout, shared public sponsor pages, customer self-service, administration,
+analytics, transactional email, and subscription/publication lifecycle handling.
+English, French, and German share the same application and customer records.
+
+The current production configuration targets the Cloudflare Worker
+`proneurs-personal-cbp-sites` and D1 database `proneurs-cbp-production` at
+`cbp.proneurs.org`. The [September 9 production incident record](docs/PURCHASE_BUTTON_INCIDENT_2026-09-09.md)
+documents a deployment and browser checks at that domain. This distinguishes
+implemented source and recorded production activity from a fresh verification of
+today's deployment, customer accounts, or completed payments; those were not
+checked during this documentation review.
+
+## Implemented application architecture
 
 - Next.js 16 and React 19
 - Cloudflare Workers via OpenNext
@@ -16,26 +48,33 @@ ClickBaitPays education and referral sites.
 - Resend transactional email
 - GitHub Actions for CI, staging deployment, and protected production deployment
 
-One application serves all surfaces:
+One application serves all surfaces. The configured production addresses are:
 
-| Surface | Planned address |
-| --- | --- |
-| Marketing and signup | `https://cbp.proneurs.org` |
-| Customer site | `https://cbp.proneurs.org/s/{slug}` |
-| Customer management | `https://cbp.proneurs.org/manage` |
-| Administration | `https://admin.cbp.proneurs.org/admin` |
+| Surface | Address | Purpose |
+| --- | --- | --- |
+| Marketing and signup | `https://cbp.proneurs.org/get-your-site` | Sell the website subscription; `/` redirects here |
+| Customer site | `https://cbp.proneurs.org/s/{slug}` | Render the personalized ClickBaitPays sponsor page |
+| Customer management | `https://cbp.proneurs.org/manage` | Edit profile/referral details, share the site, view activity, and open Stripe billing |
+| Administration | `https://admin.cbp.proneurs.org/admin` | Search accounts, manage publication, and review signup/conversion activity |
 
-Lynn's current public site is the GitHub Pages deployment at
-`https://mtheoford.github.io/lynn-clickbaitpays/`. The retired OpenAI Sites
-deployment must not be used as a public or rollback address.
+French and German equivalents use `/fr` and `/de` prefixes, including
+`/fr/s/{slug}` and `/de/s/{slug}`. Current source maps each language to its own
+localized videos; English uses the updated overview. See the
+[current referral/video release](docs/REFERRAL_PURCHASE_UPDATE_2026-10-13.md)
+and the [earlier localized video record](docs/LOCALIZED_VIDEO_ROLLOUT.md).
 
-Set `NEXT_PUBLIC_PRIMARY_DOMAIN=cbp.proneurs.org` in production so customer links
-use `/s/{slug}` without requiring wildcard DNS or a deep-subdomain TLS certificate.
-`NEXT_PUBLIC_TENANT_BASE_DOMAIN` remains available for resolving legacy tenant hosts.
+`NEXT_PUBLIC_PRIMARY_DOMAIN=cbp.proneurs.org` is set in production configuration,
+so generated customer links use `/s/{slug}`. `NEXT_PUBLIC_TENANT_BASE_DOMAIN`
+remains available for resolving legacy tenant hosts. The original subdomain-first
+plan is retained as [historical design context](docs/REPLICATED_SITE_PRODUCT_PLAN.md).
+
+The earlier Lynn sponsor page at `https://mtheoford.github.io/lynn-clickbaitpays/`
+is a historical public reference, not the address of this subscription platform.
+The retired OpenAI Sites deployment must not be used as a public or rollback address.
 
 ## Local development
 
-Use Node.js 22.13 or newer.
+Run `nvm use` to select patched Node.js 22.23.4 from `.nvmrc`. Node 24.22.1+ or 26.12.1+ within those major release lines is also supported; `npm install` and `npm ci` reject older releases.
 
 ```bash
 nvm use
@@ -70,7 +109,14 @@ npm run db:generate
 Never place account secrets in `.env.example`, `wrangler.jsonc`, or GitHub-tracked
 files.
 
-## Cloudflare bootstrap
+## Historical initial Cloudflare bootstrap — August 2026
+
+The instructions below preserve the initial setup plan. The current configuration
+already names staging/production databases, queues, and routes; its staging host
+is `proneurs-personal-cbp-sites-staging.mtheoford.workers.dev`. Use
+[`wrangler.jsonc`](wrangler.jsonc) and the [deployment workflow](.github/workflows/deploy.yml)
+for the current definitions. The placeholder-ID and `cbp-staging` route instructions
+below describe the earlier plan, not the current configuration.
 
 Add `proneurs.org` to the Cloudflare account and reproduce its existing DNS
 records before changing the domain's authoritative nameservers. Workers routes
@@ -104,7 +150,13 @@ Create a Cloudflare Access self-hosted application for the admin route, then set
 its audience (`CF_ACCESS_AUD`), team domain, and the explicit `ADMIN_EMAILS`
 allowlist. Access authentication is verified again inside the application.
 
-## GitHub environments
+## GitHub deployment workflow
+
+The checked-in workflow deploys staging after successful `main` CI and offers
+manual staging/production dispatch. It verifies required Worker secret names,
+applies D1 migrations, deploys, and runs purchase-entry smoke checks. The setup
+checklist below records the original environment requirements; repository settings
+and secret values must be inspected separately when operating a release.
 
 Create `staging` and `production` GitHub environments. Put these values in each
 environment, using test-mode Stripe values in staging and live values only after
@@ -153,8 +205,9 @@ expiration every 15 minutes. The same cron permanently purges sites whose
 administrator-scheduled 30-day deletion window has elapsed. Subscription
 cancellation is managed in Stripe; deletion is a separate administrator action.
 
-The ProNeurs Stripe live account uses one custom card retry five days after the
-initial failure, for both CBP and Shift subscriptions. Recovery emails are enabled
+The project's recorded ProNeurs Stripe account policy uses one custom card retry
+five days after the initial failure, for both CBP and Shift subscriptions.
+Recovery emails are enabled
 for card and bank-debit failures, using Stripe's hosted payment-update page. After
 retry exhaustion, subscriptions and invoices remain past due so the CBP application
 can finish its seven-day grace period. Stripe skips automatic retries for declines
@@ -184,16 +237,16 @@ Session is still open. The reminder links directly to that hosted Checkout
 Session. Resend idempotency and a non-personal audit record prevent duplicate
 delivery; the 15-minute cron also recovers reminders that could not be queued.
 
-Verify the Resend sending domain before testing reminder, welcome, and magic-link email.
-Until Resend is configured, the hosted pilot exposes Sign in with ChatGPT as a
-customer and administrator fallback; the account email must match the purchase
-or administrator allowlist email.
+Production/staging customer access uses application-owned email magic links;
+administrator access uses Cloudflare Access and the application allowlist.
+The code retains Sign in with ChatGPT compatibility for earlier pilot environments,
+but disables that fallback in production and staging. Verify the Resend sending
+domain and runtime configuration when operating transactional email.
 
 ## Operations and recovery
 
-- Weekly Dependabot checks cover npm packages and GitHub Actions. Enable
-  Dependabot alerts and security updates in the GitHub repository settings after
-  the branch is pushed.
+- Weekly Dependabot configuration covers npm packages and GitHub Actions.
+  Repository alert/security-update settings require a separate operational check.
 - `npm run audit:security` blocks new and critical advisories and enforces the
   expiration dates in `.github/security-audit-allowlist.json`. The current risk
   assessment and review procedure are in
@@ -202,12 +255,17 @@ or administrator allowlist email.
   record the database bookmark before and after production migrations.
 - Failed billing messages are retried five times and then moved to the configured
   dead-letter queue for manual inspection and replay.
-- Worker observability is enabled. Add alerting for webhook 5xx responses, queue
-  failures, and elevated application errors before the pilot.
-- Use the GitHub Pages deployment as the public reference until the Cloudflare
-  production cutover passes smoke tests and the pilot acceptance window.
+- Worker observability is enabled in configuration. The original launch checklist
+  called for alerting on webhook 5xx responses, queue failures, and elevated errors;
+  this source review does not establish the current external alert configuration.
+- Historical cutover guidance used GitHub Pages as the reference before Cloudflare
+  acceptance. Current configured platform addresses are listed above.
 
-## Launch gates
+## Original launch gates — historical checklist
+
+These are the original launch requirements, retained for operational review.
+The October 11 documentation review did not audit their completion and does not
+reset the recorded Cloudflare production status to an undeployed pilot.
 
 Do not enable live billing until branding permission, legal/claims review,
 privacy and subscription policies, wildcard TLS, Stripe business approval,

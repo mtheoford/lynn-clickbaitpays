@@ -77,7 +77,7 @@ const siteCopy = {
       callout: "Start here · Welcome to ClickBaitPays",
       title: "Welcome to ClickBaitPays",
       heading: "Watch the overview",
-      summary: "The fastest way to understand the opportunity",
+      summary: "Updated October 6, 2026 · See how campaigns work and how the 10% referral commission is paid at campaign purchase.",
     },
     momentum: {
       label: "What you will find",
@@ -111,6 +111,8 @@ const siteCopy = {
         "See campaigns, clicks, balances, referrals, deposits, and withdrawals.",
     },
     testimonialsHeading: "What members are saying.",
+    videoReferralUpdate:
+      "Referral correction for this earlier video: for campaign purchases and repurchases on or after October 1, 2026, your direct referral’s purchase immediately credits 10% of the campaign purchase amount, excluding activation fees, to your Available Balance. Campaigns purchased before October 1 keep the previous commission rule until they finish.",
     resourcesHeading: "Helpful resources",
     resourcesEyebrow: "Official reading",
     resourcesTitle: "Worth opening.",
@@ -118,7 +120,7 @@ const siteCopy = {
       {
         title: "Getting Started",
         eyebrow: "Step-by-step guide",
-        href: "https://media.base44.com/files/public/6a59be82aeb9c1fbceeb9656/618d0fa01_CBPGettingStartedGuide.pdf",
+        href: "/docs/getting-started-clickbaitpays-en.pdf",
       },
       {
         title: "Official FAQ",
@@ -138,6 +140,11 @@ const siteCopy = {
         question: "Do I need referrals?",
         answer:
           "ClickBaitPays currently describes referrals as optional. Confirm the current program rules in official materials before participating.",
+      },
+      {
+        question: "How do referral commissions work?",
+        answer:
+          "For campaigns purchased on or after October 1, 2026, you receive 10% of the campaign purchase amount, excluding activation fees, immediately in Available Balance when your direct referral buys. Campaigns purchased before October 1 keep the previous commission rule until they finish.",
       },
       {
         question: "When can earnings be withdrawn?",
@@ -249,6 +256,8 @@ const siteCopy = {
         "Repérez vos campagnes, clics, soldes, parrainages, dépôts et retraits. Cette vidéo est présentée en français.",
     },
     testimonialsHeading: "Ce qu’en disent les membres.",
+    videoReferralUpdate:
+      "Correction de la règle de parrainage présentée dans cette vidéo antérieure : pour tout achat ou rachat de campagne à partir du 1er octobre 2026, vous recevez immédiatement dans le solde disponible 10 % du montant d’achat de la campagne de votre filleul direct, hors frais d’activation. Les campagnes achetées avant le 1er octobre conservent l’ancienne règle de commission jusqu’à leur fin.",
     resourcesHeading: "Ressources utiles",
     resourcesEyebrow: "Documentation",
     resourcesTitle: "À consulter.",
@@ -276,6 +285,11 @@ const siteCopy = {
         question: "Dois-je parrainer d’autres personnes ?",
         answer:
           "ClickBaitPays indique actuellement que le parrainage est facultatif. Vérifiez les règles en vigueur dans les documents officiels avant de participer.",
+      },
+      {
+        question: "Comment fonctionnent les commissions de parrainage ?",
+        answer:
+          "Pour les campagnes achetées à partir du 1er octobre 2026, vous recevez 10 % du montant d’achat, hors frais d’activation, immédiatement dans le solde disponible lorsque votre filleul direct achète la campagne. Les campagnes achetées avant le 1er octobre conservent l’ancienne règle de commission jusqu’à leur fin.",
       },
       {
         question: "Quand puis-je retirer mes gains ?",
@@ -369,6 +383,7 @@ const siteCopy = {
       summary: "Lernen Sie Kampagnen, Klicks, Guthaben, Empfehlungen, Einzahlungen und Auszahlungen kennen. Das Video wird auf Deutsch präsentiert.",
     },
     testimonialsHeading: "Das sagen Mitglieder.",
+    videoReferralUpdate: "Korrektur der Empfehlungsregel in diesem älteren Video: Bei Kampagnenkäufen und erneuten Käufen ab dem 1. Oktober 2026 werden Ihnen sofort 10 % des Kampagnenkaufbetrags einer direkt geworbenen Person, ohne Aktivierungsgebühren, im verfügbaren Guthaben gutgeschrieben. Vor dem 1. Oktober gekaufte Kampagnen behalten bis zu ihrem Abschluss die bisherige Provisionsregel.",
     resourcesHeading: "Hilfreiche Informationen",
     resourcesEyebrow: "Dokumentation",
     resourcesTitle: "Ein Blick lohnt sich.",
@@ -381,6 +396,7 @@ const siteCopy = {
     faqs: [
       { question: "Ist die Anmeldung kostenlos?", answer: "Die öffentlichen Programmunterlagen unterscheiden zwischen der Kontoeröffnung und kostenpflichtigen Kampagnen. Informieren Sie sich vor jeder Zahlung in der offiziellen FAQ und im Dashboard über die aktuellen Kosten." },
       { question: "Muss ich andere Personen werben?", answer: "Laut ClickBaitPays sind Empfehlungen derzeit freiwillig. Prüfen Sie vor der Teilnahme die aktuellen Regeln in den offiziellen Unterlagen." },
+      { question: "Wie funktionieren Empfehlungsprovisionen?", answer: "Für Kampagnenkäufe ab dem 1. Oktober 2026 erhalten Sie beim Kauf durch eine direkt geworbene Person sofort 10 % des Kampagnenkaufbetrags, ohne Aktivierungsgebühren, im verfügbaren Guthaben. Vor dem 1. Oktober gekaufte Kampagnen behalten bis zu ihrem Abschluss die bisherige Provisionsregel." },
       { question: "Wann können Einnahmen ausgezahlt werden?", answer: "Auszahlungsfristen, Mindestbeträge, Gebühren, Voraussetzungen und Bearbeitungsregeln können sich ändern. Maßgeblich für aktuelle Informationen sind die offizielle FAQ und das Dashboard im Mitgliederbereich." },
     ],
     sponsor: {
@@ -575,6 +591,11 @@ export async function SponsorSitePage({
             <div>
               <strong>{copy.welcomeVideo.heading}</strong>
               <span>{copy.welcomeVideo.summary}</span>
+              {locale !== "en" ? (
+                <span style={{ marginTop: "10px", fontSize: "13px", lineHeight: 1.6, color: "var(--white)" }}>
+                  {copy.videoReferralUpdate}
+                </span>
+              ) : null}
             </div>
             <span className="watch-cue" aria-hidden="true">▶</span>
           </div>
@@ -625,7 +646,7 @@ export async function SponsorSitePage({
                 </div>
               </div>
               <div className="strategy-support">
-                <p>{copy.strategy.summary}</p>
+                <p>{copy.strategy.summary}<br /><strong>{copy.videoReferralUpdate}</strong></p>
                 <div className="strategy-support-actions">
                   <JoinButton href={site.referralUrl} siteSlug={site.slug} label={copy.join} />
                   <ReferralSimulator locale={locale} />
@@ -662,6 +683,7 @@ export async function SponsorSitePage({
                 <span>{copy.tour.label}</span>
                 <h3>{copy.tour.title}</h3>
                 <p>{copy.tour.summary}</p>
+                <p>{copy.videoReferralUpdate}</p>
               </div>
             </article>
           </div>

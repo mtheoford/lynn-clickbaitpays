@@ -2,10 +2,11 @@ import type { SiteLocale } from "./i18n";
 
 type VideoSlot = "welcome" | "strategy" | "tour";
 
-// Versioned objects preserve the English recordings and avoid stale cached media.
+// English uses the updated October overview; French/German retain native recordings.
+// Versioned objects avoid stale cached media and preserve earlier recordings.
 export const siteVideoSources = {
   en: {
-    welcome: "https://cbp-media.proneurs.org/videos/clickbaitpays-overview-2026-09-10.mp4",
+    welcome: "https://cbp-media.proneurs.org/videos/clickbaitpays-overview-2026-10-06.mp4",
     strategy: "https://cbp-media.proneurs.org/videos/clickbaitpays-income-strategy-2026-09-10.mp4",
     tour: "https://cbp-media.proneurs.org/videos/clickbaitpays-back-office-2026-09-10.mp4",
   },

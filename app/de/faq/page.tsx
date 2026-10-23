@@ -7,7 +7,7 @@ export const metadata = germanLegalMetadata({ path: "faq", title: "ClickBaitPays
 
 export default function GermanFaqPage() {
   return (
-    <GermanLegalPage eyebrow="Praktischer Leitfaden" title="Häufige Fragen" summary="Eine deutsche Übersetzung der 15 von ClickBaitPays veröffentlichten Fragen und Antworten, die Ihnen bei der Nutzung der Plattform helfen soll." updatedLabel="Übersetzung auf Grundlage der am 4. September 2026 abgerufenen offiziellen FAQ">
+    <GermanLegalPage eyebrow="Praktischer Leitfaden" title="Häufige Fragen" summary="Eine deutsche Übersetzung der 15 von ClickBaitPays veröffentlichten Fragen und Antworten, die Ihnen bei der Nutzung der Plattform helfen soll." updatedLabel="Offizielle FAQ abgerufen am 13. Oktober 2026">
       <p><strong>Quelle und Aktualisierungen:</strong> Diese Seite ist eine praktische Übersetzung der <a href={officialFaqUrl} target="_blank" rel="noreferrer">offiziellen ClickBaitPays-FAQ auf Englisch</a>. Funktionen, Fristen und Regeln können sich ändern. Prüfen Sie vor jedem Schritt die offizielle Quelle und die Angaben in Ihrem Konto.</p>
 
       <h2>1. Was ist ClickBaitPays?</h2>
@@ -61,7 +61,7 @@ export default function GermanFaqPage() {
       <p>Nein. Empfehlungen sind nicht erforderlich. Sie erzielen Einnahmen durch das Anklicken der Anzeigen Ihrer eigenen Kampagne. Empfehlungen ermöglichen lediglich zusätzliche Einnahmen.</p>
 
       <h2>9. Wie funktionieren Empfehlungsprovisionen?</h2>
-      <p>Sie erhalten eine Provision von 10 % für jeden Klick einer direkt geworbenen Person. Diese wird sofort Ihrem verfügbaren Guthaben gutgeschrieben.</p>
+      <p>Für Kampagnenkäufe ab dem 1. Oktober 2026 erhalten Sie eine Provision von 10 % des Kampagnenkaufbetrags einer direkt geworbenen Person, ohne Aktivierungsgebühren. Sie wird beim Kauf sofort Ihrem verfügbaren Guthaben gutgeschrieben. Vor dem 1. Oktober gekaufte Kampagnen behalten bis zu ihrem Abschluss die bisherige Provisionsregel.</p>
 
       <h2>10. Wie werde ich pro Klick bezahlt?</h2>
       <p>Jede Werbekampagnenstufe hat einen festgelegten Preis pro Klick (CPC). Wenn Sie eine Anzeige anklicken und sie für die vorgeschriebene Dauer ansehen, erhalten Sie 90 % dieses CPC. Der Betrag hängt von der Stufe ab.</p>
@@ -70,13 +70,13 @@ export default function GermanFaqPage() {
       <p>Nach den 12 Kampagnentagen werden Ihre Einnahmen sieben Tage lang zurückgehalten und anschließend Ihrem verfügbaren Guthaben gutgeschrieben. Danach können Sie damit eine neue Kampagne kaufen, es mit „Pay It Forward“ an ein anderes Mitglied übertragen oder eine Auszahlung beantragen. Auf alle Auszahlungen fällt eine Gebühr von 10 % an.</p>
 
       <h2>12. Wie werde ich ausgezahlt?</h2>
-      <p>Sobald Ihre Einnahmen im „Available Balance“ verfügbar sind, können Sie eine Auszahlung direkt an Ihre Kryptowallet beantragen. Eine Auszahlung kann einmal pro Woche beantragt werden. Das Administrationsteam bearbeitet sie manuell innerhalb von 48 Stunden nach Eingang des Antrags.</p>
+      <p>Sobald Ihre Einnahmen im „Available Balance“ verfügbar sind, können Sie eine Auszahlung direkt an Ihre Kryptowallet beantragen. Eine Auszahlung kann einmal pro Woche beantragt werden. Das Administrationsteam bearbeitet sie manuell; die Bearbeitungszeit kann variieren.</p>
 
       <h2>13. Was benötige ich für eine Auszahlung?</h2>
       <p>Sie benötigen ein Mindestguthaben von 10 USDT und eine gültige Wallet-Adresse für die ausgewählte Kryptowährung. Für jede Auszahlung fällt eine Gebühr von 10 % an.</p>
 
       <h2>14. Erfolgen Auszahlungen sofort?</h2>
-      <p>Nein. Das Administrationsteam bearbeitet Auszahlungen manuell und führt sie innerhalb von 48 Stunden nach Antragstellung aus. Nach der Bearbeitung wird die Kryptowährung direkt an die von Ihnen angegebene Wallet-Adresse gesendet.</p>
+      <p>Nein. Das Administrationsteam bearbeitet Auszahlungen manuell; die Bearbeitungszeit kann variieren. Nach der Bearbeitung wird die Kryptowährung direkt an die von Ihnen angegebene Wallet-Adresse gesendet.</p>
 
       <h2>15. Darf ich mehrere Konten erstellen?</h2>
       <p>Jede Person darf nur ein Konto besitzen.</p>

@@ -2,11 +2,11 @@ import type { SiteLocale } from "./i18n";
 
 type VideoSlot = "welcome" | "strategy" | "tour";
 
-// Keep the current English title frames and the approved translated covers.
-// Poster selection must never change the current project-hosted recordings.
+// The updated English overview has its own versioned opening frame.
+// French/German recordings retain their approved language-specific covers.
 export const siteVideoPosters = {
   en: {
-    welcome: "/video-posters/welcome.jpg",
+    welcome: "/video-posters/welcome-2026-10-06.jpg",
     strategy: "/video-posters/income-strategy.jpg",
     tour: "/video-posters/back-office.jpg",
   },
