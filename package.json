@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=22.13.0"
+    "node": "^22.23.4 || ^24.22.1 || ^26.12.1"
   },
   "scripts": {
     "dev": "next dev",
@@ -13,7 +13,7 @@
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy:staging": "npm run verify:release && opennextjs-cloudflare deploy -- --env staging --keep-vars && BASE_URL=https://proneurs-personal-cbp-sites-staging.mtheoford.workers.dev npm run test:e2e:smoke",
     "deploy:production": "npm run verify:release && opennextjs-cloudflare deploy -- --env production --keep-vars && BASE_URL=https://cbp.proneurs.org npm run test:e2e:smoke",
-    "test": "node --test tests/calculator-math.test.ts tests/site-config.test.ts tests/site-identity.test.ts tests/billing-lifecycle.test.ts tests/billing-recovery.test.ts tests/billing-recovery-integration.test.ts tests/customer-auth.test.ts tests/checkout-reservation.test.ts tests/checkout-session-cleanup.test.ts tests/magic-link-submission.test.ts tests/welcome-email.test.ts tests/checkout-reminder-email.test.ts tests/signup-page-analytics.test.ts tests/signup-analytics-report.test.ts tests/signup-analytics-d1.test.ts tests/i18n.test.ts tests/media-preservation.test.ts tests/video-facade.test.ts tests/signup-report-request.test.ts",
+    "test": "node --test tests/calculator-math.test.ts tests/site-config.test.ts tests/site-identity.test.ts tests/billing-lifecycle.test.ts tests/billing-recovery.test.ts tests/billing-recovery-integration.test.ts tests/stripe-application-boundary.test.ts tests/customer-auth.test.ts tests/checkout-reservation.test.ts tests/checkout-session-cleanup.test.ts tests/magic-link-submission.test.ts tests/welcome-email.test.ts tests/checkout-reminder-email.test.ts tests/signup-page-analytics.test.ts tests/signup-analytics-report.test.ts tests/signup-analytics-d1.test.ts tests/i18n.test.ts tests/media-preservation.test.ts tests/video-facade.test.ts tests/signup-report-request.test.ts",
     "test:calculator": "node --test tests/calculator-math.test.ts",
     "audit:security": "node scripts/security-audit.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next --ignore-pattern .open-next --ignore-pattern cloudflare-env.d.ts",
@@ -25,10 +25,10 @@
     "verify:release": "npm run audit:security && npm run lint && npm run typecheck && npm test && npm run build:worker && npm run test:e2e"
   },
   "dependencies": {
-    "@opennextjs/cloudflare": "1.20.2",
+    "@opennextjs/cloudflare": "1.20.13",
     "drizzle-orm": "0.45.2",
     "jose": "6.2.8",
-    "next": "16.3.8",
+    "next": "16.4.3",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "stripe": "^22.4.0"
@@ -42,17 +42,20 @@
     "drizzle-kit": "0.31.10",
     "esbuild": "0.28.1",
     "eslint": "9.39.4",
-    "eslint-config-next": "16.3.8",
-    "miniflare": "5.20260730.0-alpha",
+    "eslint-config-next": "16.4.3",
+    "miniflare": "5.20261019.2-beta",
     "tailwindcss": "4.2.1",
     "typescript": "5.9.3",
-    "wrangler": "4.118.0"
+    "wrangler": "4.152.0"
   },
   "overrides": {
     "@aws-sdk/credential-provider-sso": "3.973.9",
     "js-yaml": "4.3.2",
-    "sharp": "0.35.4",
-    "undici": "7.29.1"
+    "sharp": "0.35.5",
+    "undici": "7.29.1",
+    "@node-minify/core": {
+      "glob": "10.5.0"
+    }
   },
   "type": "module"
 }
