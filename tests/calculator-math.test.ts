@@ -10,6 +10,9 @@ import {
   getLevel,
   levels,
   monthlyReferralPotential,
+  referralCashThroughDay,
+  referralCommissionForDay,
+  referralGrossThroughDay,
   simulateAllStrategyPaths,
   simulateCashPath,
   simulateCompoundPath,
@@ -33,7 +36,7 @@ function near(actual: number, expected: number, tolerance = 0.01) {
   );
 }
 
-test("uses the published Getting Started campaign table", () => {
+test("uses campaign earnings and a 10% purchase referral commission", () => {
   assert.deepEqual(
     levels.map(({ id, campaign, activation, earnings, referralCommission }) => [
       id,
@@ -43,13 +46,13 @@ test("uses the published Getting Started campaign table", () => {
       referralCommission,
     ]),
     [
-      [1, 13, 1, 17.17, 1.908],
-      [2, 77, 7, 101.7, 11.3],
-      [3, 150, 15, 194.4, 21.6],
-      [4, 300, 30, 388.8, 43.2],
-      [5, 600, 60, 777.6, 86.4],
-      [6, 1200, 120, 1555.2, 172.8],
-      [7, 2400, 240, 3240, 360],
+      [1, 13, 1, 17.17, 1.3],
+      [2, 77, 7, 101.7, 7.7],
+      [3, 150, 15, 194.4, 15],
+      [4, 300, 30, 388.8, 30],
+      [5, 600, 60, 777.6, 60],
+      [6, 1200, 120, 1555.2, 120],
+      [7, 2400, 240, 3240, 240],
     ],
   );
 });
@@ -120,12 +123,12 @@ test("projects the first 365 days of ongoing Level 7 and referral withdrawals", 
   near(wait.campaignGrossSurplus, 47880);
   near(wait.campaignNetWithdrawals, 43092);
   near(wait.campaignCashRoi, 598.5);
-  near(wait.referralGrossCommissions, 3693.6);
-  near(wait.referralNetWithdrawals, 3324.24);
-  near(wait.combinedNetWithdrawals, 46416.24);
+  near(wait.referralGrossCommissions, 2565);
+  near(wait.referralNetWithdrawals, 2308.5);
+  near(wait.combinedNetWithdrawals, 45400.5);
   near(wait.averageCampaignNetPerMonth, 3591);
-  near(wait.averageReferralNetPerMonth, 277.02);
-  near(wait.averageCombinedNetPerMonth, 3868.02);
+  near(wait.averageReferralNetPerMonth, 192.375);
+  near(wait.averageCombinedNetPerMonth, 3783.375);
 
   assert.equal(keepMoving.campaignCadenceDays, 12);
   assert.equal(keepMoving.referralCadence, "reserve-backed");
@@ -133,16 +136,16 @@ test("projects the first 365 days of ongoing Level 7 and referral withdrawals", 
   assert.equal(keepMoving.committedCampaignCapital, 14400);
   assert.equal(keepMoving.campaignLaneReleaseCount, 87);
   assert.equal(keepMoving.equivalentThreeCampaignSetReleases, 29);
-  assert.equal(keepMoving.referralReleaseCount, 29);
+  assert.equal(keepMoving.referralReleaseCount, 30);
   near(keepMoving.campaignGrossSurplus, 73080);
   near(keepMoving.campaignNetWithdrawals, 65772);
   near(keepMoving.campaignCashRoi, 456.75);
-  near(keepMoving.referralGrossCommissions, 5637.6);
-  near(keepMoving.referralNetWithdrawals, 5073.84);
-  near(keepMoving.combinedNetWithdrawals, 70845.84);
+  near(keepMoving.referralGrossCommissions, 4050);
+  near(keepMoving.referralNetWithdrawals, 3645);
+  near(keepMoving.combinedNetWithdrawals, 69417);
   near(keepMoving.averageCampaignNetPerMonth, 5481);
-  near(keepMoving.averageReferralNetPerMonth, 422.82);
-  near(keepMoving.averageCombinedNetPerMonth, 5903.82);
+  near(keepMoving.averageReferralNetPerMonth, 303.75);
+  near(keepMoving.averageCombinedNetPerMonth, 5784.75);
 });
 
 test("counts staggered Level 7 lanes from their actual goal-day positions", () => {
@@ -559,20 +562,20 @@ test("charges each level activation once across an event path", () => {
   }
 });
 
-test("releases referral credit only on the modeled cadence", () => {
+test("credits referrals at purchase and repeats only on the modeled repurchase cadence", () => {
   const estimates = calculateReferralCadenceEstimates({
     people: 3,
     level: 3,
     campaignsPerPerson: 3,
   });
 
-  assert.equal(estimates.firstAvailableDay, 19);
-  near(estimates.releaseFunded.grossPerRelease, 194.4);
-  near(estimates.releaseFunded.netPerRelease, 174.96);
-  near(estimates.releaseFunded.monthlyNet, 276.2526);
-  near(estimates.reserveBacked.grossPerRelease, 194.4);
-  near(estimates.reserveBacked.netPerRelease, 174.96);
-  near(estimates.reserveBacked.monthlyNet, 437.4);
+  assert.equal(estimates.firstAvailableDay, 0);
+  near(estimates.releaseFunded.grossPerRelease, 135);
+  near(estimates.releaseFunded.netPerRelease, 121.5);
+  near(estimates.releaseFunded.monthlyNet, 191.8421);
+  near(estimates.reserveBacked.grossPerRelease, 135);
+  near(estimates.reserveBacked.netPerRelease, 121.5);
+  near(estimates.reserveBacked.monthlyNet, 303.75);
 
   const releaseFunded = simulateStrategyPath({
     startingLevel: 3,
@@ -583,12 +586,14 @@ test("releases referral credit only on the modeled cadence", () => {
   });
   const day12 = releaseFunded.steps.find((step) => step.day === 12);
   const day19 = releaseFunded.steps.find((step) => step.day === 19);
-  const day31 = releaseFunded.steps.find((step) => step.day === 31);
-  assert.ok(day12 && day19 && day31);
+  assert.ok(day12 && day19);
+  near(releaseFunded.steps[0].referralReleaseGross, 135);
+  near(releaseFunded.steps[0].walletAfterPurchase, 135);
   near(day12.referralReleaseGross, 0);
-  near(day19.referralReleaseGross, 194.4);
-  near(day19.availableBeforePurchase, 388.8);
-  near(day31.referralReleaseGross, 0);
+  near(day19.referralReleaseGross, 135);
+  assert.ok(releaseFunded.steps.every((step) =>
+    step.referralReleaseGross === (step.day % 19 === 0 ? 135 : 0),
+  ));
 
   const reserveBacked = simulateStrategyPath({
     startingLevel: 3,
@@ -598,11 +603,14 @@ test("releases referral credit only on the modeled cadence", () => {
     referralCampaigns: 3,
     referralCadence: "reserve-backed",
   });
-  const reserveDay31 = reserveBacked.steps.find(
-    (step) => step.day === 31,
-  );
-  assert.ok(reserveDay31);
-  near(reserveDay31.referralReleaseGross, 194.4);
+  const reserveDay12 = reserveBacked.steps.find((step) => step.day === 12);
+  assert.ok(reserveDay12);
+  near(reserveDay12.referralReleaseGross, 135);
+  assert.ok(reserveBacked.steps.every((step) =>
+    step.referralReleaseGross === (step.day % 12 === 0 ? 135 : 0),
+  ));
+  assert.equal(reserveBacked.ongoingProjection.referralCadence, "reserve-backed");
+  assert.equal(reserveBacked.ongoingProjection.referralCadenceDays, 12);
 });
 
 test("scales referral estimates to any entered direct-referral count", () => {
@@ -613,8 +621,8 @@ test("scales referral estimates to any entered direct-referral count", () => {
   });
 
   assert.equal(estimates.people, 7);
-  near(estimates.releaseFunded.grossPerRelease, 1209.6);
-  near(estimates.releaseFunded.netPerRelease, 1088.64);
+  near(estimates.releaseFunded.grossPerRelease, 840);
+  near(estimates.releaseFunded.netPerRelease, 756);
 });
 
 test("validates every level, starting count, and continuation mode", () => {
@@ -943,7 +951,7 @@ test("keeps very large referral counts finite and on the earliest path", () => {
         paths["smooth-timing"].goalDay,
         paths["grow-fastest"].goalDay,
       ],
-      [19, 24, 24],
+      [12, 24, 24],
     );
     assert.ok(
       Object.values(paths).every(
@@ -1064,8 +1072,62 @@ test("models the continuity reserve as 12-day replacement intervals", () => {
 });
 
 test("direct-referral averages scale by people and staggered campaigns", () => {
-  near(monthlyReferralPotential(5, 3, 4), 920.84);
-  near(getLevel(4).referralCommission, 43.2);
+  near(monthlyReferralPotential(5, 3, 4), 639.4737);
+  near(getLevel(4).referralCommission, 30);
+});
+
+test("earns the full commission on staggered purchase days with no click accrual", () => {
+  for (const level of levels) {
+    near(level.referralCommission, level.campaign * 0.1);
+    near(referralCommissionForDay(0, 2, level.id, 3), level.campaign * 0.2);
+    near(referralCommissionForDay(1, 2, level.id, 3), 0);
+    near(referralCommissionForDay(7, 2, level.id, 3), level.campaign * 0.2);
+    near(referralCommissionForDay(12, 2, level.id, 3), 0);
+    near(referralCommissionForDay(14, 2, level.id, 3), level.campaign * 0.2);
+    near(referralCommissionForDay(19, 2, level.id, 3), level.campaign * 0.2);
+    near(referralGrossThroughDay(18, 2, level.id, 3), level.campaign * 0.6);
+    near(referralCashThroughDay(18, 2, level.id, 3), level.campaign * 0.6 * withdrawalRate);
+  }
+  near(referralGrossThroughDay(-1, 3, 3, 3), 0);
+  near(referralGrossThroughDay(365, 0, 3, 3), 0);
+});
+
+test("makes referral cash available on day 0 in every ledger and compound model", () => {
+  const inputs = {
+    startingLevel: 7,
+    startingCampaigns: 3,
+    people: 3,
+    referralLevel: 3,
+    referralCampaigns: 1,
+  };
+  const cash = simulateCashPath(inputs, 19, 19);
+  near(cash.cashAvailableByDay[0], 40.5);
+  near(cash.cashAvailableByDay[1], 40.5);
+  near(cash.cashAvailableByDay[12], 40.5);
+  const continuityCash = simulateCashPath(inputs, 12, 19);
+  near(continuityCash.cashAvailableByDay[11], 40.5);
+  near(continuityCash.cashAvailableByDay[12], 81);
+  near(simulateCompoundPath(inputs, 19).cashAvailableByDay[0], 40.5);
+
+  const optimized = simulateOptimizedCompoundPath(inputs);
+  near(optimized.steps[0].walletAfterPurchase, 45);
+  near(optimized.goalWallet, 45);
+  near(optimized.projectedExitNet, (9720 + 90) * withdrawalRate);
+});
+
+test("allows an earned purchase commission to fund campaigns before click earnings release", () => {
+  const result = simulateStrategyPath({
+    startingLevel: 1,
+    startingCampaigns: 3,
+    strategy: "start-small",
+    people: 11,
+    referralLevel: 7,
+    referralCampaigns: 3,
+  });
+  near(result.steps[0].referralReleaseGross, 7920);
+  assert.equal(result.goalDay, 12);
+  near(result.steps.at(-1)?.ownReleaseGross ?? -1, 0);
+  assert.deepEqual(result.steps.at(-1)?.purchasedCampaigns, [7, 7, 7]);
 });
 
 test("formats starting, singular-day, and rounded-month milestones clearly", () => {

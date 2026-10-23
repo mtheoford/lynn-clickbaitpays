@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { Miniflare } from "miniflare";
+import { convertV4MiniflareOptions, Miniflare } from "miniflare";
 import { buildSignupTrendBuckets, type SignupTrendBucket } from "../lib/signup-analytics-report.ts";
 import { SIGNUP_EVENTS_CTE, signupTrendBucketSql } from "../lib/signup-analytics-sql.ts";
 import type { SignupAnalyticsRange } from "../lib/signup-page-analytics.ts";
@@ -12,7 +12,7 @@ type Result = { success: boolean; error?: string; results?: { success: boolean; 
 // Node's SQLite allows more compound SELECT terms than D1. Run the query in
 // workerd's actual D1 binding so this production limit remains covered.
 test("D1 chart queries support every range, deduplicate browsers and exclude future events", { timeout: 15_000 }, async () => {
-  const runtime = new Miniflare({
+  const runtime = new Miniflare(convertV4MiniflareOptions({
     modules: true,
     compatibilityDate: "2026-08-03",
     d1Databases: { DB: "signup-analytics-regression" },
@@ -28,7 +28,7 @@ test("D1 chart queries support every range, deduplicate browsers and exclude fut
         return Response.json({ success: false, error: String(error) });
       }
     } };`,
-  });
+  }));
   const run = async (statements: Statement[]): Promise<Result> => {
     const response = await runtime.dispatchFetch("https://analytics.test/", {
       method: "POST", body: JSON.stringify(statements),

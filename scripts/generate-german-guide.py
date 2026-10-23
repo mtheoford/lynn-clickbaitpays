@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""German edition of the current getting-started guide, preserving its content.
+"""German edition of the existing getting-started guide.
 
-Reuses the existing French guide's typography and layout primitives. This is a
-translation of the current project edition (2026-09-04), not a new rules update.
+Reuses the French guide's typography and layout primitives. Referral commission
+copy reflects the campaign-purchase rule confirmed on 2026-10-13.
 """
 from __future__ import annotations
 
@@ -82,7 +82,7 @@ def build_story():
     step(4, "Wählen Sie eine passende Werbekampagnenstufe, um den erforderlichen Einzahlungsbetrag zu bestimmen. Pro Konto sind bis zu 3 gleichzeitig aktive Kampagnen möglich.")
     note("Wichtig", "Der Kauf einer Werbekampagne ist der Kauf einer Werbedienstleistung. Er stellt weder eine Investition noch ein Finanzprodukt oder ein Wertpapierangebot dar.", "important")
     story.append(layout.data_table(
-        ["Stufe", "Gesamtkauf", "Anzeigen / Tag", "Pro Klick", "Kampagnenende", "Ihr Anteil (90 %)"],
+        ["Stufe", "Gesamtkauf", "Anzeigen / Tag", "Pro Klick", "Kampagnenende", "Ihre Einnahmen"],
         [["1", "14 USDT", "3", "0,48 USDT", "19,08 USDT", "17,17 USDT"],
          ["2", "84 USDT", "3", "2,83 USDT", "113,00 USDT", "101,70 USDT"],
          ["3", "165 USDT", "3", "5,40 USDT", "216,00 USDT", "194,40 USDT"],
@@ -92,7 +92,7 @@ def build_story():
          ["7", "2.640 USDT", "20", "13,50 USDT", "3.600,00 USDT", "3.240,00 USDT"]],
         [37, 78, 54, 75, 101, 123]))
     story.append(layout.Spacer(1, 7))
-    story.append(layout.para("Der Gesamtkauf enthält die einmalige Aktivierungsgebühr der Stufe. Ihr Sponsor erhält 10 % des Werts am Kampagnenende. Alle Zahlungen werden innerhalb von bis zu 7 Tagen bearbeitet.", layout.SMALL))
+    story.append(layout.para("Der Gesamtkauf enthält die einmalige Aktivierungsgebühr der Stufe. Bei jedem Erst- oder Folgekauf ab dem 1. Oktober 2026 erhalten Sie 10 % des Kampagnenpreises ohne Aktivierungsgebühren, sofort auf „Available Balance“ gutgeschrieben. Die Provision wird nicht aus Klickeinnahmen berechnet. Vor dem 1. Oktober 2026 gekaufte Kampagnen behalten bis zum Abschluss das bisherige Provisionsmodell. Die Wartezeit für Einnahmen aus Ihrer eigenen Kampagne gilt gesondert.", layout.SMALL))
     note("Beachten", "Auf alle Auszahlungen von Einnahmen wird unabhängig von der Kampagnenstufe eine Gebühr von 10 % erhoben.", "warning")
     page()
 
@@ -100,7 +100,7 @@ def build_story():
     note("Wichtig", "Eine Werbekampagne ist eine Werbedienstleistung und weder eine Investition noch ein Finanzprodukt oder Wertpapierangebot.", "important")
     story.append(layout.para("Diese Tabelle gilt nur für Käufe nach dem ersten Kauf einer bestimmten Stufe. Die einmalige Aktivierungsgebühr wird nicht erneut erhoben. „Folgekauf“ zeigt den zu zahlenden Betrag. Alle Beträge sind in USDT angegeben."))
     story.append(layout.data_table(
-        ["Stufe", "Kosten", "Erst-aktivierung", "Folgekauf", "Anz. / Tag", "Pro Klick", "Kampagnen-ende", "Anteil (90 %)"],
+        ["Stufe", "Kosten", "Erst-aktivierung", "Folgekauf", "Anz. / Tag", "Pro Klick", "Kampagnen-ende", "Ihre Einnahmen"],
         [["1", "13", "1", "13", "3", "0,48", "19,08", "17,17"],
          ["2", "77", "7", "77", "3", "2,83", "113,00", "101,70"],
          ["3", "150", "15", "150", "3", "5,40", "216,00", "194,40"],
@@ -175,10 +175,10 @@ def build_story():
     heading("Hilfe", "Häufige Fragen", "Guthaben, Auszahlungen und Wallet-Adressen.")
     qa(7, "Wann wechselt Guthaben von „In Earned Wallets“ zu „Available Balance“?", "Nach den 12 Klicktagen der Kampagne wird das Guthaben nach einer festen Wartezeit von 7 Tagen zu „Available Balance“ übertragen. Danach können Sie es per PIF übertragen, eine neue Kampagne kaufen oder eine Auszahlung beantragen. Auf Auszahlungen fällt eine Gebühr von 10 % an.")
     qa(8, "Wie beantrage ich eine Auszahlung?", "Eine Auszahlungsanfrage pro Woche ist erlaubt. Öffnen Sie unter „Financial“ den Eintrag „Withdraw“. Geben Sie unter „Request Withdrawal“ den USDT-Betrag ein; 10 % Gebühren werden abgezogen. Wählen Sie die gewünschte Kryptowährung, geben Sie Ihre Sicherheits-PIN ein und klicken Sie auf „Submit Withdrawal“.")
-    note("Wallet-Wahl", "Der Ausgangsleitfaden empfiehlt eine selbstverwaltete Wallet wie Exodus oder MetaMask statt einer Börsenwallet wie Binance oder Coinbase. Börsen können eingehende Übertragungen ablehnen oder verzögern; in manchen Fällen können Mittel verloren gehen. Bei einer selbstverwalteten Wallet behalten Sie die Kontrolle. Auszahlungen werden innerhalb von 48 Stunden nach der Anfrage manuell vom Administrationsteam bearbeitet.", "important")
+    note("Wallet-Wahl", "Der Ausgangsleitfaden empfiehlt eine selbstverwaltete Wallet wie Exodus oder MetaMask statt einer Börsenwallet wie Binance oder Coinbase. Börsen können eingehende Übertragungen ablehnen oder verzögern; in manchen Fällen können Mittel verloren gehen. Bei einer selbstverwalteten Wallet behalten Sie die Kontrolle. Auszahlungen werden manuell vom Administrationsteam bearbeitet. Die Bearbeitungszeiten können variieren.", "important")
     qa(9, "Welche Kryptowährungen sind für Auszahlungen vorgesehen?", "Bitcoin (BTC), Ethereum (ETH), Litecoin (LTC), Binance Coin (BNB), Tron (TRX), Ripple (XRP), Stellar (XLM), Polygon (POL) und Solana (SOL). Fügen Sie nach Auswahl der Währung die dazu passende Wallet-Adresse ein.")
     note("Achtung", "Die Adresse muss zur gewählten Kryptowährung passen. Eine Ethereum-Adresse kann beispielsweise keine Bitcoins empfangen. Eine unpassende Adresse kann zum dauerhaften Verlust führen. ClickBaitPays übernimmt keine Verantwortung für Verluste durch falsche Wallet-Adressen.", "warning")
-    note("Diese Ausgabe", "Deutsche Übersetzung und Layoutanpassung der bestehenden Projektausgabe vom 4. September 2026, erstellt am 5. September 2026. Menü- und Schaltflächennamen bleiben passend zur Originaloberfläche auf Englisch. Zahlen und Inhalte wurden aus der vorhandenen Ausgabe übernommen. Maßgeblich bei Änderungen sind die aktuellen Angaben in Ihrem Konto und die offiziellen Bedingungen.")
+    note("Diese Ausgabe", "Deutsche Übersetzung der bestehenden Projektausgabe. Empfehlungsprovision und Auszahlungsbearbeitung wurden anhand der offiziellen FAQ vom 13. Oktober 2026 aktualisiert. Alle anderen Zahlen und Anweisungen stammen aus der Ausgabe vom 4. September 2026. Menü- und Schaltflächennamen bleiben auf Englisch. Maßgeblich sind die Angaben in Ihrem Konto und die aktuellen offiziellen Bedingungen.")
     return story
 
 

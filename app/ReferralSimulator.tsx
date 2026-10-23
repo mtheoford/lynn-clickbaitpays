@@ -70,7 +70,7 @@ const calculatorCopy = {
     fundsAvailableDetail:
       "They move to Available Balance and can then be reused or withdrawn.",
     availabilityNote:
-      "“About day 19” assumes one campaign day is completed each day. Missing campaign days would move the dates later.",
+      "The current official FAQ specifies 12 completed campaign days plus a seven-day hold; this calculator follows that timing. “About day 19” assumes one campaign day is completed each day. Missing campaign days would move the dates later.",
     fastest: "Fastest result for these choices",
     moneyNeededToday: "Money needed today",
     firstEstimatedWithdrawal: "First estimated net withdrawal",
@@ -94,8 +94,10 @@ const calculatorCopy = {
     netGain: "Net gain",
     roiInAbout: "ROI in about",
     days: "days",
-    referralNetAddon: "Referral net add-on",
-    combinedFirstWithdrawal: "Combined first withdrawal",
+    referralNetAddon: "Referral commission after withdrawal fee",
+    combinedFirstWithdrawal: "Net total from the first campaigns and referrals",
+    referralPurchaseNote:
+      "The full 10% referral commission is credited when the referred person buys the campaign. The amount shown here is after the modeled withdrawal fee. Your own campaign withdrawal follows after about 19 days.",
     campaignRoiExcludes: "Campaign ROI excludes",
     separateDay12Reserve: "the separate Day-12 reserve",
     and: "and",
@@ -124,10 +126,10 @@ const calculatorCopy = {
     twelveMonthCampaignRoi: "12-month campaign cash ROI",
     gainDividedByCapital: "Campaign gain ÷ total capital working",
     totalsAssumption:
-      "12-month totals count modeled releases during the 365 days after the goal; the monthly figure is the total divided by 12.",
+      "12-month totals count modeled campaign releases and referral campaign purchases during the 365 days after the goal; the monthly figure is the total divided by 12.",
     referralAssumptionStart:
-      "Referral estimates assume the selected referrals repeat every",
-    referralAssumptionEnd: "days and fund their own campaigns.",
+      "Referral estimates assume the selected referrals buy new campaigns every",
+    referralAssumptionEnd: "days and pay for their own campaigns. Commission is credited at each purchase.",
     chooseModel: "Choose what to model",
     chooseModelDetail: "Pick your level, then add a referral example if wanted.",
     yourLevel: "Your campaign level",
@@ -140,7 +142,7 @@ const calculatorCopy = {
     people: "people",
     each: "each",
     referralsPay:
-      "They pay for their own campaigns. The calculator counts only your referral commissions, modeled as available after about 19 days.",
+      "They pay for their own campaigns. You receive 10% of the campaign purchase amount when they buy, excluding activation fees. The calculator counts that commission at purchase.",
     incomeShownSeparately:
       "Your campaign income, referral commissions, and combined total are shown separately below.",
     chooseCampaignCount: "Choose how many campaigns to start today",
@@ -153,7 +155,7 @@ const calculatorCopy = {
     noAdditionalReserve: "No additional reserve",
     waitForFunds: "Wait for released funds",
     waitForFundsDetail:
-      "Add no outside money on Day 12. Start the next campaigns after value becomes available around Day 19.",
+      "Add no outside money on Day 12. If you rely on your own campaign earnings, start the next campaigns when those funds become available around Day 19. Referral commission already credited at purchase can fund earlier campaigns when spots reopen on Day 12.",
     dayTwelveReserve: "Day-12 reserve",
     optionalOutsideMoney: "Optional outside money",
     keepSpotsMoving: "Keep your selected campaign spots moving",
@@ -175,7 +177,7 @@ const calculatorCopy = {
     assumptionReferrals:
       "The referral estimate models the number of direct referrals entered above at the selected level and campaign count, with those campaigns starting together. Referral campaign costs are paid by the referred people and are not included in your starting amount or Day-12 reserve.",
     assumptionReferralTiming:
-      "Referral timing assumption: the model treats the full direct referral commission as available after the referred campaign completes 12 days and the seven-day hold—about day 19. A separate referral-wallet release rule has not been independently verified.",
+      "Direct referral commission is 10% of the campaign purchase amount, excluding activation fees, and is credited at purchase. The model starts the selected referrals’ purchases today and assumes they buy again every 19 days. This repeat-purchase schedule is an assumption, not a delay in referral commission payment.",
     assumptionWithdrawal:
       "Internal reinvestment does not apply the withdrawal fee. Net cash and 12-month estimates apply the modeled 10% withdrawal fee.",
     disclaimerStart:
@@ -229,7 +231,7 @@ const calculatorCopy = {
     fundsAvailableDetail:
       "Ils passent dans le solde « Available Balance » et peuvent alors être réutilisés ou retirés.",
     availabilityNote:
-      "« Vers le jour 19 » suppose qu’un jour de campagne est effectué chaque jour. Tout jour manqué repousserait les dates.",
+      "La FAQ officielle actuelle indique 12 jours de campagne terminés, suivis de sept jours de blocage ; ce calculateur suit ce calendrier. « Vers le jour 19 » suppose qu’un jour de campagne est effectué chaque jour. Tout jour manqué repousserait les dates.",
     fastest: "Résultat le plus rapide avec ces choix",
     moneyNeededToday: "Somme nécessaire aujourd’hui",
     firstEstimatedWithdrawal: "Premier retrait net estimé",
@@ -253,8 +255,10 @@ const calculatorCopy = {
     netGain: "Gain net",
     roiInAbout: "ROI en environ",
     days: "jours",
-    referralNetAddon: "Supplément net du parrainage",
-    combinedFirstWithdrawal: "Premier retrait total",
+    referralNetAddon: "Commission de parrainage après frais de retrait",
+    combinedFirstWithdrawal: "Total net des premières campagnes et du parrainage",
+    referralPurchaseNote:
+      "La commission de parrainage de 10 % est créditée intégralement lorsque le filleul achète sa campagne. Le montant affiché ici tient compte des frais de retrait modélisés. Le retrait de vos propres gains de campagne intervient ensuite vers le jour 19.",
     campaignRoiExcludes: "Le ROI des campagnes exclut",
     separateDay12Reserve: "la réserve distincte du jour 12",
     and: "et",
@@ -283,10 +287,10 @@ const calculatorCopy = {
     twelveMonthCampaignRoi: "ROI en espèces des campagnes sur 12 mois",
     gainDividedByCapital: "Gain des campagnes ÷ capital total en activité",
     totalsAssumption:
-      "Les totaux sur 12 mois comptent les déblocages simulés pendant les 365 jours suivant l’objectif ; le montant mensuel correspond au total divisé par 12.",
+      "Les totaux sur 12 mois comptent les déblocages de campagne et les achats de campagne des filleuls simulés pendant les 365 jours suivant l’objectif ; le montant mensuel correspond au total divisé par 12.",
     referralAssumptionStart:
-      "Les estimations de parrainage supposent que les filleuls sélectionnés recommencent tous les",
-    referralAssumptionEnd: "jours et financent leurs propres campagnes.",
+      "Les estimations de parrainage supposent que les filleuls sélectionnés achètent de nouvelles campagnes tous les",
+    referralAssumptionEnd: "jours et financent leurs propres campagnes. La commission est créditée à chaque achat.",
     chooseModel: "Choisissez les éléments à simuler",
     chooseModelDetail: "Sélectionnez votre niveau, puis ajoutez un exemple de parrainage si vous le souhaitez.",
     yourLevel: "Niveau de votre campagne",
@@ -299,7 +303,7 @@ const calculatorCopy = {
     people: "personnes",
     each: "par personne",
     referralsPay:
-      "Ils financent leurs propres campagnes. Le calculateur ne compte que vos commissions de parrainage, considérées comme disponibles après environ 19 jours.",
+      "Ils financent leurs propres campagnes. Vous recevez 10 % du montant d’achat de la campagne au moment de l’achat, hors frais d’activation. Le calculateur compte cette commission à l’achat.",
     incomeShownSeparately:
       "Les revenus de vos campagnes, les commissions de parrainage et le total sont indiqués séparément ci-dessous.",
     chooseCampaignCount: "Choisissez combien de campagnes lancer aujourd’hui",
@@ -312,7 +316,7 @@ const calculatorCopy = {
     noAdditionalReserve: "Aucune réserve supplémentaire",
     waitForFunds: "Attendre le déblocage des fonds",
     waitForFundsDetail:
-      "N’ajoutez aucun fonds externe au jour 12. Lancez les campagnes suivantes lorsque les fonds deviennent disponibles, vers le jour 19.",
+      "N’ajoutez aucun fonds externe au jour 12. Si vous comptez sur vos propres gains de campagne, lancez les campagnes suivantes lorsque ces fonds deviennent disponibles, vers le jour 19. Les commissions de parrainage déjà créditées à l’achat peuvent financer des campagnes plus tôt, lorsque les emplacements se libèrent au jour 12.",
     dayTwelveReserve: "Réserve du jour 12",
     optionalOutsideMoney: "Fonds externes facultatifs",
     keepSpotsMoving: "Maintenir actifs les emplacements sélectionnés",
@@ -334,7 +338,7 @@ const calculatorCopy = {
     assumptionReferrals:
       "L’estimation de parrainage modélise le nombre de filleuls directs saisi ci-dessus, avec le niveau et le nombre de campagnes sélectionnés, toutes lancées en même temps. Les filleuls paient leurs propres campagnes ; ces coûts ne sont pas inclus dans votre mise de départ ni dans la réserve du jour 12.",
     assumptionReferralTiming:
-      "Hypothèse sur le calendrier du parrainage : le modèle considère que la totalité de la commission directe devient disponible lorsque la campagne du filleul termine ses 12 jours et la période de blocage de sept jours, soit vers le jour 19. Une règle distincte de déblocage du portefeuille de parrainage n’a pas été vérifiée indépendamment.",
+      "La commission de parrainage direct est de 10 % du montant d’achat de la campagne, hors frais d’activation, et est créditée à l’achat. Le modèle fait commencer les achats des filleuls sélectionnés aujourd’hui et suppose qu’ils achètent à nouveau tous les 19 jours. Ce calendrier de nouveaux achats est une hypothèse, pas un délai de paiement de la commission de parrainage.",
     assumptionWithdrawal:
       "Les réinvestissements internes ne sont pas soumis aux frais de retrait. Les estimations nettes et sur 12 mois appliquent les frais de retrait simulés de 10 %.",
     disclaimerStart:
@@ -368,7 +372,7 @@ const calculatorCopy = {
     afterHold: "Nach der Sperrfrist",
     fundsAvailable: "Guthaben wird verfügbar",
     fundsAvailableDetail: "Es wird dem „Available Balance“ gutgeschrieben und kann dann erneut eingesetzt oder ausgezahlt werden.",
-    availabilityNote: "„Etwa an Tag 19“ setzt voraus, dass täglich ein Kampagnentag abgeschlossen wird. Ausgelassene Kampagnentage verschieben die Termine nach hinten.",
+    availabilityNote: "Die aktuelle offizielle FAQ nennt 12 abgeschlossene Kampagnentage und eine anschließende siebentägige Sperrfrist; dieser Rechner folgt diesem Zeitplan. „Etwa an Tag 19“ setzt voraus, dass täglich ein Kampagnentag abgeschlossen wird. Ausgelassene Kampagnentage verschieben die Termine nach hinten.",
     fastest: "Schnellstes Ergebnis bei diesen Einstellungen",
     moneyNeededToday: "Heute benötigter Betrag",
     firstEstimatedWithdrawal: "Erste geschätzte Nettoauszahlung",
@@ -391,8 +395,9 @@ const calculatorCopy = {
     netGain: "Nettogewinn",
     roiInAbout: "Rendite in etwa",
     days: "Tagen",
-    referralNetAddon: "Zusätzlicher Nettoertrag aus Empfehlungen",
-    combinedFirstWithdrawal: "Erste Gesamtauszahlung",
+    referralNetAddon: "Empfehlungsprovision nach Auszahlungsgebühr",
+    combinedFirstWithdrawal: "Nettosumme aus ersten Kampagnen und Empfehlungen",
+    referralPurchaseNote: "Die volle Empfehlungsprovision von 10 % wird beim Kampagnenkauf der geworbenen Person gutgeschrieben. Der hier angezeigte Betrag berücksichtigt die modellierte Auszahlungsgebühr. Die Auszahlung Ihrer eigenen Kampagneneinnahmen folgt etwa an Tag 19.",
     campaignRoiExcludes: "Die Kampagnenrendite berücksichtigt nicht",
     separateDay12Reserve: "die gesonderte Reserve für Tag 12",
     and: "und",
@@ -419,9 +424,9 @@ const calculatorCopy = {
     afterWithdrawalFee: "Nach der modellierten Auszahlungsgebühr",
     twelveMonthCampaignRoi: "Auszahlungsrendite der Kampagnen über 12 Monate",
     gainDividedByCapital: "Kampagnengewinn ÷ insgesamt eingesetztes Kapital",
-    totalsAssumption: "Die 12-Monats-Gesamtbeträge umfassen die modellierten Freigaben in den 365 Tagen nach Erreichen des Ziels; der Monatsbetrag ist der Gesamtbetrag geteilt durch 12.",
-    referralAssumptionStart: "Die Empfehlungsschätzungen setzen voraus, dass die geworbenen Personen ihre Kampagnen alle",
-    referralAssumptionEnd: "Tage wiederholen und selbst finanzieren.",
+    totalsAssumption: "Die 12-Monats-Gesamtbeträge umfassen die modellierten Kampagnenfreigaben und Kampagnenkäufe der geworbenen Personen in den 365 Tagen nach Erreichen des Ziels; der Monatsbetrag ist der Gesamtbetrag geteilt durch 12.",
+    referralAssumptionStart: "Die Empfehlungsschätzungen setzen voraus, dass die geworbenen Personen alle",
+    referralAssumptionEnd: "Tage neue Kampagnen kaufen und diese selbst finanzieren. Die Provision wird bei jedem Kauf gutgeschrieben.",
     chooseModel: "Wählen Sie Ihr Szenario",
     chooseModelDetail: "Wählen Sie Ihre Stufe und ergänzen Sie bei Bedarf ein Empfehlungsbeispiel.",
     yourLevel: "Ihre Kampagnenstufe",
@@ -433,7 +438,7 @@ const calculatorCopy = {
     person: "Person",
     people: "Personen",
     each: "pro Person",
-    referralsPay: "Sie bezahlen ihre Kampagnen selbst. Der Rechner berücksichtigt nur Ihre Empfehlungsprovisionen und nimmt an, dass diese nach etwa 19 Tagen verfügbar sind.",
+    referralsPay: "Sie bezahlen ihre Kampagnen selbst. Sie erhalten beim Kauf 10 % des Kampagnenkaufbetrags, ohne Aktivierungsgebühren. Der Rechner berücksichtigt diese Provision zum Kaufzeitpunkt.",
     incomeShownSeparately: "Ihre Kampagneneinnahmen, Empfehlungsprovisionen und der Gesamtbetrag werden unten getrennt angezeigt.",
     chooseCampaignCount: "Wie viele Kampagnen möchten Sie heute starten?",
     campaignCountDetailStart: "Wenn die Mittel heute verfügbar sind, ergibt ihr sofortiger Einsatz den schnellsten modellierten Start. Vergleichen Sie Kosten und Ergebnis auf Stufe",
@@ -442,7 +447,7 @@ const calculatorCopy = {
     afterDayTwelveChoice: "Entscheidung für die Zeit nach Tag 12",
     noAdditionalReserve: "Keine zusätzliche Reserve",
     waitForFunds: "Auf freigegebenes Guthaben warten",
-    waitForFundsDetail: "Setzen Sie an Tag 12 keine zusätzlichen Mittel ein. Starten Sie die nächsten Kampagnen, sobald das Guthaben etwa an Tag 19 verfügbar wird.",
+    waitForFundsDetail: "Setzen Sie an Tag 12 keine zusätzlichen Mittel ein. Wenn Sie Ihre eigenen Kampagneneinnahmen verwenden, starten Sie die nächsten Kampagnen, sobald dieses Guthaben etwa an Tag 19 verfügbar wird. Bereits beim Kauf gutgeschriebene Empfehlungsprovisionen können neue Kampagnen früher finanzieren, sobald an Tag 12 wieder Plätze frei werden.",
     dayTwelveReserve: "Reserve für Tag 12",
     optionalOutsideMoney: "Optionale zusätzliche Mittel",
     keepSpotsMoving: "Die gewählten Kampagnenplätze aktiv halten",
@@ -456,7 +461,7 @@ const calculatorCopy = {
     assumptionContinuation: "„Auf freigegebenes Guthaben warten“ setzt an Tag 12 keine zusätzlichen Ersatzmittel ein. „Die gewählten Kampagnenplätze aktiv halten“ setzt nach 12 abgeschlossenen Tagen separate Mittel in Höhe der gewählten Kampagnenanzahl multipliziert mit dem Kampagnenpreis ein. Dies ist eine einmalige Überbrückung im Wachstumsmodell; spätere Käufe nutzen freigegebenes Guthaben.",
     assumptionGoal: "Das angezeigte Ziel entspricht dem schnellsten Verlauf, den die automatische Kaufregel des Rechners findet. Es garantiert nicht den kürzesten Zeitplan für jede mögliche Kaufentscheidung.",
     assumptionReferrals: "Die Empfehlungsschätzung modelliert die oben eingegebene Anzahl direkt geworbener Personen mit der ausgewählten Stufe und Kampagnenanzahl, wobei diese Kampagnen gemeinsam starten. Die geworbenen Personen tragen ihre Kampagnenkosten selbst; diese sind weder in Ihrem Startbetrag noch in Ihrer Reserve für Tag 12 enthalten.",
-    assumptionReferralTiming: "Annahme zum Zeitpunkt der Empfehlungsprovision: Das Modell behandelt die gesamte direkte Provision als verfügbar, sobald die geworbene Kampagne ihre 12 Tage und die siebentägige Sperrfrist abgeschlossen hat – etwa an Tag 19. Eine separate Freigaberegel für das Empfehlungsguthaben wurde nicht unabhängig überprüft.",
+    assumptionReferralTiming: "Die direkte Empfehlungsprovision beträgt 10 % des Kampagnenkaufbetrags, ohne Aktivierungsgebühren, und wird beim Kauf gutgeschrieben. Das Modell beginnt heute mit den Käufen der geworbenen Personen und setzt neue Käufe alle 19 Tage voraus. Dieser Zeitplan für erneute Käufe ist eine Annahme und keine Wartezeit bis zur Provisionszahlung.",
     assumptionWithdrawal: "Bei interner Reinvestition wird keine Auszahlungsgebühr angesetzt. Nettobeträge und 12-Monats-Schätzungen berücksichtigen die modellierte Auszahlungsgebühr von 10 %.",
     disclaimerStart: "Dieses Strategiebeispiel dient nur der Veranschaulichung und ist weder eine Einnahmengarantie noch eine Finanzberatung oder Anlageprognose. Kampagnenverfügbarkeit, Mitgliederaktivität, Programmregeln, Gebühren und Zeiträume können sich ändern. Herkunft der Mittel und Finanzierungskosten werden nicht modelliert. Lesen Sie die",
     officialRules: "aktuellen offiziellen Regeln",
@@ -773,10 +778,10 @@ function SelectedStrategyDetail({
   const firstReferralGross = includeReferrals
     ? path.referralEstimates.releaseFunded.grossPerRelease
     : 0;
-  const firstGrossAvailable = firstCampaignGross + firstReferralGross;
+  const firstGrossTotal = firstCampaignGross + firstReferralGross;
   const firstCampaignNet = path.firstNetWithdrawal;
   const firstReferralNet = firstReferralGross * withdrawalRate;
-  const combinedFirstWithdrawalNet = firstGrossAvailable * withdrawalRate;
+  const combinedFirstWithdrawalNet = firstGrossTotal * withdrawalRate;
   const firstWithdrawalProfit = path.firstBatchProfit;
   const firstWithdrawalRoi = path.firstBatchRoi;
 
@@ -865,16 +870,19 @@ function SelectedStrategyDetail({
             </div>
 
             {includeReferrals && (
-              <div className="outcome-card__referral-result">
-                <div>
-                  <span>{t.referralNetAddon}</span>
-                  <strong>+{formatMoney(firstReferralNet, locale)} USDT</strong>
+              <>
+                <div className="outcome-card__referral-result">
+                  <div>
+                    <span>{t.referralNetAddon}</span>
+                    <strong>+{formatMoney(firstReferralNet, locale)} USDT</strong>
+                  </div>
+                  <div>
+                    <span>{t.combinedFirstWithdrawal}</span>
+                    <strong>{formatMoney(combinedFirstWithdrawalNet, locale)} USDT</strong>
+                  </div>
                 </div>
-                <div>
-                  <span>{t.combinedFirstWithdrawal}</span>
-                  <strong>{formatMoney(combinedFirstWithdrawalNet, locale)} USDT</strong>
-                </div>
-              </div>
+                <p className="outcome-card__note">{t.referralPurchaseNote}</p>
+              </>
             )}
 
             {(path.neededByDay12 > 0 || includeReferrals) && (

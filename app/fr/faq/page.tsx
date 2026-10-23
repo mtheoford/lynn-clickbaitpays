@@ -16,7 +16,7 @@ export default function FrenchFaqPage() {
       eyebrow="Guide pratique"
       title="Questions fréquentes"
       summary="Une traduction française des 15 questions et réponses publiées par ClickBaitPays pour vous aider à utiliser la plateforme."
-      updatedLabel="Source officielle consultée le 4 septembre 2026"
+      updatedLabel="FAQ officielle consultée le 13 octobre 2026"
     >
       <p>
         <strong>Source et mises à jour:</strong> cette page est une traduction pratique de la{" "}
@@ -77,7 +77,7 @@ export default function FrenchFaqPage() {
       <p>Non. Les filleuls ne sont pas obligatoires. Vous gagnez en cliquant sur les publicités de votre propre campagne. Les filleuls permettent simplement de gagner davantage.</p>
 
       <h2>9. Comment fonctionnent les gains de parrainage?</h2>
-      <p>Vous recevez une commission de 10 % sur chaque clic effectué par votre filleul. Elle est immédiatement créditée sur votre solde disponible.</p>
+      <p>Pour les campagnes achetées à partir du 1er octobre 2026, vous recevez une commission de 10 % du montant d’achat de la campagne de votre filleul direct, hors frais d’activation. Elle est créditée immédiatement sur votre solde disponible au moment de l’achat. Les campagnes achetées avant le 1er octobre conservent l’ancienne règle de commission jusqu’à leur fin.</p>
 
       <h2>10. Comment suis-je rémunéré pour chaque clic?</h2>
       <p>Chaque niveau de campagne publicitaire possède un coût par clic (CPC) défini. Lorsque vous cliquez sur une publicité et la consultez pendant la durée requise, vous gagnez 90 % de ce CPC. Le montant varie selon le niveau.</p>
@@ -86,13 +86,13 @@ export default function FrenchFaqPage() {
       <p>Après les 12 jours de campagne, vos gains sont placés en retenue pendant 7 jours avant d’être transférés vers votre solde disponible. Vous pouvez ensuite utiliser ces fonds pour acheter une nouvelle campagne, les transférer à un autre membre avec « Pay It Forward » ou demander un retrait. Des frais de 10 % s’appliquent à tous les retraits.</p>
 
       <h2>12. Comment serai-je payé?</h2>
-      <p>Lorsque vos gains sont disponibles dans « Available Balance », vous pouvez demander un retrait directement vers votre portefeuille de cryptomonnaies. Une demande de retrait peut être effectuée une fois par semaine. Elle est traitée manuellement par l’équipe d’administration dans les 48 heures suivant son envoi.</p>
+      <p>Lorsque vos gains sont disponibles dans « Available Balance », vous pouvez demander un retrait directement vers votre portefeuille de cryptomonnaies. Une demande de retrait peut être effectuée une fois par semaine. Elle est traitée manuellement par l’équipe d’administration ; les délais de traitement peuvent varier.</p>
 
       <h2>13. Que faut-il pour effectuer un retrait?</h2>
       <p>Vous devez disposer d’un solde minimum de 10 USDT et d’une adresse de portefeuille valide pour la cryptomonnaie choisie. Des frais de retrait de 10 % s’appliquent à tous les retraits.</p>
 
       <h2>14. Les paiements sont-ils instantanés?</h2>
-      <p>Non. Les retraits sont traités manuellement par l’équipe d’administration et exécutés dans les 48 heures suivant la demande. Une fois le retrait traité, la cryptomonnaie est envoyée directement à l’adresse de portefeuille que vous avez indiquée.</p>
+      <p>Non. Les retraits sont traités manuellement par l’équipe d’administration et les délais peuvent varier. Une fois le retrait traité, la cryptomonnaie est envoyée directement à l’adresse de portefeuille que vous avez indiquée.</p>
 
       <h2>15. Puis-je créer plusieurs comptes?</h2>
       <p>Chaque personne ne peut posséder qu’un seul compte.</p>

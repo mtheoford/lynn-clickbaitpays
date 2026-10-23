@@ -14,8 +14,8 @@ const require = createRequire(import.meta.url);
 const videos = [
   {
     slot: "welcome",
-    poster: "/video-posters/welcome.jpg",
-    src: "https://cbp-media.proneurs.org/videos/clickbaitpays-overview-2026-09-10.mp4",
+    poster: "/video-posters/welcome-2026-10-06.jpg",
+    src: "https://cbp-media.proneurs.org/videos/clickbaitpays-overview-2026-10-06.mp4",
   },
   {
     slot: "strategy",
