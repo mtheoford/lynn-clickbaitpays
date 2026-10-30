@@ -1,13 +1,15 @@
-import { count, eq } from "drizzle-orm";
+import { count, desc, eq } from "drizzle-orm";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDb } from "@/db";
-import { analyticsEvents, sites, subscriptions, users } from "@/db/schema";
+import { analyticsEvents, sites, subscriptions, users, welcomeEmailDeliveries } from "@/db/schema";
 import { requireAdmin } from "@/lib/admin-auth";
 import { subscriptionAllowsDataDeletion } from "@/lib/billing-lifecycle";
 import { runtimeValue } from "@/lib/runtime";
 import { siteUrl } from "@/lib/site-config";
 import { stripeDashboardUrl } from "@/lib/stripe";
+import { accountBillingLabel } from "@/lib/billing-health-policy";
+import { welcomeDeliveryLabel } from "@/lib/welcome-delivery-policy";
 import SiteStatusActions from "../../SiteStatusActions";
 import AccountDeletionAction from "./AccountDeletionAction";
 import AdminSiteEditor from "./AdminSiteEditor";
@@ -42,6 +44,7 @@ export default async function AdminSiteDetailPage({ params }: { params: Promise<
       stripeCustomerId: users.stripeCustomerId,
       plan: subscriptions.plan,
       subscriptionStatus: subscriptions.status,
+      checkoutPaymentStatus: sites.checkoutPaymentStatus,
       stripeSubscriptionId: subscriptions.stripeSubscriptionId,
       cancelAtPeriodEnd: subscriptions.cancelAtPeriodEnd,
       currentPeriodEnd: subscriptions.currentPeriodEnd,
@@ -55,6 +58,15 @@ export default async function AdminSiteDetailPage({ params }: { params: Promise<
     .where(eq(sites.id, id))
     .limit(1);
   if (!account) notFound();
+
+  const [welcome] = await db.select({
+    status: welcomeEmailDeliveries.status,
+    providerMessageId: welcomeEmailDeliveries.providerMessageId,
+    acceptedAt: welcomeEmailDeliveries.acceptedAt,
+    deliveredAt: welcomeEmailDeliveries.deliveredAt,
+    lastCheckedAt: welcomeEmailDeliveries.lastCheckedAt,
+  }).from(welcomeEmailDeliveries).where(eq(welcomeEmailDeliveries.siteId, id))
+    .orderBy(desc(welcomeEmailDeliveries.createdAt)).limit(1);
 
   const appEnv = await runtimeValue("APP_ENV");
   const deletionAllowed = subscriptionAllowsDataDeletion(
@@ -107,7 +119,7 @@ export default async function AdminSiteDetailPage({ params }: { params: Promise<
             <span>Billing record</span>
             <strong>{account.plan ?? "Not active"}</strong>
             <small>
-              {account.subscriptionStatus ?? "No subscription connected"}
+              {accountBillingLabel({ subscriptionStatus: account.subscriptionStatus, checkoutPaymentStatus: account.checkoutPaymentStatus, siteStatus: account.siteStatus })}
               {account.cancelAtPeriodEnd && account.currentPeriodEnd
                 ? ` · Cancels ${account.currentPeriodEnd.toLocaleDateString()}`
                 : ""}
@@ -131,6 +143,17 @@ export default async function AdminSiteDetailPage({ params }: { params: Promise<
             </div>
           ) : null}
           <WelcomeEmailAction siteId={account.siteId} />
+          <div>
+            <span>Latest welcome email</span>
+            <strong>{welcomeDeliveryLabel(welcome?.status)}</strong>
+            <small>{welcome?.status === "bounced" ? "The provider reported a bounce. Review the recipient address before sending again."
+              : welcome?.status === "complained" ? "The provider reported a spam complaint. Do not automatically resend."
+              : welcome?.deliveredAt ? `Delivery confirmed ${welcome.deliveredAt.toLocaleString()}`
+              : welcome?.acceptedAt ? `Accepted ${welcome.acceptedAt.toLocaleString()}; inbox delivery not yet confirmed`
+              : "Earlier emails may not have delivery history."}</small>
+            {welcome?.providerMessageId ? <small>Provider message: {welcome.providerMessageId}</small> : null}
+            <Link href="/admin/billing">Review billing and email health →</Link>
+          </div>
           <AccountDeletionAction
             siteId={account.siteId}
             initialScheduledAt={account.deletionScheduledAt?.toISOString() ?? null}

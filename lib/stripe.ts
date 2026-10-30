@@ -17,6 +17,8 @@ export async function getStripe(): Promise<Stripe> {
   if (!secretKey) throw new Error("Stripe billing is not configured.");
   return new Stripe(secretKey, {
     httpClient: Stripe.createFetchHttpClient(),
+    timeout: 10_000,
+    maxNetworkRetries: 1,
   });
 }
 

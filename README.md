@@ -20,6 +20,15 @@ Start with the [ProNeurs project map](../PROJECT_MAP.md) for the relationship to
 Shift AI and the other folders, or the [CBP documentation index](DOCS_INDEX.md)
 for current references and historical plans.
 
+**Billing reliability — October 30, 2026:** the
+[prioritized issue and implementation plan](docs/BILLING_RELIABILITY_PLAN_2026-10-30.md)
+tracks the payment/activation incident and related fixes. Use the
+[billing operations runbook](docs/BILLING_OPERATIONS.md),
+[deployment guards](docs/DEPLOYMENT_GUARDS.md), and
+[welcome-email delivery guide](docs/WELCOME_EMAIL_DELIVERY.md) for ongoing work.
+The [release verification record](docs/BILLING_RELIABILITY_RELEASE_2026-10-30.md)
+records rollout status and live verification separately from implementation.
+
 ## Project status — reviewed October 11, 2026
 
 The source implements the replicated-site product, including signup and Stripe
@@ -134,9 +143,11 @@ npx wrangler queues create proneurs-cbp-billing-production
 npx wrangler queues create proneurs-cbp-billing-production-dead-letter
 ```
 
-Replace only the two non-local placeholder D1 IDs in `wrangler.jsonc` with the
-IDs returned by Cloudflare. The GitHub workflow instead injects each environment's
-`D1_DATABASE_ID` at deployment time, so committed placeholders are intentional.
+The original bootstrap required replacing the two non-local placeholder D1 IDs
+with IDs returned by Cloudflare. The current `wrangler.jsonc` already commits the
+actual staging and production database IDs; only the local database uses a
+placeholder. The workflow reads this configuration and does not inject a
+`D1_DATABASE_ID` variable.
 
 In Cloudflare DNS, configure proxied records that cover `cbp`, `cbp-staging`, and
 the corresponding wildcard tenant hosts. Worker routes are already declared for:
@@ -153,23 +164,24 @@ allowlist. Access authentication is verified again inside the application.
 ## GitHub deployment workflow
 
 The checked-in workflow deploys staging after successful `main` CI and offers
-manual staging/production dispatch. It verifies required Worker secret names,
-applies D1 migrations, deploys, and runs purchase-entry smoke checks. The setup
-checklist below records the original environment requirements; repository settings
-and secret values must be inspected separately when operating a release.
+manual staging/production dispatch. It uses the same release helper as
+`npm run deploy:staging` and `npm run deploy:production`: full security, lint,
+type, unit/integration, Worker-build, and local browser checks; required Worker
+secret-name checks; D1 migrations and remote schema verification; deployment;
+then live purchase-entry smoke checks. A failed migration or schema check stops
+deployment. See the [deployment runbook](docs/DEPLOYMENT_GUARDS.md) for the exact
+sequence and rollback guidance.
 
-Create `staging` and `production` GitHub environments. Put these values in each
-environment, using test-mode Stripe values in staging and live values only after
-all launch gates pass.
-
-Environment variable:
-
-- `D1_DATABASE_ID`
-
-Environment secrets:
+Create `staging` and `production` GitHub environments with these deployment
+credentials as environment secrets:
 
 - `CLOUDFLARE_ACCOUNT_ID`
 - `CLOUDFLARE_API_TOKEN`
+
+Provision the application secrets separately in each Cloudflare Worker
+environment, using test-mode Stripe values in staging. The workflow checks their
+names; it does not copy their values from GitHub or provision them:
+
 - `STRIPE_SECRET_KEY`
 - `STRIPE_WEBHOOK_SECRET`
 - `STRIPE_PRICE_MONTHLY`
@@ -178,6 +190,11 @@ Environment secrets:
 - `ADMIN_EMAILS`
 - `CF_ACCESS_AUD`
 - `CF_ACCESS_TEAM_DOMAIN`
+
+Configure the Worker sender (`EMAIL_FROM`) and the optional owner-alert recipient
+(`BILLING_ALERT_EMAIL`) separately as described in the operations runbooks.
+Database IDs come from the committed Wrangler configuration. Repository
+environment protection and runtime settings require an operational check.
 
 Protect the production environment with required reviewers. CI runs on pull
 requests and `main`; a successful `main` CI run deploys staging. Production is a
@@ -253,8 +270,11 @@ domain and runtime configuration when operating transactional email.
   [`docs/DEPENDENCY_SECURITY.md`](docs/DEPENDENCY_SECURITY.md).
 - D1 Time Travel provides point-in-time restore for accidental data changes;
   record the database bookmark before and after production migrations.
-- Failed billing messages are retried five times and then moved to the configured
-  dead-letter queue for manual inspection and replay.
+- Queue deliveries retain five configured retries and a dead-letter queue.
+  Independent 15-minute recovery also reclaims stalled events and retries failed
+  processing with backoff, up to 12 attempts. The protected billing health page
+  identifies overdue work and exhausted retries. Follow the
+  [billing operations runbook](docs/BILLING_OPERATIONS.md) before manual replay.
 - Worker observability is enabled in configuration. The original launch checklist
   called for alerting on webhook 5xx responses, queue failures, and elevated errors;
   this source review does not establish the current external alert configuration.

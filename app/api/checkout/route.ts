@@ -354,7 +354,15 @@ export async function POST(request: Request) {
     failureStage = "database_error";
     await db
       .update(sites)
-      .set({ stripeCheckoutSessionId: session.id, updatedAt: new Date() })
+      .set({
+        stripeCheckoutSessionId: session.id,
+        checkoutPaymentStatus: null,
+        checkoutCompletedAt: null,
+        checkoutLastCheckedAt: null,
+        checkoutNextCheckAt: null,
+        checkoutRecoveryError: null,
+        updatedAt: new Date(),
+      })
       .where(eq(sites.id, siteId));
 
     try {

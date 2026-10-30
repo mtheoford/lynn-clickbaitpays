@@ -13,9 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
-      NEXT_PUBLIC_SITE_URL: https://cbp-staging.proneurs.org
-      NEXT_PUBLIC_MARKETING_URL: https://cbp-staging.proneurs.org
-      NEXT_PUBLIC_TENANT_BASE_DOMAIN: cbp-staging.proneurs.org
+      NEXT_PUBLIC_SITE_URL: https://proneurs-personal-cbp-sites-staging.mtheoford.workers.dev
+      NEXT_PUBLIC_MARKETING_URL: https://proneurs-personal-cbp-sites-staging.mtheoford.workers.dev
+      NEXT_PUBLIC_TENANT_BASE_DOMAIN: cbp.proneurs.org
+      NEXT_PUBLIC_PRIMARY_DOMAIN: proneurs-personal-cbp-sites-staging.mtheoford.workers.dev
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
