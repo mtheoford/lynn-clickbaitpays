@@ -24,9 +24,10 @@ const mocks: Record<string, string> = {
   "billing-test-fixture": "let fixture; export const setFixture = value => { fixture = value; }; export const getFixture = () => fixture;",
   "@/db": 'import {getFixture} from "billing-test-fixture"; export const getDb = async () => getFixture().db;',
   "@/lib/stripe": 'import {getFixture} from "billing-test-fixture"; export const getStripe = async () => getFixture().stripe;',
-  "@/lib/email": 'import {getFixture} from "billing-test-fixture"; export const sendTransactionalEmail = async value => getFixture().send(value); export const deliverDueCheckoutReminders = async () => 0; export const deliverCheckoutReminderForSite = async () => {}; export const deliverWelcomeEmailForSite = async () => {}; export const enqueueWelcomeEmail = async () => {};',
+  "@/lib/email": 'import {getFixture} from "billing-test-fixture"; export const sendTransactionalEmail = async value => getFixture().send(value); export const deliverDueWelcomeEmails=async()=>0;export const refreshWelcomeEmailStatuses=async()=>0;export const deliverDueCheckoutReminders = async () => 0; export const deliverCheckoutReminderForSite = async () => {}; export const deliverWelcomeEmailForSite = async () => {}; export const enqueueWelcomeEmail = async () => {};',
   "@/lib/runtime": 'export const getRuntimeEnv = async () => ({}); export const runtimeValue = async name => ({ NEXT_PUBLIC_MARKETING_URL: "https://cbp.proneurs.org", NEXT_PUBLIC_SUPPORT_EMAIL: "support@proneurs.org" })[name];',
   "@/lib/site-config": 'export const siteUrl = slug => `https://${slug}.cbp.proneurs.org`;',
+  "@/lib/billing-health": "export const sendBillingHealthAlert=async()=>{};",
   "@/lib/checkout-cleanup": "export const purgeExpiredCheckoutReservations = async () => 0;",
   "@/lib/signup-analytics-server": "export const recordSignupServerEvent = async () => {};",
 };

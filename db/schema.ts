@@ -53,6 +53,11 @@ export const sites = sqliteTable(
     }),
     sourceSiteId: text("source_site_id"),
     stripeCheckoutSessionId: text("stripe_checkout_session_id"),
+    checkoutPaymentStatus: text("checkout_payment_status"),
+    checkoutCompletedAt: integer("checkout_completed_at", { mode: "timestamp_ms" }),
+    checkoutLastCheckedAt: integer("checkout_last_checked_at", { mode: "timestamp_ms" }),
+    checkoutNextCheckAt: integer("checkout_next_check_at", { mode: "timestamp_ms" }),
+    checkoutRecoveryError: text("checkout_recovery_error"),
     publishedAt: integer("published_at", { mode: "timestamp_ms" }),
     reservationExpiresAt: integer("reservation_expires_at", { mode: "timestamp_ms" }),
     deletionScheduledAt: integer("deletion_scheduled_at", { mode: "timestamp_ms" }),
@@ -66,6 +71,7 @@ export const sites = sqliteTable(
     index("idx_sites_status").on(table.status),
     index("idx_sites_deletion_scheduled_at").on(table.deletionScheduledAt),
     index("idx_sites_source_site_id").on(table.sourceSiteId),
+    index("idx_sites_checkout_recovery").on(table.status, table.checkoutNextCheckAt),
   ],
 );
 
@@ -222,8 +228,22 @@ export const stripeEvents = sqliteTable("stripe_events", {
   payloadJson: text("payload_json").notNull(),
   attempts: integer("attempts").notNull().default(0),
   lastError: text("last_error"),
+  processingToken: text("processing_token"),
+  leaseExpiresAt: integer("lease_expires_at", { mode: "timestamp_ms" }),
+  lastAttemptAt: integer("last_attempt_at", { mode: "timestamp_ms" }),
+  nextAttemptAt: integer("next_attempt_at", { mode: "timestamp_ms" }),
   receivedAt: integer("received_at", { mode: "timestamp_ms" }).notNull(),
   processedAt: integer("processed_at", { mode: "timestamp_ms" }),
+}, (table) => [
+  index("idx_stripe_events_recovery").on(table.status, table.nextAttemptAt),
+  index("idx_stripe_events_lease").on(table.leaseExpiresAt),
+]);
+
+// Serializes different Stripe events and reconciliation jobs for one resource.
+export const billingWorkLeases = sqliteTable("billing_work_leases", {
+  resourceKey: text("resource_key").primaryKey(),
+  token: text("token").notNull(),
+  expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
 });
 
 export const auditLogs = sqliteTable(
@@ -247,3 +267,28 @@ export const auditLogs = sqliteTable(
 export type User = typeof users.$inferSelect;
 export type SponsorSite = typeof sites.$inferSelect;
 export type Subscription = typeof subscriptions.$inferSelect;
+
+export const welcomeEmailDeliveries = sqliteTable("welcome_email_deliveries", {
+  id: text("id").primaryKey(),
+  siteId: text("site_id").notNull().references(() => sites.id, { onDelete: "cascade" }),
+  locale: text("locale", { enum: ["en", "fr", "de"] }).notNull().default("en"),
+  status: text("status", { enum: ["pending", "sending", "accepted", "delivered", "bounced", "complained", "failed", "needs_review", "canceled", "legacy_unknown"] }).notNull().default("pending"),
+  payloadJson: text("payload_json"),
+  providerMessageId: text("provider_message_id"),
+  providerEvent: text("provider_event"),
+  attempts: integer("attempts").notNull().default(0),
+  firstAttemptAt: integer("first_attempt_at", { mode: "timestamp_ms" }),
+  lastAttemptAt: integer("last_attempt_at", { mode: "timestamp_ms" }),
+  nextAttemptAt: integer("next_attempt_at", { mode: "timestamp_ms" }),
+  leaseToken: text("lease_token"),
+  leaseExpiresAt: integer("lease_expires_at", { mode: "timestamp_ms" }),
+  acceptedAt: integer("accepted_at", { mode: "timestamp_ms" }),
+  deliveredAt: integer("delivered_at", { mode: "timestamp_ms" }),
+  lastCheckedAt: integer("last_checked_at", { mode: "timestamp_ms" }),
+  lastError: text("last_error"),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+}, table => [
+  index("idx_welcome_deliveries_due").on(table.status, table.nextAttemptAt),
+  index("idx_welcome_deliveries_site").on(table.siteId, table.createdAt),
+]);

@@ -22,14 +22,14 @@ export async function POST(
   const { id } = await params;
   const db = await getDb();
   const [site] = await db
-    .select({ id: sites.id, status: sites.status })
+    .select({ id: sites.id, status: sites.status, publicationOverride: sites.publicationOverride })
     .from(sites)
     .where(eq(sites.id, id))
     .limit(1);
   if (!site) return NextResponse.json({ error: "Site not found." }, { status: 404 });
-  if (site.status === "pending" || site.status === "deleted") {
+  if ((site.status !== "active" && site.status !== "past_due") || site.publicationOverride) {
     return NextResponse.json(
-      { error: "The site must be provisioned before sending its welcome email." },
+      { error: "The site must be published before sending an email saying it is ready." },
       { status: 409 },
     );
   }

@@ -1,4 +1,4 @@
-import { and, eq, gt, isNotNull, isNull, lte, ne } from "drizzle-orm";
+import { and, eq, gt, isNotNull, isNull, lte } from "drizzle-orm";
 import { getDb } from "@/db";
 import { auditLogs, sites, subscriptions, users } from "@/db/schema";
 import { buildCheckoutReminderEmail } from "@/lib/checkout-reminder-email";
@@ -8,17 +8,12 @@ import { siteUrl } from "@/lib/site-config";
 import { getStripe } from "@/lib/stripe";
 import { buildWelcomeEmail } from "@/lib/welcome-email";
 import { billingLocale, localizedPublicUrl } from "@/lib/checkout-localization";
+import { sendTransactionalEmail } from "@/lib/transactional-email";
+export { sendTransactionalEmail } from "@/lib/transactional-email";
+export { enqueueWelcomeEmail, deliverWelcomeEmailForSite, deliverDueWelcomeEmails, refreshWelcomeEmailStatuses, seedMissingWelcomeDeliveries } from "@/lib/welcome-delivery";
 
 const CHECKOUT_REMINDER_ACTION = "site.checkout_reminder.sent";
 export const CHECKOUT_REMINDER_DELAY_SECONDS = 30 * 60;
-
-type EmailInput = {
-  to: string;
-  subject: string;
-  html: string;
-  text: string;
-  idempotencyKey: string;
-};
 
 function localizedPublicSiteUrl(slug: string, locale: SiteLocale): string {
   return localizedPublicUrl(siteUrl(slug), locale);
@@ -30,61 +25,6 @@ function localizedMarketingUrl(
   locale: SiteLocale,
 ): string {
   return new URL(localizedPath(locale, pathname), marketingUrl).toString();
-}
-
-async function resolveWelcomeLocale(
-  locale: SiteLocale | undefined,
-  checkoutSessionId: string | null,
-): Promise<SiteLocale> {
-  if (locale && billingLocale(locale) === locale) return locale;
-  if (!checkoutSessionId) return "en";
-
-  try {
-    const stripe = await getStripe();
-    const session = await stripe.checkout.sessions.retrieve(checkoutSessionId);
-    return billingLocale(session.metadata?.locale);
-  } catch {
-    // Legacy queue messages did not include a locale. Email delivery should
-    // remain available even if the old Checkout session can no longer be read.
-    return "en";
-  }
-}
-
-export async function sendTransactionalEmail(input: EmailInput): Promise<void> {
-  const [apiKey, from, appEnv] = await Promise.all([
-    runtimeValue("RESEND_API_KEY"),
-    runtimeValue("EMAIL_FROM"),
-    runtimeValue("APP_ENV"),
-  ]);
-
-  if (!apiKey || !from) {
-    if (!appEnv || appEnv === "local" || appEnv === "development") {
-      console.info(`[email:${input.idempotencyKey}] ${input.subject} -> ${input.to}`);
-      return;
-    }
-    throw new Error("Transactional email is not configured.");
-  }
-
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      authorization: `Bearer ${apiKey}`,
-      "content-type": "application/json",
-      "idempotency-key": input.idempotencyKey,
-    },
-    body: JSON.stringify({
-      from,
-      to: [input.to],
-      subject: input.subject,
-      html: input.html,
-      text: input.text,
-    }),
-  });
-
-  if (!response.ok) {
-    const detail = (await response.text()).slice(0, 300);
-    throw new Error(`Transactional email failed (${response.status}): ${detail}`);
-  }
 }
 
 export async function sendWelcomeEmail(input: {
@@ -112,61 +52,6 @@ export async function sendWelcomeEmail(input: {
     text: content.text,
     html: content.html,
   });
-}
-
-export async function deliverWelcomeEmailForSite(
-  siteId: string,
-  deliveryId = `welcome-${siteId}`,
-  locale?: SiteLocale,
-): Promise<void> {
-  const db = await getDb();
-  const [account] = await db
-    .select({
-      email: users.email,
-      name: users.name,
-      slug: sites.slug,
-      stripeCheckoutSessionId: sites.stripeCheckoutSessionId,
-    })
-    .from(users)
-    .innerJoin(sites, eq(sites.userId, users.id))
-    .where(and(eq(sites.id, siteId), ne(sites.status, "deleted")))
-    .limit(1);
-  if (!account) throw new Error("Welcome email account was not found.");
-
-  const marketingUrl =
-    (await runtimeValue("NEXT_PUBLIC_MARKETING_URL")) || "https://cbp.proneurs.org";
-  const effectiveLocale = await resolveWelcomeLocale(
-    locale,
-    account.stripeCheckoutSessionId,
-  );
-  await sendWelcomeEmail({
-    email: account.email,
-    name: account.name,
-    publicUrl: localizedPublicSiteUrl(account.slug, effectiveLocale),
-    manageUrl: localizedMarketingUrl(marketingUrl, "/manage", effectiveLocale),
-    siteId,
-    deliveryId,
-    locale: effectiveLocale,
-  });
-}
-
-export async function enqueueWelcomeEmail(
-  siteId: string,
-  deliveryId = `welcome-${siteId}-${crypto.randomUUID()}`,
-  locale?: SiteLocale,
-): Promise<"queued" | "sent"> {
-  const env = await getRuntimeEnv();
-  if (env.BILLING_QUEUE) {
-    await env.BILLING_QUEUE.send({
-      type: "welcome_email",
-      siteId,
-      deliveryId,
-      ...(locale ? { locale } : {}),
-    });
-    return "queued";
-  }
-  await deliverWelcomeEmailForSite(siteId, deliveryId, locale);
-  return "sent";
 }
 
 export async function deliverCheckoutReminderForSite(

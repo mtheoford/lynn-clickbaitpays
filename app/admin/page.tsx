@@ -5,6 +5,7 @@ import { getDb } from "@/db";
 import { sites, subscriptions, users } from "@/db/schema";
 import { adminSignOutPath, requireAdmin } from "@/lib/admin-auth";
 import { siteUrl } from "@/lib/site-config";
+import { accountBillingLabel } from "@/lib/billing-health-policy";
 import {
   parseSignupAnalyticsRange,
   type SignupAnalyticsRange,
@@ -24,6 +25,7 @@ type AdminRow = {
   status: string;
   plan: string | null;
   subscriptionStatus: string | null;
+  checkoutPaymentStatus: string | null;
   createdAt: Date;
 };
 
@@ -90,6 +92,7 @@ export default async function AdminPage({
         status: sites.status,
         plan: subscriptions.plan,
         subscriptionStatus: subscriptions.status,
+        checkoutPaymentStatus: sites.checkoutPaymentStatus,
         createdAt: sites.createdAt,
       })
       .from(sites)
@@ -136,7 +139,7 @@ export default async function AdminPage({
 
       <section className="admin-title-row">
         <div><p className="eyebrow">Account operations</p><h1>New signups and subscriber sites</h1><p>See the newest accounts first, check their signup and billing status, and manage publication.</p></div>
-        <div className="admin-title-links"><a href="#admin-funnel-title">Optional reports ↓</a><Link href="/get-your-site">Open signup page ↗</Link></div>
+        <div className="admin-title-links"><Link href="/admin/billing">Billing and email health →</Link><a href="#admin-funnel-title">Optional reports ↓</a><Link href="/get-your-site">Open signup page ↗</Link></div>
       </section>
 
       <section className="admin-stat-grid" aria-label="Site account totals">
@@ -169,7 +172,7 @@ export default async function AdminPage({
                   <tr key={row.siteId}>
                     <td><Link className="admin-customer-link" href={`/admin/sites/${row.siteId}`}>{row.displayName} →</Link><span>{row.email}</span><span>{row.phone}</span></td>
                     <td><a href={siteUrl(row.slug)} target="_blank" rel="noreferrer">{siteUrl(row.slug).replace(/^https?:\/\//, "")} ↗</a></td>
-                    <td><strong>{row.plan ?? "—"}</strong><span>{row.subscriptionStatus ?? "No subscription"}</span></td>
+                    <td><strong>{row.plan ?? "—"}</strong><span>{accountBillingLabel({ subscriptionStatus: row.subscriptionStatus, checkoutPaymentStatus: row.checkoutPaymentStatus, siteStatus: row.status })}</span></td>
                     <td>{row.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</td>
                     <td><SiteStatusActions siteId={row.siteId} status={row.status} /></td>
                   </tr>

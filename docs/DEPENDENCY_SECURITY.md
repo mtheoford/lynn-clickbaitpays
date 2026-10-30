@@ -1,7 +1,66 @@
 # Dependency security exceptions
 
-- Last reviewed: October 10, 2026
-- Next mandatory review: October 24, 2026
+- Last reviewed: October 30, 2026
+- Next mandatory review: November 6, 2026
+
+## October 30 billing reliability release review
+
+The release updates the existing `undici` override from 7.29.1 to 7.30.1 and
+refreshes the compatible transitive `zod` dependency from 4.4.3 to 4.6.7. These
+are the only package-version changes. No Stripe API, Next.js, OpenNext, Wrangler,
+Miniflare, or migration-tool version changes were made for this remediation.
+
+The [Undici 7.30.1 release](https://github.com/nodejs/undici/releases/tag/v7.30.1)
+fixes all eight newly reported Undici advisories. Its Node.js requirement remains
+`>=20.18.1`, compatible with the repository's supported Node.js versions. The
+[Zod advisory](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5) is fixed in
+4.6.6; the installed 4.6.7 satisfies both existing consumers' `^4.0.0` ranges.
+The updated audit has no critical or high findings. Its four moderate package
+entries all resolve to the single older esbuild advisory below. No new advisory
+exception was added, and the gate's severity and expiration rules are unchanged.
+
+### Fresh review of the remaining development-tool advisory
+
+[GHSA-67mh-4wv8-2f99](https://github.com/evanw/esbuild/security/advisories/GHSA-67mh-4wv8-2f99)
+affects esbuild through 0.24.2 and is fixed from 0.25.0. The vulnerable behavior
+requires esbuild's development server: a browser visiting an untrusted page can
+read responses from that server because of permissive CORS. Listening only on
+localhost does not remove that attack path.
+
+Fresh dependency and source inspection on October 30 established the following:
+
+- The affected copy remains only at `drizzle-kit@0.31.10` →
+  `@esbuild-kit/esm-loader@2.6.5` → `@esbuild-kit/core-utils@3.3.2` →
+  `esbuild@0.18.20`. The repository's other esbuild copies are patched.
+- The installed `core-utils` source calls only `transform` and `transformSync`;
+  it contains no `serve` call. The application, worker, scripts, and CI contain
+  no Drizzle Kit runtime import or esbuild server invocation. The sole package
+  script invoking Drizzle Kit is `db:generate`, against repository-controlled
+  schema/configuration files.
+- `npm view drizzle-kit@0.31.11 dependencies` confirms the current stable release
+  still declares `@esbuild-kit/esm-loader: ^2.5.5`. Updating that patch does not
+  remove the vulnerable path. npm's proposed downgrade to Drizzle Kit 0.18.1 is
+  not a compatible fix. Forcing a newer pre-1.0 esbuild outside the loader's
+  `~0.18.20` range is not an established safe migration-tool upgrade.
+- This release's successful Worker build and production dry-run had no
+  `drizzle-kit`, `esbuild-kit`, or `node_modules/esbuild` paths in 440 bundled
+  input modules. A scan of 1,559 generated JavaScript/JSON artifact files found
+  no matching tooling paths. The server-function metafile separately listed
+  690 inputs with no Drizzle Kit or esbuild-kit path.
+
+On this evidence, only the existing development-tool exception is renewed for
+seven days, through November 6. Do not run Drizzle Studio or an esbuild development
+server. Re-review immediately if the tooling is imported into runtime code,
+server functionality is introduced, or a supported upstream fix becomes
+available. Before November 6, check the upstream dependency path again and remove
+the exception when supported remediation is available. A newly discovered
+advisory or an expired exception must continue to fail the security gate.
+
+Local release evidence is preserved under `outputs/billing-reliability/`:
+`npm-audit-after-patches.json`, `worker-tooling-exclusion.json`,
+`worker-metafile.json`, `artifact-build.log`, and
+`development-tool-artifact-check.json`. These are local verification outputs,
+not application data or deployed files.
 
 ## October 10 release prerequisite review
 
