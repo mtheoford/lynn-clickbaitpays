@@ -12,13 +12,14 @@ Production rollout results are recorded in `BILLING_RELIABILITY_RELEASE_2026-10-
 | BILL-002 | 27 `invoice.paid` events ($733 total) and two `invoice.payment_failed` events failed on writes to `billing_recovery`, October 14–23. Migration `0008_billing_recovery.sql` was applied October 23 at 18:42:44 UTC, after the final failure at 16:11:01 UTC. Local deployment scripts omitted migration application; CI already applied migrations. | Internal failures after successful payments; delayed recovery notices for two $9 renewals. 26 paid accounts were active and one canceled when reviewed. | P0 |
 | BILL-003 | Admin displayed “No subscription” for a paid account because it read only the local subscription join. Failed/stalled jobs had no owner alert or automatic rescue. | Payment and provisioning could disagree without staff knowing. | P1 |
 | MAIL-001 | Welcome jobs used a provider idempotency key, but discarded the provider message ID and stored neither acceptance nor delivery status. | Staff could not distinguish queued, accepted, delivered, and failed mail. | P1 |
-| OPS-001 | 29 historical failed invoice events remained after the table was repaired; one September 28 expired-checkout event remained pending. | Misleading operational backlog and unresolved audit history. | P2 |
+| OPS-001 | 29 historical failed invoice events remained after the table was repaired; one September 28 expired-checkout event remained pending. Initial read-only dead-letter peeks showed five copies: three of those failed paid-invoice events and the two already-recovered incident events. Later peeks returned other batches; the release record documents the verified cleanup. | Misleading operational backlog and unresolved audit history. | P2 |
+| SEC-001 | The release audit found patched Undici/Zod issues and a remaining development-only esbuild advisory under Drizzle Kit. The latter is excluded from production and has a reviewed exception through November 6. | No live Worker exposure through this tooling path; recheck upstream before the exception expires. [Issue #49](https://github.com/mtheoford/lynn-clickbaitpays/issues/49). | P3 |
 
 The exact reason BILL-001's original execution stopped is **not established**.
 A stale processing checkpoint is evidence of incomplete execution, not proof of
 a particular timeout, queue outage, or dead-letter result. The migration timing
 and failed statements strongly support a schema/deployment mismatch for BILL-002;
-the stored SQL error does not retain its original low-level database cause.
+the stored SQL error does not retain its original low-level database cause. The later dead-letter inspection establishes that the incident event copies reached that queue, but does not establish why their original processing stopped.
 
 The two failed renewals were actual payment failures, separate from our processing
 error. Their specific bank decline reasons are not present in saved invoice
@@ -47,7 +48,9 @@ the canceled account. This investigation did not measure checkout abandonment.
    sends for review rather than blindly resending. Do not mass-send old welcomes.
 5. **P2 — Reconcile historical work (OPS-001).** Save the affected IDs and account
    state, replay only existing notifications, verify completion and unchanged
-   entitlement/cancellation/override rules, and retain an auditable outcome.
+   entitlement/cancellation/override rules, and retain an auditable outcome. Remove only exact dead-letter message copies whose saved events have been verified completed; preserve all event/payment records.
+
+6. **P3 — Recheck development tooling (SEC-001).** Review the supported upstream fix by November 6 and remove the temporary exception when a compatible patch is available. Preserve the audit gate.
 
 ## Boundaries that must remain intact
 
@@ -60,7 +63,8 @@ the canceled account. This investigation did not measure checkout abandonment.
   language, media, pricing, analytics behavior, or access controls.
 - A replay must not create duplicate local subscriptions or duplicate welcome mail.
 - Provider acceptance is not represented as delivery. Older untracked welcome
-  emails remain explicitly unknown until an owner requests a new send.
+  history remains explicitly unknown; an owner-requested resend creates a separate
+  tracked delivery record.
 - Automated owner alerts contain an authenticated admin link, not customer
   financial details, raw event payloads, tokens, or credentials.
 
@@ -80,14 +84,15 @@ additive schema in place when rolling code back.
 
 ## Tracking checklist
 
-- [ ] BILL-001: automatic recovery implemented and regression-tested
-- [ ] BILL-002: all supported releases apply and verify schema first
-- [ ] BILL-003: protected health page, accurate labels, owner alert configured
-- [ ] MAIL-001: durable outbox, acceptance/delivery distinction, safe retries
-- [ ] OPS-001: 29 historical invoice failures and expired-checkout record reconciled
-- [ ] Staging verification complete
-- [ ] Production verification and scheduled-pass observation complete
-- [ ] Release record records version, tests, rollback reference, and limitations
+- [x] BILL-001: automatic recovery implemented and regression-tested
+- [x] BILL-002: all supported releases apply and verify schema first
+- [x] BILL-003: protected health page, accurate labels, owner alert configured
+- [x] MAIL-001: durable outbox, acceptance/delivery distinction, safe retries
+- [x] OPS-001: 29 historical invoice failures and expired-checkout record reconciled
+- [x] Staging verification complete
+- [x] Production verification and scheduled-pass observation complete
+- [x] Release record records version, tests, rollback reference, and limitations
+- [ ] SEC-001: recheck supported upstream fix by November 6 ([issue #49](https://github.com/mtheoford/lynn-clickbaitpays/issues/49))
 
 Reopen the relevant ID if an incident recurs. Record timestamps, event/delivery
 IDs, current provider state, customer impact, and the repair outcome; do not put

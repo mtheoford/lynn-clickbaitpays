@@ -164,7 +164,8 @@ Use the queue API/client's documented JSON-body transport. Do not place an entir
 
 4. If recovering an unlinked paid checkout and its invoice, process the checkout event first. Verify the local subscription exists and the checkout event completed before enqueueing the related invoice. Invoice processing cannot create a missing checkout association by itself.
 5. Verify `completed`, a cleared error/lease, the expected current local billing and publication state, exactly one matching subscription, and the existing public page. Confirm email acceptance/delivery separately. An event may complete while publication correctly remains canceled, suspended, or overridden.
-6. Record the reviewed IDs, before/after outcomes, current Stripe basis, and any intentionally retained exception in a private operational record. Do not publicly paste customer payloads, credentials, or account emails.
+6. If a matching dead-letter copy remains after successful recovery, inspect it with the nonleasing Queue `messages/peek` endpoint. Verify its exact stored event ID is completed before removing only that message through `messages/purge` using its opaque reference. Never purge the entire queue to clear an incident, and retain the application event/payment history.
+7. Record the reviewed IDs, before/after outcomes, current Stripe basis, and any intentionally retained exception in a private operational record. Do not publicly paste customer payloads, credentials, or account emails.
 
 Replay performs Stripe reads and local reconciliation, not a new charge. It can change local publication according to current billing and can queue the normal welcome or applicable recovery notices. Review those possible side effects before a manual replay.
 
