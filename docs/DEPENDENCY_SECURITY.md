@@ -1,7 +1,27 @@
 # Dependency security exceptions
 
-- Last reviewed: October 30, 2026
+- Last reviewed: November 2, 2026
 - Next mandatory review: November 6, 2026
+
+## November 2 admin revenue release review
+
+Two newly reported moderate advisories affect existing build/lint tooling:
+[glob cancellation](https://github.com/advisories/GHSA-3g3m-2fjr-6pw4)
+and [minimatch pattern amplification](https://github.com/advisories/GHSA-g3hv-75wg-m249).
+Their fixes (glob 14.0.2 and minimatch 11.0.1) are outside the existing consumer
+major ranges; minimatch 3.x consumers also use the older callable API. Forcing
+these versions across OpenNext and ESLint requires a separate compatibility review.
+
+The reviewed call sites are build minification, bundle discovery and lint over
+repository-controlled files/patterns. Application routes do not import this tooling
+or accept glob expressions. The November 2 production server metafile has no glob,
+minimatch, ESLint or node-minify module paths; a scan of 1,127 generated JS/JSON
+files likewise found none. This bounds the findings to trusted local/CI tooling,
+with no production request path. Explicit development-only exceptions expire
+November 6, alongside the existing esbuild exception. No severity, expiry or
+unknown-advisory gate is relaxed. Re-review immediately if runtime imports or
+untrusted pattern inputs are introduced, and evaluate supported upstream upgrades
+by November 6. Do not expose build/lint tools as a service.
 
 ## October 30 billing reliability release review
 

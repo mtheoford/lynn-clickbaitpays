@@ -1,11 +1,21 @@
 {
   "schemaVersion": 1,
-  "reviewedAt": "2026-10-30",
+  "reviewedAt": "2026-11-02",
   "exceptions": {
     "GHSA-67mh-4wv8-2f99": {
       "expires": "2026-11-06",
       "scope": "development-only",
       "reason": "Fresh review October 30: esbuild 0.18.20 remains only under Drizzle Kit's legacy config loader; stable Drizzle Kit 0.31.11 still requires it. The loader uses transform/transformSync and never serve; repository-controlled migration generation is the only Drizzle Kit invocation. Production Worker dry-run has zero tooling paths in 440 bundled inputs and 1559 scanned artifact files. Do not run Drizzle Studio or esbuild serve. Recheck the supported upstream path by November 6; this exception covers only GHSA-67mh-4wv8-2f99 in development tooling."
+    },
+    "GHSA-3g3m-2fjr-6pw4": {
+      "expires": "2026-11-06",
+      "scope": "development-only",
+      "reason": "November 2 review: glob is used only by OpenNext/build minification against repository-controlled paths; no customer patterns or AbortSignal-bounded HTTP glob walks. Production server metafile and generated JS/JSON scan contain no glob/minimatch/node-minify module paths. Upstream fix is glob 14.0.2, outside the currently supported 10.x/13.x dependency ranges. Keep filesystem tooling out of runtime and re-review by November 6."
+    },
+    "GHSA-g3hv-75wg-m249": {
+      "expires": "2026-11-06",
+      "scope": "development-only",
+      "reason": "November 2 review: minimatch is limited to ESLint and OpenNext build tooling using repository-controlled patterns. The app does not accept customer glob patterns and production server metafile/artifacts contain no minimatch paths. Upstream 11.0.1 is outside existing 3.x/9.x/10.x consumer ranges and includes API changes; do not force it across lint consumers. Re-review supported upgrades by November 6; never expose glob/lint tooling to request data."
     }
   }
 }

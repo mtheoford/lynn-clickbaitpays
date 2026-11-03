@@ -5239,10 +5239,13 @@ footer.site-copyright {
 .admin-funnel-stat-grid strong { grid-row: 1 / 3; grid-column: 2; align-self: center; color: #f0f2f8; font-family: var(--font-manrope), sans-serif; font-size: 38px; letter-spacing: -.045em; }
 .admin-funnel-stat-grid small { color: #69728e; font-size: 8px; }
 .admin-funnel-message { margin: 0 14px 14px; padding: 10px 12px; border: 1px solid rgba(255,202,98,.2); border-radius: 9px; color: #d9bd7c; background: rgba(255,202,98,.045); font-size: 9px; }
-.admin-stat-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.admin-stat-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
 .admin-stat-grid article { min-height: 96px; padding: 17px; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.018); }
 .admin-stat-grid span { color: #8189a3; font-size: 9px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
 .admin-stat-grid strong { font-family: var(--font-manrope), sans-serif; font-size: 29px; }
+.admin-stat-grid small, .admin-revenue-note { color: #969eb8; font-size: 11px; line-height: 1.5; }
+.admin-stat-grid strong { overflow-wrap: anywhere; }
+.admin-revenue-note { width: min(1240px, calc(100% - 40px)); margin: 12px auto 22px; }
 .admin-table-panel { margin-top: 22px; overflow: hidden; border: 1px solid var(--line); border-radius: 17px; background: rgba(255,255,255,.012); }
 .admin-panel-heading { min-height: 78px; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; gap: 20px; border-bottom: 1px solid var(--line); }
 .admin-panel-heading h2 { margin: 0; font-family: var(--font-manrope), sans-serif; font-size: 18px; }

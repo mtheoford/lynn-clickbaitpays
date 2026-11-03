@@ -6,6 +6,8 @@ import { sites, subscriptions, users } from "@/db/schema";
 import { adminSignOutPath, requireAdmin } from "@/lib/admin-auth";
 import { siteUrl } from "@/lib/site-config";
 import { accountBillingLabel } from "@/lib/billing-health-policy";
+import { getStripe } from "@/lib/stripe";
+import { subscriberRevenue } from "@/lib/subscriber-revenue";
 import {
   parseSignupAnalyticsRange,
   type SignupAnalyticsRange,
@@ -25,6 +27,7 @@ type AdminRow = {
   status: string;
   plan: string | null;
   subscriptionStatus: string | null;
+  stripeSubscriptionId: string | null;
   checkoutPaymentStatus: string | null;
   createdAt: Date;
 };
@@ -92,6 +95,7 @@ export default async function AdminPage({
         status: sites.status,
         plan: subscriptions.plan,
         subscriptionStatus: subscriptions.status,
+        stripeSubscriptionId: subscriptions.stripeSubscriptionId,
         checkoutPaymentStatus: sites.checkoutPaymentStatus,
         createdAt: sites.createdAt,
       })
@@ -126,6 +130,21 @@ export default async function AdminPage({
     { total: 0, active: 0, pending: 0, past_due: 0, suspended: 0, canceled: 0, deleted: 0 },
   );
 
+  let revenue: Awaited<ReturnType<typeof subscriberRevenue>> | null = null;
+  if (!databaseMessage) {
+    try {
+      const stripe = await getStripe();
+      revenue = await subscriberRevenue(rows, params => stripe.subscriptions.list(params, {
+        timeout: 10_000, maxNetworkRetries: 0,
+      }));
+    } catch {
+      console.error("Administrator recurring revenue verification failed.");
+    }
+  }
+  const money = (cents: number) => new Intl.NumberFormat("en-US", {
+    style: "currency", currency: "USD",
+  }).format(cents / 100);
+
   return (
     <main className="admin-page">
       <header className="admin-header">
@@ -148,7 +167,11 @@ export default async function AdminPage({
         <article><span>Pending</span><strong>{counts.pending}</strong></article>
         <article><span>Past due</span><strong>{counts.past_due}</strong></article>
         <article><span>Suspended</span><strong>{counts.suspended}</strong></article>
+        <article><span>Monthly sites</span><strong>{revenue?.monthlySites ?? "Unavailable"}</strong><small>Active paid sites{revenue ? ` · ${money(revenue.monthlyMrrCents)}/mo` : ""}</small></article>
+        <article><span>Annual sites</span><strong>{revenue?.annualSites ?? "Unavailable"}</strong><small>Active paid sites{revenue ? ` · ${money(revenue.annualMrrCents)}/mo` : ""}</small></article>
+        <article><span>Estimated monthly recurring revenue</span><strong>{revenue ? money(revenue.totalMrrCents) : "Unavailable"}</strong><small>USD · annual subscriptions ÷ 12</small></article>
       </section>
+      <p className="admin-revenue-note">{revenue ? "Verified against current Stripe subscriptions." : "Revenue figures are unavailable until billing can be verified."} Free, complimentary, promotional/discounted, trial, past-due and suspended sites are excluded. Estimate before taxes and fees.{query ? " Totals reflect your account search." : ""}</p>
 
       <section className="admin-table-panel">
         <div className="admin-panel-heading">

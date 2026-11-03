@@ -81,6 +81,15 @@ The earlier Lynn sponsor page at `https://mtheoford.github.io/lynn-clickbaitpays
 is a historical public reference, not the address of this subscription platform.
 The retired OpenAI Sites deployment must not be used as a public or rollback address.
 
+## Subscriber revenue summary
+
+The CBP admin summary verifies monthly and annual paid-site counts against current
+Stripe subscriptions linked to the displayed accounts. Free/zero-price, complimentary,
+promotional/discounted, trial, past-due, suspended and canceled sites are excluded.
+Estimated MRR uses actual USD recurring prices and quantities, with annual amounts
+divided by 12, before taxes and fees. The cards show unavailable if verification fails.
+Account search filters these totals alongside the existing site totals.
+
 ## Local development
 
 Run `nvm use` to select patched Node.js 22.23.4 from `.nvmrc`. Node 24.22.1+ or 26.12.1+ within those major release lines is also supported; `npm install` and `npm ci` reject older releases.
