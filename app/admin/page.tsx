@@ -6,6 +6,9 @@ import { sites, subscriptions, users } from "@/db/schema";
 import { adminSignOutPath, requireAdmin } from "@/lib/admin-auth";
 import { siteUrl } from "@/lib/site-config";
 import { accountBillingLabel } from "@/lib/billing-health-policy";
+import { getStripe, stripeConfig } from "@/lib/stripe";
+import { subscriberRevenue } from "@/lib/subscriber-revenue";
+import { collectedRevenue } from "@/lib/collected-revenue";
 import {
   parseSignupAnalyticsRange,
   type SignupAnalyticsRange,
@@ -25,6 +28,7 @@ type AdminRow = {
   status: string;
   plan: string | null;
   subscriptionStatus: string | null;
+  stripeSubscriptionId: string | null;
   checkoutPaymentStatus: string | null;
   createdAt: Date;
 };
@@ -92,6 +96,7 @@ export default async function AdminPage({
         status: sites.status,
         plan: subscriptions.plan,
         subscriptionStatus: subscriptions.status,
+        stripeSubscriptionId: subscriptions.stripeSubscriptionId,
         checkoutPaymentStatus: sites.checkoutPaymentStatus,
         createdAt: sites.createdAt,
       })
@@ -126,6 +131,39 @@ export default async function AdminPage({
     { total: 0, active: 0, pending: 0, past_due: 0, suspended: 0, canceled: 0, deleted: 0 },
   );
 
+  let revenue: Awaited<ReturnType<typeof subscriberRevenue>> | null = null;
+  let collected: Awaited<ReturnType<typeof collectedRevenue>> | null = null;
+  if (!databaseMessage) {
+    try {
+      const stripe = await getStripe();
+      const results = await Promise.allSettled([
+        subscriberRevenue(rows, params => stripe.subscriptions.list(params, { timeout: 10_000, maxNetworkRetries: 0 })),
+        stripeConfig().then(config => collectedRevenue(config,
+          new Set(rows.flatMap(row => row.stripeSubscriptionId ? [row.stripeSubscriptionId] : [])),
+          params => stripe.invoicePayments.list(params, { timeout: 30_000, maxNetworkRetries: 0 }))),
+      ]);
+      if (results[0].status === "fulfilled") revenue = results[0].value;
+      if (results[1].status === "fulfilled") collected = results[1].value;
+      for (const [index, result] of results.entries()) {
+        if (result.status !== "rejected") continue;
+        const error = result.reason as { name?: string; code?: string; statusCode?: number; param?: string; message?: string };
+        const safeReasons = new Set(["Missing CBP price identifiers.", "Invoice ownership unavailable.",
+          "Cannot reconcile mixed or incomplete CBP invoice.", "Unsupported receipt currency.",
+          "Cannot reconcile invoice cash payment and refunds.", "Invalid receipt or refund amount.",
+          "Incomplete payment pagination."]);
+        console.error(JSON.stringify({ message: "Administrator revenue verification incomplete.",
+          metric: index === 0 ? "subscriptions" : "collected", error: error.name,
+          code: error.code, statusCode: error.statusCode, param: error.param,
+          reason: safeReasons.has(error.message ?? "") ? error.message : undefined }));
+      }
+    } catch {
+      console.error("Administrator recurring revenue verification failed.");
+    }
+  }
+  const money = (cents: number) => new Intl.NumberFormat("en-US", {
+    style: "currency", currency: "USD",
+  }).format(cents / 100);
+
   return (
     <main className="admin-page">
       <header className="admin-header">
@@ -143,12 +181,17 @@ export default async function AdminPage({
       </section>
 
       <section className="admin-stat-grid" aria-label="Site account totals">
+        <article className="admin-collected-total"><span>Total collected · all time</span><strong>{collected ? money(collected.totalCollectedCents) : "Unavailable"}</strong><small>{collected ? `Annual sales ${money(collected.annualCollectedCents)} · Monthly payments ${money(collected.monthlyCollectedCents)} · After refunds, before Stripe fees and taxes` : "Historical Stripe payments could not be verified"}</small></article>
         <article><span>All sites</span><strong>{counts.total}</strong></article>
         <article><span>Active</span><strong>{counts.active}</strong></article>
         <article><span>Pending</span><strong>{counts.pending}</strong></article>
         <article><span>Past due</span><strong>{counts.past_due}</strong></article>
         <article><span>Suspended</span><strong>{counts.suspended}</strong></article>
+        <article><span>Monthly sites</span><strong>{revenue?.monthlySites ?? "Unavailable"}</strong><small>Active paid sites{revenue ? ` · ${money(revenue.monthlyMrrCents)}/mo` : ""}</small></article>
+        <article><span>Annual sites</span><strong>{revenue?.annualSites ?? "Unavailable"}</strong><small>{collected ? `Annual sales collected · ${money(collected.annualCollectedCents)}` : "Active paid sites"}</small></article>
+        <article><span>Monthly recurring revenue</span><strong>{revenue ? money(revenue.monthlyMrrCents) : "Unavailable"}</strong><small>USD · monthly subscriptions only</small></article>
       </section>
+      <p className="admin-revenue-note">Total collected includes actual CBP Stripe payments and renewals from all time, less refunds, including customers who later canceled. Free/promo payments are excluded. Monthly recurring revenue uses active paid monthly sites only; annual payments are counted in collected sales. Figures are before Stripe fees and taxes.{query ? " Account search filters site counts and monthly recurring revenue; collected sales remain all-time CBP totals." : ""}</p>
 
       <section className="admin-table-panel">
         <div className="admin-panel-heading">
