@@ -18,7 +18,7 @@ export async function collectedRevenue(
   const seenCharges = new Set<string>();
   let cursor: string | undefined;
   do {
-    const page = await list({ status: "paid", limit: 100,
+    const page = await list({ status: "paid", limit: 25,
       expand: ["data.invoice", "data.payment.payment_intent.latest_charge", "data.payment.charge"],
       ...(cursor ? { starting_after: cursor } : {}),
     });

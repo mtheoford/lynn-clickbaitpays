@@ -140,11 +140,22 @@ export default async function AdminPage({
         subscriberRevenue(rows, params => stripe.subscriptions.list(params, { timeout: 10_000, maxNetworkRetries: 0 })),
         stripeConfig().then(config => collectedRevenue(config,
           new Set(rows.flatMap(row => row.stripeSubscriptionId ? [row.stripeSubscriptionId] : [])),
-          params => stripe.invoicePayments.list(params, { timeout: 10_000, maxNetworkRetries: 0 }))),
+          params => stripe.invoicePayments.list(params, { timeout: 30_000, maxNetworkRetries: 0 }))),
       ]);
       if (results[0].status === "fulfilled") revenue = results[0].value;
       if (results[1].status === "fulfilled") collected = results[1].value;
-      if (results.some(result => result.status === "rejected")) console.error("Administrator revenue verification incomplete.");
+      for (const [index, result] of results.entries()) {
+        if (result.status !== "rejected") continue;
+        const error = result.reason as { name?: string; code?: string; statusCode?: number; param?: string; message?: string };
+        const safeReasons = new Set(["Missing CBP price identifiers.", "Invoice ownership unavailable.",
+          "Cannot reconcile mixed or incomplete CBP invoice.", "Unsupported receipt currency.",
+          "Cannot reconcile invoice cash payment and refunds.", "Invalid receipt or refund amount.",
+          "Incomplete payment pagination."]);
+        console.error(JSON.stringify({ message: "Administrator revenue verification incomplete.",
+          metric: index === 0 ? "subscriptions" : "collected", error: error.name,
+          code: error.code, statusCode: error.statusCode, param: error.param,
+          reason: safeReasons.has(error.message ?? "") ? error.message : undefined }));
+      }
     } catch {
       console.error("Administrator recurring revenue verification failed.");
     }
