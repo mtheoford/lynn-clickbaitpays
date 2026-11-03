@@ -86,8 +86,11 @@ The retired OpenAI Sites deployment must not be used as a public or rollback add
 The CBP admin summary verifies monthly and annual paid-site counts against current
 Stripe subscriptions linked to the displayed accounts. Free/zero-price, complimentary,
 promotional/discounted, trial, past-due, suspended and canceled sites are excluded.
-Estimated MRR uses actual USD recurring prices and quantities, with annual amounts
-divided by 12, before taxes and fees. The cards show unavailable if verification fails.
+Monthly recurring revenue uses only actual USD monthly subscription prices and
+quantities. Annual sales sum the full annual prices of the active paid annual sites,
+shown separately without dividing by 12 or adding to monthly revenue. These are
+current subscription totals, before taxes and fees, rather than historical cash receipts.
+The cards show unavailable if verification fails.
 Account search filters these totals alongside the existing site totals.
 
 ## Local development

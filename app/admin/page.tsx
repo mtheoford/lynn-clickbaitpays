@@ -168,10 +168,10 @@ export default async function AdminPage({
         <article><span>Past due</span><strong>{counts.past_due}</strong></article>
         <article><span>Suspended</span><strong>{counts.suspended}</strong></article>
         <article><span>Monthly sites</span><strong>{revenue?.monthlySites ?? "Unavailable"}</strong><small>Active paid sites{revenue ? ` · ${money(revenue.monthlyMrrCents)}/mo` : ""}</small></article>
-        <article><span>Annual sites</span><strong>{revenue?.annualSites ?? "Unavailable"}</strong><small>Active paid sites{revenue ? ` · ${money(revenue.annualMrrCents)}/mo` : ""}</small></article>
-        <article><span>Estimated monthly recurring revenue</span><strong>{revenue ? money(revenue.totalMrrCents) : "Unavailable"}</strong><small>USD · annual subscriptions ÷ 12</small></article>
+        <article><span>Annual sites</span><strong>{revenue?.annualSites ?? "Unavailable"}</strong><small>{revenue ? `Total annual sales · ${money(revenue.annualSalesCents)}` : "Active paid sites"}</small></article>
+        <article><span>Monthly recurring revenue</span><strong>{revenue ? money(revenue.monthlyMrrCents) : "Unavailable"}</strong><small>USD · monthly subscriptions only</small></article>
       </section>
-      <p className="admin-revenue-note">{revenue ? "Verified against current Stripe subscriptions." : "Revenue figures are unavailable until billing can be verified."} Free, complimentary, promotional/discounted, trial, past-due and suspended sites are excluded. Estimate before taxes and fees.{query ? " Totals reflect your account search." : ""}</p>
+      <p className="admin-revenue-note">{revenue ? "Verified against current Stripe subscriptions." : "Revenue figures are unavailable until billing can be verified."} Annual sales total the full annual prices of active paid sites and are shown separately from monthly revenue. Free, complimentary, promotional/discounted, trial, past-due and suspended sites are excluded. Totals before taxes and fees.{query ? " Totals reflect your account search." : ""}</p>
 
       <section className="admin-table-panel">
         <div className="admin-panel-heading">

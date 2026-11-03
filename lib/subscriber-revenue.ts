@@ -30,7 +30,7 @@ export async function subscriberRevenue(sites: RevenueSite[], list: ListSubscrip
     } while (true);
   }
 
-  const result = { monthlySites: 0, annualSites: 0, monthlyMrrCents: 0, annualMrrCents: 0 };
+  const result = { monthlySites: 0, annualSites: 0, monthlyMrrCents: 0, annualSalesCents: 0 };
   const counted = new Set<string>();
   for (const site of candidates) {
     if (counted.has(site.siteId)) continue;
@@ -58,11 +58,11 @@ export async function subscriberRevenue(sites: RevenueSite[], list: ListSubscrip
     counted.add(site.siteId);
     if (site.plan === "annual") {
       result.annualSites += 1;
-      result.annualMrrCents += cents / 12;
+      result.annualSalesCents += cents;
     } else {
       result.monthlySites += 1;
       result.monthlyMrrCents += cents;
     }
   }
-  return { ...result, totalMrrCents: result.monthlyMrrCents + result.annualMrrCents };
+  return result;
 }

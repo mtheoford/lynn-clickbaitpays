@@ -15,7 +15,7 @@ function subscription(id: string, interval = "month", amount = 900, discounts: s
   } as unknown as Stripe.Subscription;
 }
 
-test("normalizes actual annual prices and excludes free, promo and nonpaying sites", async () => {
+test("keeps full annual sales separate from monthly revenue and excludes free, promo and nonpaying sites", async () => {
   const records = [site("monthly"), site("annual", "annual"), site("free"), site("promo"),
     site("past", "monthly", "past_due"), site("suspended", "monthly", "suspended"),
     site("comp", "complimentary"), site("missing"), site("trial"), site("itemPromo"), site("paused")];
@@ -30,7 +30,17 @@ test("normalizes actual annual prices and excludes free, promo and nonpaying sit
   const totals = await subscriberRevenue([...records, records[0]], async () => ({ data: remote, has_more: false }));
   assert.equal(totals.monthlySites, 1);
   assert.equal(totals.annualSites, 1);
-  assert.equal(totals.totalMrrCents, 1100 + 7900 / 12);
+  assert.equal(totals.monthlyMrrCents, 1100);
+  assert.equal(totals.annualSalesCents, 7900);
+});
+
+test("52 monthly sites at $9 produce $468 MRR independently of 37 annual sales at $79", async () => {
+  const monthly = Array.from({ length: 52 }, (_, index) => site(`monthly${index}`));
+  const annual = Array.from({ length: 37 }, (_, index) => site(`annual${index}`, "annual"));
+  const remote = [...monthly.map(row => subscription(row.siteId)),
+    ...annual.map(row => subscription(row.siteId, "year", 7900))];
+  const totals = await subscriberRevenue([...monthly, ...annual], async () => ({ data: remote, has_more: false }));
+  assert.deepEqual(totals, { monthlySites: 52, annualSites: 37, monthlyMrrCents: 46800, annualSalesCents: 292300 });
 });
 
 test("reads every page and only counts application-linked subscriptions", async () => {
@@ -54,5 +64,6 @@ test("fails closed when billing cannot be verified or pagination is incomplete",
 
 test("does not request billing data for a portfolio without eligible sites", async () => {
   const totals = await subscriberRevenue([site("comp", "complimentary")], async () => { throw new Error("Unexpected Stripe call"); });
-  assert.equal(totals.totalMrrCents, 0);
+  assert.equal(totals.monthlyMrrCents, 0);
+  assert.equal(totals.annualSalesCents, 0);
 });
