@@ -83,15 +83,25 @@ The retired OpenAI Sites deployment must not be used as a public or rollback add
 
 ## Subscriber revenue summary
 
-The CBP admin summary verifies monthly and annual paid-site counts against current
-Stripe subscriptions linked to the displayed accounts. Free/zero-price, complimentary,
-promotional/discounted, trial, past-due, suspended and canceled sites are excluded.
-Monthly recurring revenue uses only actual USD monthly subscription prices and
-quantities. Annual sales sum the full annual prices of the active paid annual sites,
-shown separately without dividing by 12 or adding to monthly revenue. These are
-current subscription totals, before taxes and fees, rather than historical cash receipts.
-The cards show unavailable if verification fails.
-Account search filters these totals alongside the existing site totals.
+The CBP admin summary shows two separate figures:
+
+- **Total collected (all time):** actual paid Stripe invoice payments for CBP's
+  configured price IDs, including renewals and customers who later canceled or
+  whose local account was removed, less refunds. Annual sales and monthly payment
+  totals are shown separately. Free/promo receipts and unrelated products are
+  excluded. This is before Stripe fees and taxes, not profit or bank payouts.
+- **Monthly recurring revenue:** only active paid monthly subscriptions, using
+  actual USD prices and quantities. Annual payments are never divided by 12 or
+  added to this figure. Free, complimentary, discounted, trial and inactive sites
+  are excluded from paid-site counts and recurring revenue.
+
+Invoice payments are paginated and matched through exact CBP price IDs. A linked
+subscription with unrecognized/mixed prices, an unexpanded or shared payment,
+unsupported currency, or incomplete history makes collected sales unavailable
+rather than displaying a partial or guessed total. Subscription and payment
+verification fail independently, preserving whichever figure can be verified.
+Search filters site counts/current monthly revenue; collected sales remain the
+all-time CBP total.
 
 ## Local development
 

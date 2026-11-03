@@ -6,8 +6,9 @@ import { sites, subscriptions, users } from "@/db/schema";
 import { adminSignOutPath, requireAdmin } from "@/lib/admin-auth";
 import { siteUrl } from "@/lib/site-config";
 import { accountBillingLabel } from "@/lib/billing-health-policy";
-import { getStripe } from "@/lib/stripe";
+import { getStripe, stripeConfig } from "@/lib/stripe";
 import { subscriberRevenue } from "@/lib/subscriber-revenue";
+import { collectedRevenue } from "@/lib/collected-revenue";
 import {
   parseSignupAnalyticsRange,
   type SignupAnalyticsRange,
@@ -131,12 +132,19 @@ export default async function AdminPage({
   );
 
   let revenue: Awaited<ReturnType<typeof subscriberRevenue>> | null = null;
+  let collected: Awaited<ReturnType<typeof collectedRevenue>> | null = null;
   if (!databaseMessage) {
     try {
       const stripe = await getStripe();
-      revenue = await subscriberRevenue(rows, params => stripe.subscriptions.list(params, {
-        timeout: 10_000, maxNetworkRetries: 0,
-      }));
+      const results = await Promise.allSettled([
+        subscriberRevenue(rows, params => stripe.subscriptions.list(params, { timeout: 10_000, maxNetworkRetries: 0 })),
+        stripeConfig().then(config => collectedRevenue(config,
+          new Set(rows.flatMap(row => row.stripeSubscriptionId ? [row.stripeSubscriptionId] : [])),
+          params => stripe.invoicePayments.list(params, { timeout: 10_000, maxNetworkRetries: 0 }))),
+      ]);
+      if (results[0].status === "fulfilled") revenue = results[0].value;
+      if (results[1].status === "fulfilled") collected = results[1].value;
+      if (results.some(result => result.status === "rejected")) console.error("Administrator revenue verification incomplete.");
     } catch {
       console.error("Administrator recurring revenue verification failed.");
     }
@@ -162,16 +170,17 @@ export default async function AdminPage({
       </section>
 
       <section className="admin-stat-grid" aria-label="Site account totals">
+        <article className="admin-collected-total"><span>Total collected · all time</span><strong>{collected ? money(collected.totalCollectedCents) : "Unavailable"}</strong><small>{collected ? `Annual sales ${money(collected.annualCollectedCents)} · Monthly payments ${money(collected.monthlyCollectedCents)} · After refunds, before Stripe fees and taxes` : "Historical Stripe payments could not be verified"}</small></article>
         <article><span>All sites</span><strong>{counts.total}</strong></article>
         <article><span>Active</span><strong>{counts.active}</strong></article>
         <article><span>Pending</span><strong>{counts.pending}</strong></article>
         <article><span>Past due</span><strong>{counts.past_due}</strong></article>
         <article><span>Suspended</span><strong>{counts.suspended}</strong></article>
         <article><span>Monthly sites</span><strong>{revenue?.monthlySites ?? "Unavailable"}</strong><small>Active paid sites{revenue ? ` · ${money(revenue.monthlyMrrCents)}/mo` : ""}</small></article>
-        <article><span>Annual sites</span><strong>{revenue?.annualSites ?? "Unavailable"}</strong><small>{revenue ? `Total annual sales · ${money(revenue.annualSalesCents)}` : "Active paid sites"}</small></article>
+        <article><span>Annual sites</span><strong>{revenue?.annualSites ?? "Unavailable"}</strong><small>{collected ? `Annual sales collected · ${money(collected.annualCollectedCents)}` : "Active paid sites"}</small></article>
         <article><span>Monthly recurring revenue</span><strong>{revenue ? money(revenue.monthlyMrrCents) : "Unavailable"}</strong><small>USD · monthly subscriptions only</small></article>
       </section>
-      <p className="admin-revenue-note">{revenue ? "Verified against current Stripe subscriptions." : "Revenue figures are unavailable until billing can be verified."} Annual sales total the full annual prices of active paid sites and are shown separately from monthly revenue. Free, complimentary, promotional/discounted, trial, past-due and suspended sites are excluded. Totals before taxes and fees.{query ? " Totals reflect your account search." : ""}</p>
+      <p className="admin-revenue-note">Total collected includes actual CBP Stripe payments and renewals from all time, less refunds, including customers who later canceled. Free/promo payments are excluded. Monthly recurring revenue uses active paid monthly sites only; annual payments are counted in collected sales. Figures are before Stripe fees and taxes.{query ? " Account search filters site counts and monthly recurring revenue; collected sales remain all-time CBP totals." : ""}</p>
 
       <section className="admin-table-panel">
         <div className="admin-panel-heading">

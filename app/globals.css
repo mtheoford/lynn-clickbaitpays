@@ -5245,6 +5245,7 @@ footer.site-copyright {
 .admin-stat-grid strong { font-family: var(--font-manrope), sans-serif; font-size: 29px; }
 .admin-stat-grid small, .admin-revenue-note { color: #969eb8; font-size: 11px; line-height: 1.5; }
 .admin-stat-grid strong { overflow-wrap: anywhere; }
+.admin-stat-grid .admin-collected-total { grid-column: 1 / -1; border-color: rgba(46,231,242,.25); }
 .admin-revenue-note { width: min(1240px, calc(100% - 40px)); margin: 12px auto 22px; }
 .admin-table-panel { margin-top: 22px; overflow: hidden; border: 1px solid var(--line); border-radius: 17px; background: rgba(255,255,255,.012); }
 .admin-panel-heading { min-height: 78px; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; gap: 20px; border-bottom: 1px solid var(--line); }
